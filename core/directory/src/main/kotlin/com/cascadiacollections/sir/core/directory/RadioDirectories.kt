@@ -46,13 +46,19 @@ object RadioDirectories {
     }
 
     /**
-     * Mirrors discovered from `all.api.radio-browser.info/json/servers`, cached for the
-     * process and falling back to [RotatingMirrorProvider.DEFAULT_MIRRORS].
+     * Mirrors discovered using DNS A/AAAA plus reverse lookup, then HTTP discovery
+     * if DNS yields no usable names. Cached for the process, with known hosts as
+     * the final fallback when both discovery methods fail.
      */
     fun discoveringMirrorProvider(
         httpClient: OkHttpClient,
         userAgent: String = RadioBrowserDirectory.DEFAULT_USER_AGENT
-    ): MirrorProvider = DiscoveringMirrorProvider(RadioBrowserServerListSource(httpClient, userAgent))
+    ): MirrorProvider = DiscoveringMirrorProvider(
+        FallbackServerListSource(
+            RadioBrowserDnsServerListSource(resolve = httpClient.dns::lookup),
+            RadioBrowserServerListSource(httpClient, userAgent)
+        )
+    )
 
     /**
      * Directory-sized HTTP client: short timeouts because these are small JSON calls
