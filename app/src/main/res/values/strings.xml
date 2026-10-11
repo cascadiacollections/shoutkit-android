@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">SIR</string>
+    <string name="app_name" translatable="false">Shoutkit</string>
     <string name="radio_error">Stream unavailable, retry shortly</string>
     <string name="play">Play</string>
     <string name="pause">Pause</string>
@@ -68,7 +68,7 @@
     <string name="more_options">More options</string>
     <string name="open_in_apple_music">Open in Apple Music</string>
     <string name="open_source_licenses">Open Source Licenses</string>
-    <string name="privacy_policy_url" translatable="false">https://cascadiacollections.github.io/sir-android/privacy/</string>
+    <string name="privacy_policy_url" translatable="false">https://cascadiacollections.github.io/shoutkit-android/privacy/</string>
     <string name="done">Done</string>
     <string name="save">Save</string>
     <string name="debug_options">Debug Options</string>
@@ -150,7 +150,7 @@
 
     <!-- Share -->
     <string name="share">Share</string>
-    <string name="share_now_playing">Now playing on SIR: %1$s</string>
+    <string name="share_now_playing">Now playing on Shoutkit: %1$s</string>
 
     <!-- Track history -->
     <string name="track_history_title">Track history</string>
@@ -158,7 +158,7 @@
     <string name="copy_track">Copy track info</string>
 
     <!-- App shortcuts -->
-    <string name="shortcut_play_long">Play SIR Radio</string>
+    <string name="shortcut_play_long">Play Shoutkit Radio</string>
     <string name="shortcut_whats_playing_short">What\'s playing</string>
     <string name="shortcut_whats_playing_long">What\'s playing?</string>
     <string name="shortcut_favorite_short">Favorite</string>
@@ -191,18 +191,18 @@
 
     <!-- Automation: sir://play links (routines, Tasker, pinned shortcuts) -->
     <string name="play_station_link_label">Play station</string>
-    <string name="play_link_invalid">That SIR play link isn\'t valid</string>
+    <string name="play_link_invalid">That Shoutkit play link isn\'t valid</string>
     <string name="play_link_unknown_station">Couldn\'t find that station</string>
     <string name="play_link_failed">Couldn\'t start playback</string>
     <string name="copy_automation_link">Copy automation link</string>
     <!-- Clipboard label (shown by the system clipboard UI) -->
-    <string name="automation_link_clip_label">SIR automation link</string>
+    <string name="automation_link_clip_label">Shoutkit automation link</string>
     <string name="automation_link_copied">Automation link copied</string>
     <string name="add_to_home_screen">Add to home screen</string>
 
     <!-- Notification / Service -->
     <string name="notification_channel_name">Radio Playback</string>
-    <string name="station_name" translatable="false">SIR</string>
+    <string name="station_name" translatable="false">Shoutkit</string>
     <string name="stream_description">Live stream</string>
     <string name="stream_quality">Stream Quality</string>
     <string name="seek_back_30">Replay 30s</string>
@@ -210,7 +210,7 @@
 
     <!-- Widget -->
     <string name="widget_description">Play a favorite station from your home screen</string>
-    <string name="widget_label">SIR Quick Play</string>
+    <string name="widget_label">Shoutkit Quick Play</string>
     <string name="quick_play_choose_station">Choose a station</string>
     <string name="quick_play_first_saved">First saved station</string>
     <string name="quick_play_no_saved_stations">Save stations in the app to choose one here. Until then, the widget plays the current station.</string>
@@ -236,11 +236,11 @@
     <string name="about_version_value" translatable="false">%1$s (%2$d) · %3$s</string>
     <string name="about_source_code">Source code</string>
     <string name="about_report_issue">Report an issue</string>
-    <string name="about_support">Support SIR</string>
+    <string name="about_support">Support Shoutkit</string>
     <string name="about_support_url" translatable="false">https://github.com/sponsors/KevinTCoughlin</string>
     <string name="about_station_data">Station data from Radio Browser</string>
-    <string name="about_source_code_url" translatable="false">https://github.com/cascadiacollections/sir-android</string>
-    <string name="about_report_issue_url" translatable="false">https://github.com/cascadiacollections/sir-android/issues/new</string>
+    <string name="about_source_code_url" translatable="false">https://github.com/cascadiacollections/shoutkit-android</string>
+    <string name="about_report_issue_url" translatable="false">https://github.com/cascadiacollections/shoutkit-android/issues/new</string>
     <string name="about_station_data_url" translatable="false">https://www.radio-browser.info</string>
 
     <!-- Library: ordering, backup, Recently Heard, Top Tracks -->
