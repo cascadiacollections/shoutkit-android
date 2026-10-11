@@ -10,7 +10,7 @@
 
 *A lightweight, battery-efficient internet radio app for Android, optimized for streaming audio playback.*
 
-[Features](#features) • [Download](#nightly-builds) • [Building](#building) • [Tech Stack](#tech-stack) • [Privacy](#privacy)
+[Features](#features) • [Download](#latest-apks) • [Building](#building) • [Tech Stack](#tech-stack) • [Privacy](#privacy)
 
 </div>
 
@@ -206,6 +206,6 @@ Copyright © 2026 Cascadia Collections
 
 ## Nightly APK
 
-[Download the signed FOSS APK](https://github.com/cascadiacollections/sir-android/releases/download/nightly-build/sir-android-nightly.apk) or view the [nightly release](https://github.com/cascadiacollections/sir-android/releases/tag/nightly-build). Builds publish on pushes to main and daily at 10:23 UTC; Actions also supports manual runs. Enable installation from unknown sources on your device, then open the APK. Nightlies keep the same signing key so subsequent builds install as updates. Switching from a store or locally signed build may require uninstalling it first.
+[Download the newest nightly APK from Releases](https://github.com/cascadiacollections/sir-android/releases). Choose `sir-android-nightly.apk` from the newest Nightly Build. Signed FOSS builds publish on pushes to main, daily at 10:23 UTC, and manual Actions runs. Enable installation from unknown sources, then open the APK. Nightlies use a persistent signing key so subsequent builds install as updates; switching from a store or locally signed build may require uninstalling first.
 
-Maintainers: `NIGHTLY_KEYSTORE_BASE64` holds a persistent JKS with alias `androiddebugkey` and store/key password `android`. Preserve this secret to keep installed nightlies updateable. The workflow verifies APK signatures and publishes `SHA256SUMS`.
+Maintainers: `NIGHTLY_KEYSTORE_BASE64` holds a persistent JKS with alias `androiddebugkey` and store/key password `android`. Preserve this secret to keep installed nightlies updateable. The workflow verifies signatures and publishes `SHA256SUMS`. Each build uses a unique tag because this repository enforces immutable releases.
