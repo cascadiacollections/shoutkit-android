@@ -1,228 +1,202 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIR — Unofficial SModcast Internet Radio</title>
-  <meta name="description" content="SIR is an unofficial, fan-made Android app for streaming SModcast Internet Radio." />
-  <style>
-    :root {
-      --primary: #6650A4;
-      --primary-dark: #4F378B;
-      --on-primary: #FFFFFF;
-      --surface: #FFFBFE;
-      --on-surface: #1C1B1F;
-      --on-surface-variant: #49454F;
-      --outline: #79747E;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--surface);
-      color: var(--on-surface);
-      line-height: 1.6;
-    }
-
-    header {
-      background: var(--primary);
-      color: var(--on-primary);
-      padding: 4rem 1.5rem 3rem;
-      text-align: center;
-    }
-
-    header h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    header p {
-      margin-top: 0.75rem;
-      font-size: 1.125rem;
-      opacity: 0.9;
-    }
-
-    .badge-row {
-      margin-top: 2rem;
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .badge-row a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255,255,255,0.15);
-      color: var(--on-primary);
-      text-decoration: none;
-      padding: 0.6rem 1.25rem;
-      border-radius: 100px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: 1.5px solid rgba(255,255,255,0.4);
-      transition: background 0.15s;
-    }
-
-    a:focus-visible { outline: 3px solid #FFB300; outline-offset: 4px; }
-    .install-steps { padding-left: 1.5rem; margin: 1rem 0; }
-    .install-steps li { margin-bottom: 0.5rem; }
-
-    .badge-row a:hover { background: rgba(255,255,255,0.25); }
-
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .feature {
-      padding: 1.25rem;
-      border: 1px solid #E7E0EC;
-      border-radius: 12px;
-    }
-
-    .feature h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 0.4rem;
-    }
-
-    .feature p {
-      font-size: 0.875rem;
-      color: var(--on-surface-variant);
-    }
-
-    h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--on-surface);
-    }
-
-    section { margin-bottom: 3rem; }
-
-    footer {
-      border-top: 1px solid #E7E0EC;
-      padding: 1.5rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--on-surface-variant);
-    }
-
-    footer a { color: var(--primary); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shoutkit for Android — Find your frequency</title>
+<meta name="description" content="Find your frequency. A free and open-source Android app by Cascadia Collections.">
+<meta name="theme-color" content="#151a16">
+<link rel="canonical" href="https://cascadiacollections.github.io/shoutkit-android/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shoutkit for Android">
+<meta property="og:description" content="Find your frequency">
+<meta property="og:url" content="https://cascadiacollections.github.io/shoutkit-android/">
+<meta property="og:image" content="https://cascadiacollections.github.io/shoutkit-android/assets/social.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-  <h1>SIR</h1>
-  <p>Unofficial Android app for SModcast Internet Radio.</p>
-  <p style="margin-top:0.4rem; font-size:0.8rem; opacity:0.7;">Fan-made · Not affiliated with SModcast</p>
-  <div class="badge-row">
-    <a href="https://github.com/cascadiacollections/sir-android/releases" id="nightly-download">
-      ↓ Get latest nightly APK
-    </a>
-    <a href="https://github.com/cascadiacollections/sir-android">
-      GitHub
-    </a>
-  </div>
-</header>
-
-<main>
-  <section>
-    <h2>Features</h2>
-    <div class="features">
-      <div class="feature">
-        <h3>One tap to play</h3>
-        <p>Tap anywhere on screen to start or stop the stream. No clutter.</p>
-      </div>
-      <div class="feature">
-        <h3>Sleep timer</h3>
-        <p>Set a timer from 15 minutes to 2 hours and drift off.</p>
-      </div>
-      <div class="feature">
-        <h3>Equalizer</h3>
-        <p>Normal, Bass Boost, Vocal, and Treble presets built in.</p>
-      </div>
-      <div class="feature">
-        <h3>Chromecast</h3>
-        <p>Cast to any Chromecast-enabled device on your network.</p>
-      </div>
-      <div class="feature">
-        <h3>Background playback</h3>
-        <p>Persistent media notification with full playback controls.</p>
-      </div>
-      <div class="feature">
-        <h3>Auto-reconnect</h3>
-        <p>Exponential backoff retry after network interruptions.</p>
-      </div>
-      <div class="feature">
-        <h3>Wear OS</h3>
-        <p>Standalone companion app for your watch.</p>
-      </div>
-      <div class="feature">
-        <h3>Android Auto</h3>
-        <p>Hands-free media controls while driving.</p>
-      </div>
-      <div class="feature">
-        <h3>Home widget</h3>
-        <p>Glance widget with Material 3 theming for your home screen.</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>Try SIR early</h2>
-    <p>Get the signed FOSS nightly for your Android phone. New builds arrive daily and after updates to the app. These are early builds, so you may encounter bugs.</p>
-    <ol class="install-steps">
-      <li>Tap <strong>Get latest nightly APK</strong>. If GitHub opens, choose <code>sir-android-nightly.apk</code> from the newest Nightly Build.</li>
-      <li>Open the downloaded APK. When Android asks, allow your browser or file manager to <strong>install unknown apps</strong>.</li>
-      <li>Install and open SIR. Download a newer nightly the same way to update.</li>
-    </ol>
-    <p>Nightlies use the same signing key so you can update without uninstalling. Switching from a store or locally signed build may require uninstalling first, which removes local app data.</p>
-    <p style="margin-top:1rem;"><a href="https://github.com/cascadiacollections/sir-android/releases">Build notes and checksums</a> · <a href="https://github.com/cascadiacollections/sir-android/issues">Report a bug or share feedback</a></p>
-    <p style="margin-top:1rem; color:var(--on-surface-variant);">SIR is an unofficial, fan-made app and is not affiliated with or endorsed by SModcast or its creators.</p>
-  </section>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+<nav aria-label="Main">
+<a class="brand" href="./">
+<span class="brandmark" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>Shoutkit</a>
+<div class="navlinks">
+<a href="#experience">The app</a>
+<a href="https://github.com/cascadiacollections/shoutkit-android">Source ↗</a>
+<a href="#download">Get Shoutkit ↓</a>
+</div>
+</nav>
+<main id="main">
+<div class="hero">
+<div>
+<div class="eyebrow">Independent radio. Open source.</div>
+<h1>Find your<br>
+<span>frequency.</span>
+</h1>
+<p class="intro muted">Local voices. Faraway sounds. Your next favorite station. Explore internet radio with a free, open-source player made for Android.</p>
+<div class="buttons">
+<a class="button primary" href="https://github.com/cascadiacollections/shoutkit-android/releases">Download for Android <span aria-hidden="true">↗</span>
+</a>
+<a class="button" href="#experience">Take a look <span aria-hidden="true">↓</span>
+</a>
+</div>
+<p class="small muted">FOSS build · Android 7.0+ · MIT licensed</p>
+</div>
+<div class="heroart">
+<div class="phone">
+<img src="assets/listen.webp" alt="Shoutkit listening screen with playback controls and bottom navigation" width="1080" height="2400" fetchpriority="high">
+</div>
+<span class="air">A WORLD OF RADIO ↗</span>
+</div>
+</div>
+<div class="signal">
+<span>Discover stations</span>
+<span>Save your favorites</span>
+<span>Listen on your terms</span>
+</div>
+<section id="experience">
+<div class="sectionhead">
+<div>
+<div class="eyebrow">01 / Tune in</div>
+<h2>Less searching.<br>More listening.</h2>
+</div>
+<p class="muted">A familiar Android experience for an endlessly interesting medium. Start exploring, build your library, and settle into a good broadcast.</p>
+</div>
+<div class="gallery">
+<figure>
+<div class="phone">
+<img src="assets/listen.webp" alt="Shoutkit Listen screen with playback controls" width="1080" height="2400" loading="lazy">
+</div>
+<figcaption>
+<strong>Make yourself comfortable.</strong>A clear listening screen with playback and favorite controls.</figcaption>
+</figure>
+<figure>
+<div class="phone">
+<img src="assets/search.webp" alt="Shoutkit Browse screen with genre filters and station discovery" width="1080" height="2400" loading="lazy">
+</div>
+<figcaption>
+<strong>Follow your curiosity.</strong>Search the station directory for a familiar name or a new sound.</figcaption>
+</figure>
+<figure>
+<div class="phone">
+<img src="assets/library.webp" alt="Shoutkit Library screen with saved stations" width="1080" height="2400" loading="lazy">
+</div>
+<figcaption>
+<strong>Keep the good ones.</strong>Bring your saved stations and listening history together.</figcaption>
+</figure>
+</div>
+<p class="shotnote">Actual app screens captured on an Android emulator. Content and appearance can vary.</p>
+</section>
+<section>
+<div class="sectionhead">
+<div>
+<div class="eyebrow">02 / Make yourself at home</div>
+<h2>Radio that fits<br>your day.</h2>
+</div>
+</div>
+<div class="featuregrid">
+<article>
+<span class="number">01</span>
+<h3>One tap, then carry on.</h3>
+<p class="muted">Keep listening in the background, with playback controls on your notification and lock screen.</p>
+</article>
+<article>
+<span class="number">02</span>
+<h3>A softer landing.</h3>
+<p class="muted">Set a sleep timer for 15, 30, 60, or 90 minutes. Adjust the sound with built-in equalizer presets.</p>
+</article>
+<article>
+<span class="number">03</span>
+<h3>Your shortcuts.</h3>
+<p class="muted">Reach a station from your home screen, widget, or Quick Settings. Use playback links in your own routines.</p>
+</article>
+</div>
+</section>
+<section class="open">
+<div>
+<div class="eyebrow">03 / Open by design</div>
+<h2>Your radio.<br>Your choice.</h2>
+<p class="muted">This is the FOSS edition of Shoutkit: no Google dependencies, Firebase analytics, or Crashlytics. Preferences and saved stations stay on your device.</p>
+<a class="button" href="https://github.com/cascadiacollections/shoutkit-android">Explore the source ↗</a>
+</div>
+<div class="code">
+<span>PROJECT</span>
+<br>shoutkit-android<br>
+<span>LICENSE</span>
+<br>MIT<br>
+<span>PLATFORM</span>
+<br>Android / FOSS</div>
+</section>
+<section id="download" class="install">
+<div>
+<div class="eyebrow">04 / Get on the air</div>
+<h2>A little setup.<br>A lot to hear.</h2>
+<p class="muted">Get the Android APK from GitHub Releases. Nightly builds are development versions; check the release notes before installing.</p>
+<a class="button primary" href="https://github.com/cascadiacollections/shoutkit-android/releases">View releases ↗</a>
+</div>
+<ol class="steps">
+<li>
+<strong>Choose a build.</strong>
+<span class="muted">Open the latest release and download its installable FOSS or nightly APK.</span>
+</li>
+<li>
+<strong>Install on Android.</strong>
+<span class="muted">Allow installation from your browser or file manager when Android asks, then open the APK.</span>
+</li>
+<li>
+<strong>Find your first station.</strong>
+<span class="muted">Open Shoutkit, explore the directory, and save something you love. Streaming needs an internet connection.</span>
+</li>
+</ol>
+</section>
+<section>
+<div class="faq">
+<div class="eyebrow">A few good questions</div>
+<h2>Before you tune in.</h2>
+<details>
+<summary>Is Shoutkit free and open source?</summary>
+<p class="muted">Yes. The source is available under the MIT license, and the FOSS build excludes Google and proprietary dependencies.</p>
+</details>
+<details>
+<summary>Does the FOSS build support Chromecast?</summary>
+<p class="muted">Chromecast and the Google Wearable Data Layer belong to the Play flavor. They are excluded from the FOSS build advertised here.</p>
+</details>
+<details>
+<summary>Does radio use mobile data?</summary>
+<p class="muted">Yes. Live streams need a network connection and can use mobile data. Use Wi-Fi when you want to avoid your mobile data allowance.</p>
+</details>
+<details>
+<summary>What leaves my device?</summary>
+<p class="muted">Station discovery and listening connect to directory services and broadcasters. Optional album artwork lookup sends the current artist and track title to Apple's iTunes Search. See the <a href="privacy/">privacy page</a> for details.</p>
+</details>
+</div>
+</section>
+<div class="closing">
+<h2>Somewhere, something<br>good is playing.</h2>
+<a class="button" href="https://github.com/cascadiacollections/shoutkit-android/releases">Find it with Shoutkit ↗</a>
+</div>
 </main>
-
-<footer>
-  <p>
-    Unofficial fan app · Not affiliated with SModcast &nbsp;·&nbsp;
-    &copy; 2026 Cascadia Collections &nbsp;·&nbsp;
-    <a href="/sir-android/privacy/">Privacy Policy</a> &nbsp;·&nbsp;
-    <a href="https://github.com/cascadiacollections/sir-android">Open Source (GitHub)</a>
-  </p>
+<footer style="margin-top:70px">
+<span>Shoutkit / Cascadia Collections</span>
+<div>
+<a href="privacy/">Privacy</a>
+<a href="https://github.com/cascadiacollections/shoutkit-android/issues">Feedback</a>
+<a href="https://github.com/cascadiacollections/shoutkit-android">GitHub ↗</a>
+</div>
 </footer>
-
-<script>
-  // Immutable nightlies have a new release URL for every build.
-  // Keep the releases page as a usable fallback if GitHub is unavailable.
-  fetch('https://api.github.com/repos/cascadiacollections/sir-android/releases?per_page=100')
-    .then(response => { if (!response.ok) throw new Error('Releases unavailable'); return response.json(); })
-    .then(releases => {
-      const nightly = releases
-        .filter(release => !release.draft && release.tag_name.startsWith('nightly-'))
-        .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
-        .flatMap(release => release.assets)
-        .find(asset => asset.name === 'sir-android-nightly.apk');
-      if (nightly && nightly.browser_download_url.startsWith('https://github.com/cascadiacollections/sir-android/releases/download/')) {
-        document.getElementById('nightly-download').href = nightly.browser_download_url;
-      }
-    })
-    .catch(() => {});
-</script>
+</div>
 </body>
 </html>
