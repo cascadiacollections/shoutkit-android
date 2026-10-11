@@ -57,6 +57,27 @@ class DirectoryDecoratorsTest {
     private val uuid = "96062a7b-0601-11e8-ae97-52543be04c81"
 
     @Test
+    fun `production directory searches arbitrary names online even when curated matches exist`() = runTest {
+        val transport = FakeTransport { url ->
+            val name = url.queryParameter("name")
+            Reply.Http(body = """[{"stationuuid":"$uuid","name":"Live $name","url":"https://stream.example/live"}]""")
+        }
+        val directory = RadioDirectories.create(
+            httpClient = transport.client,
+            mirrorProvider = RotatingMirrorProvider(listOf("https://directory.example"))
+        )
+
+        for (query in listOf("KEXP", "WFMU", "BBC Radio 6 Music")) {
+            val result = directory.search(StationQuery(query)).getOrThrow()
+            assertThat(result.map { it.name }).containsExactly("Live $query")
+        }
+        assertThat(transport.urls.map { it.encodedPath })
+            .containsExactly("/json/stations/search", "/json/stations/search", "/json/stations/search")
+        assertThat(transport.urls.map { it.queryParameter("name") })
+            .containsExactly("KEXP", "WFMU", "BBC Radio 6 Music")
+    }
+
+    @Test
     fun `clicks are never cached`() = runTest {
         val spy = SpyDirectory()
         val cache = CachingRadioDirectory(spy, clock = { 0L })
