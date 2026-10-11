@@ -67,6 +67,10 @@
       transition: background 0.15s;
     }
 
+    a:focus-visible { outline: 3px solid #FFB300; outline-offset: 4px; }
+    .install-steps { padding-left: 1.5rem; margin: 1rem 0; }
+    .install-steps li { margin-bottom: 0.5rem; }
+
     .badge-row a:hover { background: rgba(255,255,255,0.25); }
 
     main {
@@ -128,8 +132,8 @@
   <p>Unofficial Android app for SModcast Internet Radio.</p>
   <p style="margin-top:0.4rem; font-size:0.8rem; opacity:0.7;">Fan-made · Not affiliated with SModcast</p>
   <div class="badge-row">
-    <a href="https://cascadiacollections.github.io/sir-android/foss.apk" download>
-      ↓ Download FOSS APK (.apk)
+    <a href="https://github.com/cascadiacollections/sir-android/releases" id="nightly-download">
+      ↓ Get latest nightly APK
     </a>
     <a href="https://github.com/cascadiacollections/sir-android">
       GitHub
@@ -181,13 +185,16 @@
   </section>
 
   <section>
-    <h2>Install</h2>
-    <p style="color: var(--on-surface-variant); font-size: 0.95rem;">
-      SIR is currently available as a sideload APK while the Play Store listing is being set up.
-      Download the latest nightly build from GitHub, enable "Install from unknown sources" on your
-      device, and install. SIR is an unofficial, fan-made app and is not affiliated with or
-      endorsed by SModcast or its creators.
-    </p>
+    <h2>Try SIR early</h2>
+    <p>Get the signed FOSS nightly for your Android phone. New builds arrive daily and after updates to the app. These are early builds, so you may encounter bugs.</p>
+    <ol class="install-steps">
+      <li>Tap <strong>Get latest nightly APK</strong>. If GitHub opens, choose <code>sir-android-nightly.apk</code> from the newest Nightly Build.</li>
+      <li>Open the downloaded APK. When Android asks, allow your browser or file manager to <strong>install unknown apps</strong>.</li>
+      <li>Install and open SIR. Download a newer nightly the same way to update.</li>
+    </ol>
+    <p>Nightlies use the same signing key so you can update without uninstalling. Switching from a store or locally signed build may require uninstalling first, which removes local app data.</p>
+    <p style="margin-top:1rem;"><a href="https://github.com/cascadiacollections/sir-android/releases">Build notes and checksums</a> · <a href="https://github.com/cascadiacollections/sir-android/issues">Report a bug or share feedback</a></p>
+    <p style="margin-top:1rem; color:var(--on-surface-variant);">SIR is an unofficial, fan-made app and is not affiliated with or endorsed by SModcast or its creators.</p>
   </section>
 </main>
 
@@ -200,5 +207,22 @@
   </p>
 </footer>
 
+<script>
+  // Immutable nightlies have a new release URL for every build.
+  // Keep the releases page as a usable fallback if GitHub is unavailable.
+  fetch('https://api.github.com/repos/cascadiacollections/sir-android/releases?per_page=100')
+    .then(response => { if (!response.ok) throw new Error('Releases unavailable'); return response.json(); })
+    .then(releases => {
+      const nightly = releases
+        .filter(release => !release.draft && release.tag_name.startsWith('nightly-'))
+        .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
+        .flatMap(release => release.assets)
+        .find(asset => asset.name === 'sir-android-nightly.apk');
+      if (nightly && nightly.browser_download_url.startsWith('https://github.com/cascadiacollections/sir-android/releases/download/')) {
+        document.getElementById('nightly-download').href = nightly.browser_download_url;
+      }
+    })
+    .catch(() => {});
+</script>
 </body>
 </html>
