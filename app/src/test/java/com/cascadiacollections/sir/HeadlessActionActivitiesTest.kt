@@ -81,7 +81,7 @@ class HeadlessActionActivitiesTest {
     fun `favorite shortcut on the default stream saves nothing`() {
         Robolectric.buildActivity(FavoriteCurrentStationActivity::class.java).setup()
 
-        assertThat(awaitToast()).isEqualTo("SIR is always available and can't be added to My Stations")
+        assertThat(awaitToast()).isEqualTo("Shoutkit is always available and can't be added to My Stations")
         assertThat(runBlocking { repo().savedStations.first() }).isEmpty()
     }
 
@@ -131,7 +131,7 @@ class HeadlessActionActivitiesTest {
         val activity = playLink("sir://play/%3Cscript%3E")
 
         assertThat(activity.isFinishing).isTrue()
-        assertThat(ShadowToast.getTextOfLatestToast()).isEqualTo("That SIR play link isn't valid")
+        assertThat(ShadowToast.getTextOfLatestToast()).isEqualTo("That Shoutkit play link isn't valid")
         assertThat(shadowOf(app).nextStartedService).isNull()
     }
 }

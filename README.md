@@ -1,11 +1,11 @@
 <div align="center">
 
-# SIR - Internet Radio for Android
+# Shoutkit — Internet Radio for Android
 
-[![Build Status](https://github.com/cascadiacollections/sir-android/workflows/Android%20CI/badge.svg)](https://github.com/cascadiacollections/sir-android/actions)
+[![Build Status](https://github.com/cascadiacollections/shoutkit-android/workflows/Android%20CI/badge.svg)](https://github.com/cascadiacollections/shoutkit-android/actions)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=24)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
-[![Latest Release](https://img.shields.io/github/v/release/cascadiacollections/sir-android?include_prereleases&label=nightly)](https://github.com/cascadiacollections/sir-android/releases)
+[![Latest Release](https://img.shields.io/github/v/release/cascadiacollections/shoutkit-android?include_prereleases&label=nightly)](https://github.com/cascadiacollections/shoutkit-android/releases)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 *A lightweight, battery-efficient internet radio app for Android, optimized for streaming audio playback.*
@@ -50,8 +50,8 @@ not a live stream, so it plays once and stops unless Settings → "Loop finished
 is on.
 
 **Google Assistant routine.** Google Home app → Routines → e.g. "Good morning" → Add
-action → "Try adding your own" (custom command) → `play NPR Newscast on SIR`. This uses
-SIR's voice search, which checks your saved stations by name and then the directory. Which
+action → "Try adding your own" (custom command) → `play NPR Newscast on Shoutkit`. This uses
+Shoutkit's voice search, which checks your saved stations by name and then the directory. Which
 Assistant routine features are available depends on your device and on Google's rollout
 of Gemini, so this one is untested.
 
@@ -80,7 +80,7 @@ adb shell am start -a android.intent.action.VIEW -d sir://play/<id>
 | Variant | Description |
 |---------|-------------|
 | **Play** | Google Play build with Firebase Crashlytics + Analytics |
-| **FOSS** | Fully open-source build, no Google dependencies |
+| **FOSS** | Fully open-source build, no proprietary Google services |
 
 ## Optimizations
 
@@ -178,7 +178,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
 
 **Development builds are automatically published on every commit to `main`**
 
-[![Download Nightly](https://img.shields.io/badge/Download-Nightly%20Build-blue?style=for-the-badge&logo=android)](https://github.com/cascadiacollections/sir-android/releases)
+[![Download Nightly](https://img.shields.io/badge/Download-Nightly%20Build-blue?style=for-the-badge&logo=android)](https://github.com/cascadiacollections/shoutkit-android/releases)
 
 </div>
 
@@ -196,7 +196,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
 
 ## Privacy
 
-SIR collects no personal data. All preferences are stored locally on-device. See the [Privacy Policy](https://cascadiacollections.github.io/sir-android/privacy/).
+Shoutkit collects no personal data. All preferences are stored locally on-device. See the [Privacy Policy](https://cascadiacollections.github.io/shoutkit-android/privacy/).
 
 ## License
 
@@ -206,6 +206,6 @@ Copyright © 2026 Cascadia Collections
 
 ## Nightly APK
 
-[Download the newest nightly APK from Releases](https://github.com/cascadiacollections/sir-android/releases). Choose `sir-android-nightly.apk` from the newest Nightly Build. Signed FOSS builds publish on pushes to main, daily at 10:23 UTC, and manual Actions runs. Enable installation from unknown sources, then open the APK. Nightlies use a persistent signing key so subsequent builds install as updates; switching from a store or locally signed build may require uninstalling first.
+[Download the newest nightly APK from Releases](https://github.com/cascadiacollections/shoutkit-android/releases). Choose `shoutkit-android-nightly.apk` from the newest Nightly Build. Signed FOSS builds publish on pushes to main, daily at 10:23 UTC, and manual Actions runs. Enable installation from unknown sources, then open the APK. Nightlies use a persistent signing key so subsequent builds install as updates; switching from a store or locally signed build may require uninstalling first.
 
 Maintainers: `NIGHTLY_KEYSTORE_BASE64` holds a persistent JKS with alias `androiddebugkey` and store/key password `android`. Preserve this secret to keep installed nightlies updateable. The workflow verifies signatures and publishes `SHA256SUMS`. Each build uses a unique tag because this repository enforces immutable releases.
