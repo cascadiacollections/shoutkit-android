@@ -23,6 +23,14 @@ class CuratedFallbackDirectoryTest {
     private val failing = FixedDirectory(Result.failure(IOException("offline")))
 
     @Test
+    fun `KEXP remains searchable during a directory outage`() = runTest {
+        val directory = CuratedFallbackDirectory(failing)
+        val stations = directory.search(StationQuery("  kExP  ")).getOrThrow()
+        assertThat(stations.map { it.name }).containsExactly("KEXP 90.3 FM Seattle")
+        assertThat(stations.map { it.streamUrl }).containsExactly("https://kexp.streamguys1.com/kexp160.aac")
+    }
+
+    @Test
     fun `top stations fall back to curated list on failure`() = runTest {
         val directory = CuratedFallbackDirectory(failing)
 

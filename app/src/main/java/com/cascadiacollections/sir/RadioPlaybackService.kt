@@ -407,10 +407,15 @@ class RadioPlaybackService : MediaLibraryService() {
         // Time-shift data source wraps OkHttp for DVR-style replay
         val timeShiftFactory = TimeShiftDataSource.Factory(httpDataSourceFactory, timeShift)
 
-        // Progressive streams read through the time-shift buffer; HLS goes straight to
-        // OkHttp, because the buffer models one continuous connection and HLS is many.
+        // Rewind is currently disabled. Read directly in that mode so a paused
+        // player backpressures the source instead of a background reader dropping
+        // bytes when its replay buffer fills. Dropping bytes can misalign ICY
+        // metadata boundaries and corrupt AAC decoding on resume.
+        // HLS always reads directly because it consists of separate segment requests.
         val mediaSourceFactory = StreamMediaSourceFactory(
-            progressive = DefaultMediaSourceFactory(context).setDataSourceFactory(timeShiftFactory),
+            progressive = DefaultMediaSourceFactory(context).setDataSourceFactory(
+                if (SEEKBACK_ENABLED) timeShiftFactory else httpDataSourceFactory
+            ),
             hls = HlsMediaSource.Factory(httpDataSourceFactory)
         ).setLoadErrorHandlingPolicy(StreamLoadErrorHandlingPolicy())
 

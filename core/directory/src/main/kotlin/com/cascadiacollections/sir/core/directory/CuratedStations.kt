@@ -50,6 +50,17 @@ object CuratedStations {
             codec = "MP3",
             countryCode = "FR",
             tags = "funk,soul,world"
+        ),
+        // Broadcaster-published endpoint: https://kexp.org/streaming-urls/
+        // Keep KEXP searchable when the community directory is unavailable.
+        Station(
+            id = "curated-kexp",
+            name = "KEXP 90.3 FM Seattle",
+            url = "https://kexp.streamguys1.com/kexp160.aac",
+            bitrate = 160,
+            codec = "AAC",
+            countryCode = "US",
+            tags = "alternative,indie,eclectic"
         )
     )
 

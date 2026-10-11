@@ -1,12 +1,14 @@
 package com.cascadiacollections.sir.core.directory
 
 import java.io.IOException
+import java.net.InetAddress
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -73,8 +75,52 @@ fun interface ServerListSource {
 }
 
 /**
- * Fetches `https://all.api.radio-browser.info/json/servers`, the discovery endpoint the
- * radio-browser documentation recommends over hard-coding hosts.
+ * Discovers all A/AAAA addresses for the round-robin host, then reverse-resolves
+ * each address to the HTTPS mirror hostname, as the Radio Browser client docs advise.
+ * Uses the system resolver by default; no HTTP discovery endpoint must be healthy.
+ */
+class RadioBrowserDnsServerListSource(
+    private val resolve: (String) -> List<InetAddress> = Dns.SYSTEM::lookup,
+    private val reverse: (InetAddress) -> String = {
+        InetAddress.getByAddress(it.address).canonicalHostName
+    }
+) : ServerListSource {
+    override fun serverNames(): List<String> {
+        val names = resolve("all.api.radio-browser.info").distinctBy { it.hostAddress }.mapNotNull { address ->
+            val name = try {
+                reverse(address).trim().trimEnd('.').lowercase(Locale.ROOT)
+            } catch (_: IOException) {
+                return@mapNotNull null
+            }
+            // PTR failure can return an IP literal. Use only directory-owned DNS
+            // names so HTTPS keeps its normal certificate and hostname validation.
+            name.takeIf {
+                it.endsWith(".api.radio-browser.info") && DiscoveringMirrorProvider.toBaseUrl(it) != null
+            }
+        }.distinct()
+        if (names.isEmpty()) throw IOException("DNS discovery returned no usable radio-browser mirrors")
+        return names
+    }
+}
+
+/** Tries discovery sources in order; one unavailable source does not prevent discovery. */
+class FallbackServerListSource(private vararg val sources: ServerListSource) : ServerListSource {
+    override fun serverNames(): List<String> {
+        var failure: IOException? = null
+        for (source in sources) {
+            try {
+                val names = source.serverNames().filter { DiscoveringMirrorProvider.toBaseUrl(it) != null }
+                if (names.isNotEmpty()) return names
+            } catch (error: IOException) {
+                failure = error
+            }
+        }
+        throw IOException("All radio-browser discovery sources failed", failure)
+    }
+}
+
+/**
+ * HTTP fallback discovery from `https://all.api.radio-browser.info/json/servers`.
  *
  * Uses a short `callTimeout` derived from [httpClient] so a dead discovery endpoint costs
  * a few seconds of the caller's failover budget, not all of it.
