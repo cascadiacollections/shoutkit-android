@@ -203,3 +203,9 @@ SIR collects no personal data. All preferences are stored locally on-device. See
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 Copyright © 2026 Cascadia Collections
+
+## Nightly APK
+
+[Download the signed FOSS APK](https://github.com/cascadiacollections/sir-android/releases/download/nightly-build/sir-android-nightly.apk) or view the [nightly release](https://github.com/cascadiacollections/sir-android/releases/tag/nightly-build). Builds publish on pushes to main and daily at 10:23 UTC; Actions also supports manual runs. Enable installation from unknown sources on your device, then open the APK. Nightlies keep the same signing key so subsequent builds install as updates. Switching from a store or locally signed build may require uninstalling it first.
+
+Maintainers: `NIGHTLY_KEYSTORE_BASE64` holds a persistent JKS with alias `androiddebugkey` and store/key password `android`. Preserve this secret to keep installed nightlies updateable. The workflow verifies APK signatures and publishes `SHA256SUMS`.
