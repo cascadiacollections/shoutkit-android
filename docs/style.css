@@ -108,3 +108,5 @@ body{background:#151a16;color:#f4f5ed}
 .signal{flex-wrap:wrap;gap:10px}
 .open{grid-template-columns:1fr;gap:25px}
 }
+
+.closing a:focus-visible{outline-color:#151a16}

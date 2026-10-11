@@ -138,12 +138,12 @@
     <string name="tab_settings">设置</string>
     <!-- Share -->
     <string name="share">分享</string>
-    <string name="share_now_playing">正在 SIR 上播放：%1$s</string>
+    <string name="share_now_playing">正在 Shoutkit 上播放：%1$s</string>
     <string name="track_history_title">播放记录</string>
     <string name="track_history_empty">听过的曲目会显示在这里。</string>
     <string name="copy_track">复制曲目信息</string>
     <!-- App shortcuts -->
-    <string name="shortcut_play_long">播放 SIR 电台</string>
+    <string name="shortcut_play_long">播放 Shoutkit 电台</string>
     <string name="shortcut_whats_playing_short">正在播放</string>
     <string name="shortcut_whats_playing_long">正在播放什么？</string>
     <string name="shortcut_favorite_short">收藏</string>
@@ -169,11 +169,11 @@
         <item>把此电台添加到我的电台</item>
     </string-array>
     <string name="play_station_link_label">播放电台</string>
-    <string name="play_link_invalid">该 SIR 播放链接无效</string>
+    <string name="play_link_invalid">该 Shoutkit 播放链接无效</string>
     <string name="play_link_unknown_station">找不到该电台</string>
     <string name="play_link_failed">无法开始播放</string>
     <string name="copy_automation_link">复制自动化链接</string>
-    <string name="automation_link_clip_label">SIR 自动化链接</string>
+    <string name="automation_link_clip_label">Shoutkit 自动化链接</string>
     <string name="automation_link_copied">已复制自动化链接</string>
     <string name="add_to_home_screen">添加到主屏幕</string>
     <!-- Notification / Service -->
@@ -184,7 +184,7 @@
     <string name="go_live">直播</string>
     <!-- Widget -->
     <string name="widget_description">在主屏幕上播放收藏的电台</string>
-    <string name="widget_label">SIR 快速播放</string>
+    <string name="widget_label">Shoutkit 快速播放</string>
     <string name="quick_play_choose_station">选择电台</string>
     <string name="quick_play_first_saved">第一个收藏的电台</string>
     <string name="quick_play_no_saved_stations">在应用中收藏电台后即可在此选择。在此之前，小组件将播放当前电台。</string>
@@ -208,7 +208,7 @@
     <string name="about_version">版本</string>
     <string name="about_source_code">源代码</string>
     <string name="about_report_issue">报告问题</string>
-    <string name="about_support">支持 SIR</string>
+    <string name="about_support">支持 Shoutkit</string>
     <string name="about_station_data">电台数据来自 Radio Browser</string>
 
     <!-- Library: ordering, backup, Recently Heard, Top Tracks -->

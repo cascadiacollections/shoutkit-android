@@ -80,7 +80,7 @@ adb shell am start -a android.intent.action.VIEW -d sir://play/<id>
 | Variant | Description |
 |---------|-------------|
 | **Play** | Google Play build with Firebase Crashlytics + Analytics |
-| **FOSS** | Fully open-source build, no Google dependencies |
+| **FOSS** | Fully open-source build, no proprietary Google services |
 
 ## Optimizations
 

@@ -52,7 +52,7 @@ class RadioUiTest {
                 )
             }
         }
-        composeRule.onNodeWithText("SIR").assertIsDisplayed()
+        composeRule.onNodeWithText("Shoutkit").assertIsDisplayed()
     }
 
     @Test
@@ -209,7 +209,7 @@ class RadioUiTest {
                 ListenScreen(state = RadioUiState(isConnected = true), onToggle = {})
             }
         }
-        composeRule.onNodeWithText("SIR").assertIsDisplayed()
+        composeRule.onNodeWithText("Shoutkit").assertIsDisplayed()
         composeRule.onNodeWithText("Live radio").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Favorite").assertIsNotEnabled()
     }

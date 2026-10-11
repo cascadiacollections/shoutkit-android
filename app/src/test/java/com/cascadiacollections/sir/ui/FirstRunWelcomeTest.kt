@@ -27,7 +27,7 @@ class FirstRunWelcomeTest {
             SirTheme { FirstRunWelcome(onDone = { done++ }) }
         }
 
-        composeRule.onNodeWithText("Welcome to SIR").assertIsDisplayed()
+        composeRule.onNodeWithText("Welcome to Shoutkit").assertIsDisplayed()
         composeRule.onNodeWithText("No accounts, no tracking. Find a station and press play.").assertIsDisplayed()
         composeRule.onNodeWithText("Get started").performClick()
 
