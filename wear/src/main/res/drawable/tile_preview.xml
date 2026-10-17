@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tile picker preview for RadioTileService: station name, playback state and
+     "Play <last station>", drawn as placeholder bars since vectors cannot render text. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M96,0a96,96 0,1 1,0 192a96,96 0,1 1,0 -192z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M66,62h60a6,6 0,0 1,0 12h-60a6,6 0,0 1,0 -12z" />
+    <path
+        android:fillColor="#99FFFFFF"
+        android:pathData="M80,84h32a4,4 0,0 1,0 8h-32a4,4 0,0 1,0 -8z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M68,116l14,8l-14,8z" />
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M90,120h34a4,4 0,0 1,0 8h-34a4,4 0,0 1,0 -8z" />
+</vector>
