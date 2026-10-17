@@ -45,6 +45,37 @@ jobs:
             yes | $SDKMANAGER "platforms;android-37.0"
           fi
 
+      # Robolectric downloads its android-all jars lazily from the test JVMs, and
+      # parallel test tasks fetching them at once has failed CI ("Failed to fetch
+      # maven artifact org.robolectric:android-all-instrumented"). Cache them per
+      # Robolectric version and fetch any missing ones up front, once, with retries.
+      # Keep the list in sync with the SDK levels used in @Config(sdk = [...]).
+      - name: Read Robolectric version
+        id: robolectric
+        run: echo "version=$(sed -n 's/^robolectric = "\(.*\)"/\1/p' gradle/libs.versions.toml)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Robolectric SDKs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.m2/repository/org/robolectric/android-all-instrumented
+          key: robolectric-sdks-${{ steps.robolectric.outputs.version }}
+
+      - name: Pre-fetch Robolectric SDKs
+        run: |
+          versions=(
+            "12.1-robolectric-8229987-i7" # API 32
+            "14-robolectric-10818077-i7"  # API 34
+          )
+          for version in "${versions[@]}"; do
+            for attempt in 1 2 3; do
+              mvn --batch-mode --quiet dependency:get \
+                -Dartifact="org.robolectric:android-all-instrumented:${version}" \
+                -Dtransitive=false && break
+              [ "$attempt" = 3 ] && exit 1
+              sleep $((attempt * 10))
+            done
+          done
+
       - name: Decode keystore
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         run: |
