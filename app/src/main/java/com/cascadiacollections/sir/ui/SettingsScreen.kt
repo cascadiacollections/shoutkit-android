@@ -275,7 +275,7 @@ fun SettingsContent(
 
                 is CastModuleState.Failed -> stringResource(R.string.chromecast_not_available)
 
-                else -> null
+                CastModuleState.NotInstalled, CastModuleState.Unavailable -> null
             }
             ListItem(
                 headlineContent = { Text(stringResource(R.string.enable_chromecast)) },
@@ -286,7 +286,10 @@ fun SettingsContent(
 
                         is CastModuleState.Installed -> Switch(checked = true, onCheckedChange = null, enabled = false)
 
-                        else -> Switch(
+                        CastModuleState.NotInstalled,
+                        is CastModuleState.Failed,
+                        CastModuleState.Unavailable
+                        -> Switch(
                             checked = chromecastEnabled,
                             onCheckedChange = { enabled ->
                                 scope.launch {

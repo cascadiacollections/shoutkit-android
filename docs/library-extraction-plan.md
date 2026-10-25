@@ -5,6 +5,30 @@ Extract reusable, clean library APIs from `sir` into FOSS modules publishable un
 
 ---
 
+## API stability: sealed types
+
+A sealed type in a published library's public API freezes its set of subtypes. Consumers
+`when` over it without an `else`, so adding a subtype breaks their build, and a consumer
+that is not recompiled against the new version throws `NoWhenBranchMatchedException` at
+runtime. See [Java sealed classes and exhaustive pattern matching](https://neilmadden.blog/2026/04/24/java-sealed-classes-and-exhaustive-pattern-matching/)
+for the same problem in Java (`MatchException`).
+
+Before publishing, decide per type:
+
+- **Genuinely closed:** keep it sealed, say so in its KDoc, and treat a new subtype as a
+  major version bump. `PlaybackMode` (`Live` / `TimeShifted`) qualifies.
+- **Likely to grow:** don't expose it as sealed. Use an open interface or abstract class
+  whose KDoc tells consumers to handle unknown subtypes with an `else` branch.
+  `FeatureModuleState` falls here: `CastModuleState` already gained `Unavailable` for the
+  FOSS flavor after the states above were listed, and Play feature delivery may report
+  more.
+
+Inside the app, where everything is compiled together, sealed types are the right tool.
+Match on them exhaustively rather than with `else`, so a new subtype fails to compile at
+every site that needs to handle it.
+
+---
+
 ## Proposed Libraries
 
 ### 1. `media3-timeshift` (Phase 1 — Ready now)
@@ -31,12 +55,12 @@ Extract reusable, clean library APIs from `sir` into FOSS modules publishable un
 
 **Components:**
 - `DynamicFeatureManager` — Generalized from `CastFeatureManager`, parameterized module name
-- `FeatureModuleState` — Sealed interface (`NotInstalled`, `Installing(progress)`, `Installed`, `Failed(code)`)
+- `FeatureModuleState` — Open (not sealed) state type (`NotInstalled`, `Installing(progress)`, `Installed`, `Failed(code)`, `Unavailable`); see [API stability](#api-stability-sealed-types)
 - `DeviceDetector` — Generalized from `CastDeviceDetector`, WiFi-gated lifecycle-aware scanner
 
 **Changes needed:**
 - Rename `CastFeatureManager` → `DynamicFeatureManager(context, moduleName)`
-- Rename `CastModuleState` → `FeatureModuleState`
+- Rename `CastModuleState` → `FeatureModuleState` and unseal it for the public API
 - Rename `CastDeviceDetector` → `DeviceDetector`, add `requireWifi` param
 - Remove `CAST_MODULE_NAME` constant, use constructor param
 
