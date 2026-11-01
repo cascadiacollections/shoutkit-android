@@ -364,15 +364,4 @@
             column="1"/>
     </issue>
 
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;SIR&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;SIR&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/glance_default_loading_layout.xml"
-            line="11"
-            column="9"/>
-    </issue>
-
 </issues>

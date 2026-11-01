@@ -12,15 +12,4 @@
             column="13"/>
     </issue>
 
-    <issue
-        id="SquareAndRoundTilePreviews"
-        message="Tiles need preview assets"
-        errorLine1="        &lt;service"
-        errorLine2="        ^">
-        <location
-            file="src/main/AndroidManifest.xml"
-            line="49"
-            column="9"/>
-    </issue>
-
 </issues>
