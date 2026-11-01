@@ -1,5 +1,8 @@
-// Keep an installable, verified release URL in the HTML as the no-JS/offline fallback.
-// Nightlies are prereleases, so /releases/latest does not find them.
+// The nightly workflow rewrites these hrefs to the release it just published.
+// Nightlies are prereleases, so /releases/latest does not find them, and immutable
+// releases cannot roll one tag forward. When the API is reachable, point the
+// buttons at the newest asset directly. Rate limits and network failures keep
+// the published HTML link.
 (async () => {
   try {
     const response = await fetch("https://api.github.com/repos/cascadiacollections/shoutkit-android/releases?per_page=10", { headers: { Accept: "application/vnd.github+json" } });
