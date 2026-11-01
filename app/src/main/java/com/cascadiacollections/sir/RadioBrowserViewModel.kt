@@ -223,15 +223,8 @@ class RadioBrowserViewModel(
                 return@launch
             }
 
-            val seenUrls = _uiState.value.savedStations.mapTo(mutableSetOf()) { it.url }
-            var added = 0
-            parsed.forEach { station ->
-                if (seenUrls.add(station.url)) {
-                    settingsRepository.saveStation(station)
-                    added++
-                }
-            }
-            onResult(PlaylistImportResult.Imported(added = added, skipped = parsed.size - added))
+            val result = settingsRepository.importPlaylistStations(parsed)
+            onResult(PlaylistImportResult.Imported(added = result.added, skipped = result.skipped))
         }
     }
 

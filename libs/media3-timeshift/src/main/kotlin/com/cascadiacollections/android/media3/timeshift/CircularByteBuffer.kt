@@ -37,12 +37,29 @@ class CircularByteBuffer(val capacity: Int) {
     fun write(src: ByteArray, offset: Int, length: Int) {
         if (length <= 0) return
         lock.withLock {
-            for (i in 0 until length) {
-                data[indexFor(writeOffset)] = src[offset + i]
-                writeOffset++
-                val oldestOffset = oldestOffsetInternal()
-                if (readOffset < oldestOffset) readOffset = oldestOffset
+            var srcOffset = offset
+            var remaining = length
+            // Only the last [capacity] bytes are retained. Skipping the prefix keeps
+            // the absolute write cursor identical to copying one byte at a time.
+            if (remaining > capacity) {
+                val skip = remaining - capacity
+                srcOffset += skip
+                writeOffset += skip
+                remaining = capacity
             }
+            while (remaining > 0) {
+                val writePos = indexFor(writeOffset)
+                val spaceToEnd = capacity - writePos
+                val chunk = remaining.coerceAtMost(spaceToEnd)
+                System.arraycopy(src, srcOffset, data, writePos, chunk)
+                writeOffset += chunk
+                srcOffset += chunk
+                remaining -= chunk
+            }
+            // The oldest retained offset only moves forward, so one check at the
+            // end matches pushing the read cursor on every overwritten byte.
+            val oldestOffset = oldestOffsetInternal()
+            if (readOffset < oldestOffset) readOffset = oldestOffset
             dataAvailable.signalAll()
         }
     }

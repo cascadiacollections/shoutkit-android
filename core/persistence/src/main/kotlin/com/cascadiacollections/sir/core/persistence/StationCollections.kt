@@ -80,6 +80,41 @@ object StationCollections {
     }
 
     /**
+     * Appends playlist stations, skipping any URL already saved or seen earlier in
+     * [imported]. A station whose id is already saved, but whose URL is new, replaces
+     * that row in place — the same rule as [addFavorite] — so the import cannot
+     * duplicate it or move it.
+     *
+     * Membership is a URL set plus an id index, so a long playlist is one pass rather
+     * than a scan of the saved list per row.
+     */
+    fun mergePlaylist(current: List<Station>, imported: List<Station>): MergeResult {
+        if (imported.isEmpty()) return MergeResult(current, added = 0, skipped = 0)
+        val seenUrls = HashSet<String>(current.size + imported.size)
+        current.forEach { seenUrls.add(it.url) }
+        val indexById = HashMap<String, Int>(current.size)
+        current.forEachIndexed { index, station -> indexById.putIfAbsent(station.id, index) }
+        val stations = current.toMutableList()
+        var added = 0
+        for (station in imported) {
+            if (!seenUrls.add(station.url)) continue
+            val existing = indexById[station.id]
+            if (existing != null) {
+                stations[existing] = station
+            } else {
+                indexById[station.id] = stations.size
+                stations += station
+            }
+            added++
+        }
+        return MergeResult(
+            stations = if (added == 0) current else stations,
+            added = added,
+            skipped = imported.size - added
+        )
+    }
+
+    /**
      * Finds a station by name for voice search ("Play [station name]"): an exact
      * case-insensitive match first, falling back to a substring match, so "Play NPR"
      * finds a station named exactly "NPR" before matching "Classical NPR" and doesn't
