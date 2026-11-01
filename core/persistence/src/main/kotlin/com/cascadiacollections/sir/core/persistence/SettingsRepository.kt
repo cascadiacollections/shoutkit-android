@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
@@ -177,9 +178,10 @@ class SettingsRepository(private val context: Context) :
     }
 
     /** The custom equalizer curve, one gain per UI slider (-1f..1f, 0f = flat). */
-    val equalizerCustomBands: Flow<List<Float>> = context.dataStore.data.map { preferences ->
-        decodeFloatList(preferences[equalizerCustomBandsKey])
-    }
+    val equalizerCustomBands: Flow<List<Float>> = context.dataStore.data
+        .map { it[equalizerCustomBandsKey] }
+        .distinctUntilChanged()
+        .map { decodeFloatList(it) }
 
     /**
      * Set equalizer preset, exiting custom-band mode — a preset and a custom curve are
@@ -223,16 +225,16 @@ class SettingsRepository(private val context: Context) :
     /**
      * Flow of the user's saved (favourite) stations.
      */
-    override val savedStations: Flow<List<Station>> = context.dataStore.data.map { preferences ->
-        StationCodec.decode(preferences[savedStationsKey])
-    }
+    override val savedStations: Flow<List<Station>> = decodedStations(savedStationsKey)
 
     /** Saved stations ordered by play count, with saved order breaking ties. */
-    val mostPlayedSavedStations: Flow<List<Station>> = context.dataStore.data.map { preferences ->
-        val counts = decodePlayCounts(preferences[stationPlayCountsKey])
-        StationCodec.decode(preferences[savedStationsKey])
-            .sortedByDescending { counts[it.id] ?: 0 }
-    }
+    val mostPlayedSavedStations: Flow<List<Station>> = context.dataStore.data
+        .map { preferences -> preferences[savedStationsKey] to preferences[stationPlayCountsKey] }
+        .distinctUntilChanged()
+        .map { (savedRaw, countsRaw) ->
+            val counts = decodePlayCounts(countsRaw)
+            StationCodec.decode(savedRaw).sortedByDescending { counts[it.id] ?: 0 }
+        }
 
     /** Whether speculative connection prewarming is enabled. Disabled until measured. */
     val connectionPrewarmingEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -316,9 +318,7 @@ class SettingsRepository(private val context: Context) :
     /**
      * Flow of recently played stations, newest first.
      */
-    override val recentStations: Flow<List<Station>> = context.dataStore.data.map { preferences ->
-        StationCodec.decode(preferences[recentStationsKey])
-    }
+    override val recentStations: Flow<List<Station>> = decodedStations(recentStationsKey)
 
     override val hiddenRecentStationIds: Flow<Set<String>> = context.dataStore.data.map { preferences ->
         preferences[hiddenRecentStationIdsKey].orEmpty()
@@ -393,9 +393,10 @@ class SettingsRepository(private val context: Context) :
      * stream. Persisted so the choice survives process death and is visible to the
      * playback service, the widget and the tile without an explicit hand-off.
      */
-    val selectedStation: Flow<Station?> = context.dataStore.data.map { preferences ->
-        StationCodec.decode(preferences[selectedStationKey]).firstOrNull()
-    }
+    val selectedStation: Flow<Station?> = context.dataStore.data
+        .map { it[selectedStationKey] }
+        .distinctUntilChanged()
+        .map { StationCodec.decode(it).firstOrNull() }
 
     /**
      * Selects [station] for playback and records it as recently played.
@@ -483,6 +484,25 @@ class SettingsRepository(private val context: Context) :
     }
 
     /**
+     * Saves playlist stations in one transaction. Each call used to read, decode and
+     * rewrite the whole favourites document, so a long import was quadratic.
+     */
+    suspend fun importPlaylistStations(imported: List<Station>): StationCollections.MergeResult {
+        var result = StationCollections.MergeResult(emptyList(), added = 0, skipped = imported.size)
+        if (imported.isEmpty()) return result
+        context.dataStore.edit { preferences ->
+            result = StationCollections.mergePlaylist(
+                StationCodec.decode(preferences[savedStationsKey]),
+                imported
+            )
+            if (result.added > 0) {
+                preferences[savedStationsKey] = StationCodec.encode(result.stations)
+            }
+        }
+        return result
+    }
+
+    /**
      * Merges [imported] favourites (e.g. from a ShoutKit JSON backup) by station id,
      * appending new ones at the end, in one transaction. Returns what was added/skipped.
      */
@@ -512,6 +532,16 @@ class SettingsRepository(private val context: Context) :
         }
         return updated
     }
+
+    /**
+     * Decodes a station list only when that preference string changes. DataStore emits
+     * the whole file on every edit, and re-decoding favourites or recents for an
+     * unrelated toggle made every collector look like the list had changed.
+     */
+    private fun decodedStations(key: Preferences.Key<String>): Flow<List<Station>> = context.dataStore.data
+        .map { it[key] }
+        .distinctUntilChanged()
+        .map { StationCodec.decode(it) }
 
     /**
      * Read-modify-write inside a single DataStore transaction so concurrent edits

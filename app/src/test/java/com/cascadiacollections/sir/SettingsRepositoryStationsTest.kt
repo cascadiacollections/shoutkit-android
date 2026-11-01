@@ -1,5 +1,6 @@
 package com.cascadiacollections.sir
 
+import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.hasSize
@@ -11,7 +12,9 @@ import com.cascadiacollections.sir.core.directory.RadioDirectory
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.core.model.StationQuery
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
+import com.cascadiacollections.sir.core.playback.StreamQuality
 import java.io.IOException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -160,6 +163,37 @@ class SettingsRepositoryStationsTest {
 
         assertThat(repo.recentStations.first()).isEmpty()
         assertThat(repo.savedStations.first().map { it.id }).containsExactly("a")
+    }
+
+    @Test
+    fun `an unrelated preference write does not re-emit decoded station collections`() = runBlocking {
+        val repo = repo()
+        repo.saveStation(station("a"))
+        repo.selectStation(station("a"))
+
+        repo.savedStations.test {
+            assertThat(awaitItem().map { it.id }).containsExactly("a")
+            repo.setStreamQuality(StreamQuality.LOW)
+            delay(300)
+            expectNoEvents()
+            repo.saveStation(station("b"))
+            assertThat(awaitItem().map { it.id }).containsExactly("a", "b")
+            cancelAndIgnoreRemainingEvents()
+        }
+        repo.selectedStation.test {
+            assertThat(awaitItem()?.id).isEqualTo("a")
+            repo.setChromecastEnabled(true)
+            delay(300)
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+        repo.recentStations.test {
+            assertThat(awaitItem().map { it.id }).containsExactly("a")
+            repo.setReportPlaysToDirectory(false)
+            delay(300)
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
 
