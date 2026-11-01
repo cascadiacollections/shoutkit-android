@@ -135,6 +135,20 @@ class CircularByteBufferTest {
     }
 
     @Test
+    fun `write across the physical end preserves byte order`() {
+        val buf = CircularByteBuffer(8)
+        buf.write(byteArrayOf(1, 2, 3, 4, 5, 6), 0, 6)
+        buf.read(ByteArray(4), 0, 4)
+
+        // Source offset 1: the leading 0 is not part of the write.
+        buf.write(byteArrayOf(0, 7, 8, 9, 10), 1, 4)
+
+        val dst = ByteArray(6)
+        assertThat(buf.read(dst, 0, 6)).isEqualTo(6)
+        assertThat(dst).isEqualTo(byteArrayOf(5, 6, 7, 8, 9, 10))
+    }
+
+    @Test
     fun `wrap-around write maintains correct available count`() {
         val buf = CircularByteBuffer(8)
         buf.write(byteArrayOf(1, 2, 3, 4, 5, 6), 0, 6)

@@ -56,6 +56,55 @@ class StationCollectionsTest {
     }
 
     @Test
+    fun `playlist import appends new urls and skips duplicates`() {
+        val current = listOf(station("existing", name = "Kept", url = "https://example.com/a"))
+        val imported = listOf(
+            station("imported:https://example.com/a", name = "Again", url = "https://example.com/a"),
+            station("imported:https://example.com/b", name = "B", url = "https://example.com/b"),
+            station("imported:https://example.com/b", name = "B again", url = "https://example.com/b")
+        )
+
+        val result = StationCollections.mergePlaylist(current, imported)
+
+        assertThat(result.added).isEqualTo(1)
+        assertThat(result.skipped).isEqualTo(2)
+        assertThat(result.stations.map { it.url })
+            .containsExactly("https://example.com/a", "https://example.com/b")
+        assertThat(result.stations[0].name).isEqualTo("Kept")
+        assertThat(result.stations[1].name).isEqualTo("B")
+    }
+
+    @Test
+    fun `playlist import replaces a saved id in place when the url is new`() {
+        val current = listOf(
+            station("imported:https://new", name = "Old name", url = "https://old"),
+            station("keep")
+        )
+        val imported = listOf(
+            station("imported:https://new", name = "New name", url = "https://new")
+        )
+
+        val result = StationCollections.mergePlaylist(current, imported)
+
+        assertThat(result.added).isEqualTo(1)
+        assertThat(result.skipped).isEqualTo(0)
+        assertThat(result.stations.map { it.id }).containsExactly("imported:https://new", "keep")
+        assertThat(result.stations[0].name).isEqualTo("New name")
+        assertThat(result.stations[0].url).isEqualTo("https://new")
+    }
+
+    @Test
+    fun `an empty playlist import is a no-op`() {
+        val current = listOf(station("a"))
+
+        val result = StationCollections.mergePlaylist(current, emptyList())
+
+        assertThat(result.stations).isEqualTo(current)
+        assertThat(result.added).isEqualTo(0)
+        assertThat(result.skipped).isEqualTo(0)
+    }
+
+    @Test
     fun `removing an unknown favorite is a no-op`() {
         val current = listOf(station("a"))
 
