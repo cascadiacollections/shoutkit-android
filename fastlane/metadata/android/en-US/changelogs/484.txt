@@ -1,0 +1,5 @@
+First F-Droid release.
+
+• Search the Radio Browser directory and play stations in the background
+• Favorites, recents, import and export
+• Sleep timer, equalizer, widget, Android Auto and Android TV
