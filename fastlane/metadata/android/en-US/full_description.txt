@@ -1,23 +1,33 @@
-SIR is a lightweight internet radio player for Android. Browse stations, start
-playback with one tap, and control audio from the notification, lock screen,
-Android Auto, or a Wear OS companion.
+Shoutkit is a lightweight internet radio player. Search the community-run
+Radio Browser directory (radio-browser.info), save your favorite stations and
+listen in the background.
 
 Features:
-• Listen to internet radio stations with reliable background playback
-• Browse and search station directories, and save favorites
-• Use media controls from notifications, the lock screen, and Android Auto
-• Set a sleep timer and adjust the equalizer
-• See track information when a station provides it
-• Optional Chromecast support is available in the separate Play flavor; it is
-  not included in this FOSS build
+• Search and browse stations by name and genre, or add a station by its stream URL
+• Background playback with notification, lock screen and Quick Settings tile controls
+• Shows the current song when a station sends track information
+• Favorites, recently played stations and recently heard songs
+• Import and export your saved stations
+• Sleep timer and equalizer presets (Normal, Bass Boost, Vocal, Treble)
+• Pauses when headphones disconnect and reconnects after stream errors
+• Home screen widget and app shortcuts
+• Android Auto and Android TV support
+• Play links (sir://play/…) for routines, Tasker and home screen shortcuts
+
+Network services:
+• Station search uses the Radio Browser API. By default Shoutkit tells Radio
+  Browser when you start one of its stations, so popular stations rank higher.
+  You can turn this off in Settings.
+• Optional album artwork sends the current song's artist and title to Apple's
+  iTunes Search. It is on by default and can be turned off in Settings.
 
 Privacy:
-• No account or sign-in is required
+• No account or sign-in
 • Preferences are stored on your device
-• The FOSS build does not include Firebase analytics or crash reporting
-• Network access is used for station directories, radio streams, and artwork
+• This build contains no Google Play Services, Firebase, analytics or crash
+  reporting. Chromecast and the Wear OS companion app are only in the Google
+  Play build.
 
-SIR is free and open-source software, licensed under the MIT License. Source
-code: https://github.com/cascadiacollections/sir-android
-
-Privacy policy: https://cascadiacollections.github.io/sir-android/privacy/
+Shoutkit is free software under the MIT License.
+Source code: https://github.com/cascadiacollections/shoutkit-android
+Privacy policy: https://cascadiacollections.github.io/shoutkit-android/privacy/

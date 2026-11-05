@@ -1,1 +1,1 @@
-Open-source internet radio with background playback
+Free, open-source internet radio player with background playback
