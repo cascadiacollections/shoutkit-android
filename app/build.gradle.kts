@@ -88,8 +88,11 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            val releaseSigningConfig = signingConfigs.getByName("release")
-            if (releaseSigningConfig.storeFile != null) signingConfig = releaseSigningConfig
+            // findByName, not getByName: F-Droid's build strips the signingConfigs block
+            // (and lines that assign signingConfig) before building, so "release" may not exist.
+            signingConfigs.findByName("release")?.takeIf { it.storeFile != null }?.let {
+                signingConfig = it
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
