@@ -3,6 +3,7 @@
 # Shoutkit — Internet Radio for Android
 
 [![Build Status](https://github.com/cascadiacollections/shoutkit-android/workflows/Android%20CI/badge.svg)](https://github.com/cascadiacollections/shoutkit-android/actions)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/cascadiacollections/shoutkit-android/badge)](https://scorecard.dev/viewer/?uri=github.com/cascadiacollections/shoutkit-android)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=24)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Latest Release](https://img.shields.io/github/v/release/cascadiacollections/shoutkit-android?include_prereleases&label=nightly)](https://github.com/cascadiacollections/shoutkit-android/releases)
