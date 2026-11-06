@@ -7,7 +7,7 @@
     <shortcut
         android:shortcutId="play"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/play"
         android:shortcutLongLabel="@string/shortcut_play_long">
         <intent
@@ -21,7 +21,7 @@
         android:shortcutId="whats_playing"
         tools:targetApi="n_mr1"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/shortcut_whats_playing_short"
         android:shortcutLongLabel="@string/shortcut_whats_playing_long">
         <intent
@@ -35,7 +35,7 @@
         android:shortcutId="favorite_current"
         tools:targetApi="n_mr1"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/shortcut_favorite_short"
         android:shortcutLongLabel="@string/shortcut_favorite_long">
         <intent

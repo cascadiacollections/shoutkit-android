@@ -163,7 +163,7 @@
             android:exported="true"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:label="@string/station_name"
-            android:icon="@drawable/ic_launcher_foreground">
+            android:icon="@drawable/ic_tile_beacon">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
