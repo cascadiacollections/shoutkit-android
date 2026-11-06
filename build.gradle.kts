@@ -1,4 +1,21 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+// These are transitive Gradle plugin dependencies. Explicit constraints keep
+// security updates editable by Dependabot without adding libraries to the APK.
+buildscript {
+    dependencies {
+        constraints {
+            classpath("com.google.guava:guava:33.8.0-jre")
+            classpath("org.apache.commons:commons-lang3:3.21.0")
+            classpath("org.apache.httpcomponents:httpclient:4.5.14")
+            classpath("org.bitbucket.b_c:jose4j:0.9.7")
+            classpath("org.bouncycastle:bcpkix-jdk18on:1.85")
+            classpath("org.bouncycastle:bcprov-jdk18on:1.85")
+            classpath("org.jdom:jdom2:2.0.6.1")
+        }
+    }
+}
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
@@ -10,6 +27,28 @@ plugins {
     alias(libs.plugins.firebase.crashlytics) apply false
     alias(libs.plugins.aboutlibraries.plugin) apply false
     alias(libs.plugins.detekt) apply false
+}
+
+// Android Lint runs from its own resolved classpath (androidLintTool), which AGP fills with
+// older Guava, commons-lang3, httpclient and Bouncy Castle. Patched minimums for that tool
+// classpath only.
+val lintToolSecurityConstraints = listOf(
+    "com.google.guava:guava:33.8.0-jre",
+    "org.apache.commons:commons-lang3:3.21.0",
+    "org.apache.httpcomponents:httpclient:4.5.14",
+    "org.bouncycastle:bcpkix-jdk18on:1.85",
+    "org.bouncycastle:bcprov-jdk18on:1.85",
+)
+// Patched minimum for Guava, which media3, Cast and Wear pull in transitively.
+val guavaSecurity = libs.guava.security.get().toString()
+subprojects {
+    val constraintHandler = dependencies.constraints
+    configurations.matching { it.name == "androidLintTool" }.configureEach {
+        lintToolSecurityConstraints.forEach { dependencyConstraints.add(constraintHandler.create(it)) }
+    }
+    configurations.matching { it.name == "implementation" }.configureEach {
+        dependencyConstraints.add(constraintHandler.create(guavaSecurity))
+    }
 }
 
 // Configure Java toolchain for all subprojects

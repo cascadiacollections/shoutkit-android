@@ -38,6 +38,11 @@ android {
 }
 
 dependencies {
+    // Patched minimum for Wire, which benchmark-common pulls in transitively.
+    constraints {
+        implementation(libs.wire.runtime.benchmark)
+        implementation(libs.wire.runtime.jvm.benchmark)
+    }
     implementation(libs.androidx.junit)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.uiautomator)
