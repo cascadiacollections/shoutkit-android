@@ -132,6 +132,21 @@ jobs:
           test "$draft" = "false"
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -qx 'shoutkit-android-nightly.apk'
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -qx 'shoutkit-android-nightly.apk.sigstore.json'
+      # Keep the 10 newest nightly prereleases and delete the rest with their
+      # tags. Only `nightly-*` prereleases are touched, never a stable release.
+      # A failed delete warns instead of failing the run.
+      - name: Prune old nightly prereleases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP: 10
+        run: |
+          set -euo pipefail
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 500 --json tagName,isPrerelease,createdAt \
+            --jq "[.[] | select(.isPrerelease and (.tagName | startswith(\"nightly-\")))] | sort_by(.createdAt) | reverse | .[$KEEP:] | .[].tagName" |
+          while read -r old; do
+            echo "Deleting $old"
+            gh release delete "$old" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || echo "::warning::Could not delete $old"
+          done
       - name: Point the site at this nightly
         env:
           GH_TOKEN: ${{ github.token }}
