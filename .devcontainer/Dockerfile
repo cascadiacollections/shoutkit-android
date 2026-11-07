@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/java:21
+FROM mcr.microsoft.com/devcontainers/java:21@sha256:e2d67c30737dd4f6822ad9e715429815889f8084c6b53536f448b48dbc2e0514
 
 ARG ANDROID_SDK_VERSION=11076708
 ARG ANDROID_BUILD_TOOLS=36.0.0
