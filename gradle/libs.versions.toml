@@ -1,8 +1,8 @@
 [versions]
 guavaSecurity = "33.8.0-android"
 # benchmark-common 1.5.0 is built against Wire 6; keep its patched minimum on 6.x.
-wireBenchmark = "6.4.7"
-agp = "9.5.0"
+wireBenchmark = "7.1.2"
+agp = "9.5.1"
 compileSdk = "37"
 minSdk = "24"
 targetSdk = "37"
