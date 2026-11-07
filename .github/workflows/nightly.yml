@@ -141,9 +141,13 @@ jobs:
           KEEP: 10
         run: |
           set -euo pipefail
-          gh release list --repo "$GITHUB_REPOSITORY" --limit 500 --json tagName,isPrerelease,createdAt \
-            --jq "[.[] | select(.isPrerelease and (.tagName | startswith(\"nightly-\")))] | sort_by(.createdAt) | reverse | .[$KEEP:] | .[].tagName" |
+          current="nightly-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          # Sort by publishedAt: a release's createdAt is its target commit's
+          # date, so a re-run of an old commit would sort as old.
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 500 --json tagName,isPrerelease,publishedAt \
+            --jq "[.[] | select(.isPrerelease and (.tagName | startswith(\"nightly-\")))] | sort_by(.publishedAt) | reverse | .[$KEEP:] | .[].tagName" |
           while read -r old; do
+            if [ "$old" = "$current" ]; then continue; fi
             echo "Deleting $old"
             gh release delete "$old" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || echo "::warning::Could not delete $old"
           done
