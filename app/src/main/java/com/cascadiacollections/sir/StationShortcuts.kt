@@ -62,7 +62,7 @@ object StationShortcuts {
             // so rank == position preserves that ordering — without it every shortcut
             // defaults to rank 0 and the launcher is free to order them arbitrarily.
             .setRank(rank)
-            .setIcon(IconCompat.createWithResource(context, R.drawable.ic_launcher_foreground))
+            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(
                 // Station IDs derived from imported stream URLs can contain reserved
                 // characters like ':' and '/'; the link percent-encodes them so
@@ -89,7 +89,7 @@ object StationShortcuts {
         val shortcut = ShortcutInfoCompat.Builder(context, PIN_PREFIX + station.id)
             .setShortLabel(station.name.ifBlank { context.getString(R.string.play_station_link_label) })
             .setLongLabel(station.name.ifBlank { context.getString(R.string.play_station_link_label) })
-            .setIcon(IconCompat.createWithResource(context, R.drawable.ic_launcher_foreground))
+            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(
                 Intent(PlayStationActivity.ACTION_PLAY_STATION, StationDeepLink.playLink(station.id))
                     .setClass(context, PlayStationActivity::class.java)
