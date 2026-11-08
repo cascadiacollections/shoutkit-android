@@ -7,11 +7,11 @@
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=24)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Latest Release](https://img.shields.io/github/v/release/cascadiacollections/shoutkit-android?include_prereleases&label=nightly)](https://github.com/cascadiacollections/shoutkit-android/releases)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: GPL-3.0 app, MIT libraries](https://img.shields.io/badge/License-GPL--3.0%20%2F%20MIT-blue.svg)](#license)
 
 *A lightweight, battery-efficient internet radio app for Android, optimized for streaming audio playback.*
 
-[Features](#features) • [Download](#latest-apks) • [Building](#building) • [Tech Stack](#tech-stack) • [Privacy](#privacy)
+[Features](#features) • [Download](#getting-shoutkit) • [Building](#building) • [Tech Stack](#tech-stack) • [Privacy](#privacy)
 
 </div>
 
@@ -76,11 +76,25 @@ screen** and use that shortcut where Routines lets you pick an app shortcut.
 adb shell am start -a android.intent.action.VIEW -d sir://play/<id>
 ```
 
+## Getting Shoutkit
+
+Shoutkit is free software. Every feature is in the free build.
+
+| Where | Price | Build | Notes |
+|-------|-------|-------|-------|
+| [GitHub Releases](https://github.com/cascadiacollections/shoutkit-android/releases) | Free | FOSS | Signed nightlies, see [Nightly APK](#nightly-apk) |
+| F-Droid | Free | FOSS | Built and signed by F-Droid |
+| Google Play | Paid | Play | Same app, plus Chromecast and the Wear OS companion. Buying it funds development. |
+| Source | Free | Either | See [Building](#building) |
+
+Each channel signs with a different key, so Android won't update across channels. Switching from
+one to another means uninstalling first. Export your stations (Settings) before you do.
+
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
-| **Play** | Google Play build with Firebase Crashlytics + Analytics |
+| **Play** | Google Play build with Firebase Crashlytics + Analytics, Chromecast, Wear OS |
 | **FOSS** | Fully open-source build, no proprietary Google services |
 
 ## Optimizations
@@ -201,7 +215,21 @@ Shoutkit collects no personal data. All preferences are stored locally on-device
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+| Component | License |
+|-----------|---------|
+| App modules: `:app`, `:cast`, `:wear`, `:benchmark` | [GPL-3.0](LICENSE), with an [app store permission](LICENSE-EXCEPTION.md) |
+| Libraries: `:core:*`, `:libs:*`, and `build-logic` | MIT (per-module `LICENSE` files) |
+
+If you add a module, a `LICENSE` file in its directory makes it MIT. Without one, it inherits
+GPL-3.0 from the root `LICENSE`. An MIT module must not depend on a GPL-3.0 one. CI checks this
+in the `license-boundary` job (`.github/scripts/check-license-boundary.sh`).
+
+The GPL-3.0 terms apply from version 1.3.0 onward. Releases up to and including 1.2.1 were
+published under MIT, and those copies stay MIT. The Simplified Chinese translation
+(`app/src/main/res/values-zh-rCN/`, #138) was contributed under MIT and keeps its MIT terms
+inside the GPL-3.0 app. MIT is GPL-compatible, so no relicensing is needed for it.
+
+The licenses don't cover the Shoutkit name and icon. See [TRADEMARK.md](TRADEMARK.md).
 
 Copyright © 2026 Cascadia Collections
 
