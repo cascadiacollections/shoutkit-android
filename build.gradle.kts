@@ -57,8 +57,9 @@ subprojects {
         extensions.configure<JavaPluginExtension> {
             toolchain {
                 languageVersion.set(JavaLanguageVersion.of(21))
-                // Use Eclipse Adoptium Temurin - OSS JDK with enterprise-grade support
-                vendor.set(JvmVendorSpec.ADOPTIUM)
+                // Any vendor's JDK 21. mise installs Temurin locally and in CI, but
+                // F-Droid's build server only has Debian's OpenJDK, and a vendor pin
+                // fails there with "Cannot find a Java installation".
             }
         }
     }
