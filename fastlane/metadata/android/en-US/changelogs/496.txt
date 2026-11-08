@@ -1,0 +1,7 @@
+First F-Droid release.
+
+• New ShoutKit beacon launcher icon, with a themed (monochrome) icon
+• Faster station lists and more resilient live playback
+• Search the Radio Browser directory and play stations in the background
+• Favorites, recents, import and export
+• Sleep timer, equalizer, widget, Android Auto and Android TV

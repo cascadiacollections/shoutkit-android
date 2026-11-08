@@ -65,7 +65,7 @@ android {
         applicationId = "com.cascadiacollections.sir"
         versionCode = providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
             .standardOutput.asText.get().trim().toIntOrNull() ?: 1
-        versionName = "1.2.0"
+        versionName = "1.2.1"
 
         // Short commit for Settings → About. providers.exec keeps this configuration-cache
         // safe (the output is a tracked input); a missing git binary, or a source tree that
