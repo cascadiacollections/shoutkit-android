@@ -24,6 +24,13 @@ jobs:
           persist-credentials: false
       - name: Check MIT modules don't depend on GPL-3.0 modules
         run: .github/scripts/check-license-boundary.sh
+      # Every file needs licensing info; REUSE.toml maps paths to licenses.
+      - name: REUSE lint
+        run: pipx run reuse==6.3.0 lint
+      # setup-gradle validates the wrapper too, but Scorecard only recognises this action when
+      # it checks the checked-in gradle-wrapper.jar.
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
   build:
     runs-on: ubuntu-latest
