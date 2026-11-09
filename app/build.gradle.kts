@@ -88,6 +88,11 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            // Leave META-INF/version-control-info.textproto out. AGP reads only loose ref
+            // files, so a checkout whose refs git has packed (or a source tarball) writes
+            // NO_VALID_GIT_FOUND instead of the commit, and the APK stops being
+            // reproducible. BuildConfig.GIT_COMMIT (above) already records the commit.
+            vcsInfo.include = false
             // findByName, not getByName: F-Droid's build strips the signingConfigs block
             // (and lines that assign signingConfig) before building, so "release" may not exist.
             signingConfigs.findByName("release")?.takeIf { it.storeFile != null }?.let {
