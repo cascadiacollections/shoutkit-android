@@ -1,4 +1,4 @@
-Shoutkit is a lightweight internet radio player. Search the community-run
+ShoutKit is a lightweight internet radio player. Search the community-run
 Radio Browser directory (radio-browser.info), save your favorite stations and
 listen in the background.
 
@@ -15,7 +15,7 @@ Features:
 • Play links (sir://play/…) for routines, Tasker and home screen shortcuts
 
 Network services:
-• Station search uses the Radio Browser API. By default Shoutkit tells Radio
+• Station search uses the Radio Browser API. By default ShoutKit tells Radio
   Browser when you start one of its stations, so popular stations rank higher.
   You can turn this off in Settings.
 • Optional album artwork sends the current song's artist and title to Apple's
@@ -28,6 +28,6 @@ Privacy:
   reporting. Chromecast and the Wear OS companion app are only in the Google
   Play build.
 
-Shoutkit is free software: the app is GPL-3.0 and its libraries are MIT.
+ShoutKit is free software: the app is GPL-3.0 and its libraries are MIT.
 Source code: https://github.com/cascadiacollections/shoutkit-android
 Privacy policy: https://cascadiacollections.github.io/shoutkit-android/privacy/
