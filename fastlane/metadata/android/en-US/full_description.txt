@@ -28,6 +28,6 @@ Privacy:
   reporting. Chromecast and the Wear OS companion app are only in the Google
   Play build.
 
-Shoutkit is free software under the MIT License.
+Shoutkit is free software: the app is GPL-3.0 and its libraries are MIT.
 Source code: https://github.com/cascadiacollections/shoutkit-android
 Privacy policy: https://cascadiacollections.github.io/shoutkit-android/privacy/
