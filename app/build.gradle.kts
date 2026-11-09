@@ -145,6 +145,11 @@ android {
         // Use native libraries compression for smaller APK, faster load on Android 6+
         jniLibs {
             useLegacyPackaging = false
+            // The only native libraries are prebuilt ones from AndroidX AARs. Package them
+            // as published: AGP's strip step rewrites them when an NDK is installed and
+            // skips them when none is, so builds on machines with and without an NDK
+            // (F-Droid's has none) would otherwise differ and break reproducibility.
+            keepDebugSymbols += "**/*.so"
         }
     }
 
