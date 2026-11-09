@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Shoutkit — FOSS privacy</title>
-<meta name="description" content="How the Shoutkit FOSS Android build uses local storage and network services.">
+<title>Shoutkit for Android: privacy (FOSS build)</title>
+<meta name="description" content="Shoutkit for Android has no ads, no account and no analytics. How the FOSS build uses local storage and network services.">
 <link rel="stylesheet" href="../style.css">
 <link rel="icon" href="../assets/icon.svg">
 <style>main{max-width:760px;margin:50px auto 90px}h1{font-size:clamp(3rem,7vw,5rem)}h2{font-size:1.6rem;margin-top:45px}main p,main li{color:var(--muted)}</style>
@@ -18,12 +18,12 @@
 <main>
 <div class="eyebrow">The FOSS Android edition</div>
 <h1>Privacy,<br>in plain sight.</h1>
-<p>Updated October 11, 2026. This page describes the FOSS build of Shoutkit, developed by Cascadia Collections. Other build flavors can include different services.</p>
+<p>Updated November 8, 2026. This page describes the FOSS build of Shoutkit, developed by Cascadia Collections. Other build flavors can include different services.</p>
 <h2>What stays on your device</h2>
 <p>Your preferences, saved stations, and recent listening are stored locally. Shoutkit does not require an account. The FOSS build excludes Firebase Analytics, Crashlytics, Google Cast, and the Google Wearable Data Layer.</p>
 <h2>What connects to the internet</h2>
-<p>Station discovery uses the community Radio Browser directory and its mirrors. Audio streams connect to broadcasters' servers. Station images are fetched from their image hosts. These services receive connection information such as your IP address and standard request headers.</p>
-<p>When optional album artwork lookup is enabled, the current artist and track title are sent to Apple's iTunes Search service to find cover art. The app's settings explain this option.</p>
+<p>Station discovery uses the community Radio Browser directory and its mirrors. By default, Shoutkit tells Radio Browser when you start one of its stations, so popular stations rank higher; you can turn this off in Settings. Audio streams connect to broadcasters' servers. Station images are fetched from their image hosts. These services receive connection information such as your IP address and standard request headers.</p>
+<p>Optional album artwork lookup is on by default. While it is on, the current artist and track title are sent to Apple's iTunes Search service to find cover art. You can turn it off in Settings.</p>
 <h2>Permissions and playback</h2>
 <p>Network access supports directory browsing and audio streaming. Foreground media playback and wake locks keep audio running in the background. Notification permission shows playback controls. Network state helps the app handle connection changes and metered networks; Bluetooth permission supports headset reconnection behavior where available.</p>
 <h2>External services</h2>
@@ -32,7 +32,7 @@
 <p>Review the <a href="https://github.com/cascadiacollections/shoutkit-android">source code</a> or open an issue on the <a href="https://github.com/cascadiacollections/shoutkit-android/issues">project tracker</a>. This page will be updated when the FOSS build's behavior changes.</p>
 </main>
 <footer>
-<span>Shoutkit / Cascadia Collections</span>
+<span>Shoutkit · Cascadia Collections</span>
 <a href="../">Back to the app</a>
 </footer>
 </div>
