@@ -1,0 +1,2 @@
+• Shoutkit is now GPL-3.0 free software (its libraries stay MIT)
+• Reproducible builds: the F-Droid build matches the official one byte for byte
