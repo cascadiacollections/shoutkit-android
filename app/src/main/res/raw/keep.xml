@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Cast dynamic feature's manifest refers to this string, which keeps it through
+  resource shrinking. F-Droid builds without the :cast module, so keep it explicitly:
+  otherwise the two builds' resources.arsc differ and the APK isn't reproducible.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/cast_feature_title" />

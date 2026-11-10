@@ -4,3 +4,9 @@
 # R8 warnings for the classes it would otherwise pull into the reference graph.
 -dontwarn com.google.android.gms.**
 -dontwarn com.google.android.play.core.**
+
+# Reproducible builds: F-Droid builds this flavor without the :cast module, which shifts
+# the order R8 assigns short names in, so the same source produced classes.dex files that
+# differed only in obfuscated names. The FOSS source is public, so renaming protects
+# nothing; R8 still shrinks and optimizes.
+-dontobfuscate
