@@ -224,6 +224,10 @@ If you add a module, a `LICENSE` file in its directory makes it MIT. Without one
 GPL-3.0 from the root `LICENSE`. An MIT module must not depend on a GPL-3.0 one. CI checks this
 in the `license-boundary` job (`.github/scripts/check-license-boundary.sh`).
 
+[`REUSE.toml`](REUSE.toml) records the same split per path for [REUSE](https://reuse.software)
+tools, with the license texts in `LICENSES/`. The same CI job runs `reuse lint`. An MIT module
+outside `core/` and `libs/` needs its own entry there too.
+
 The GPL-3.0 terms apply from version 1.3.0 onward. Releases up to and including 1.2.1 were
 published under MIT, and those copies stay MIT. The Simplified Chinese translation
 (`app/src/main/res/values-zh-rCN/`, #138) was contributed under MIT and keeps its MIT terms
