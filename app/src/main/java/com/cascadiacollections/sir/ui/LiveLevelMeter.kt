@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.cascadiacollections.android.audiolevels.AudioLevels
 import com.cascadiacollections.android.audiolevels.PeakHold
+import kotlin.math.pow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -120,11 +121,11 @@ private fun DrawScope.drawMirroredBars(frame: MeterFrame, color: Color) {
     val centre = size.height / 2
     for (band in 0 until count) {
         val left = band * (barWidth + spacing)
-        val barHeight = maxOf(minimumHeight, size.height * frame.levels[band])
+        val barHeight = maxOf(minimumHeight, size.height * displayed(frame.levels[band]))
         drawRoundRect(color, Offset(left, centre - barHeight / 2), Size(barWidth, barHeight), radius)
         val peak = frame.peaks.getOrElse(band) { 0f }
         if (peak > 0f) {
-            val offset = minOf(size.height - capHeight, size.height * peak) / 2
+            val offset = minOf(size.height - capHeight, size.height * displayed(peak)) / 2
             val capSize = Size(barWidth, capHeight)
             val capRadius = CornerRadius(capHeight / 2, capHeight / 2)
             for (y in floatArrayOf(centre - offset, centre + offset)) {
@@ -133,6 +134,15 @@ private fun DrawScope.drawMirroredBars(frame: MeterFrame, color: Color) {
         }
     }
 }
+
+/**
+ * Display curve from the spec's "Drawing (UI)" section: bars and caps at `level^0.6` of the
+ * height. Typical stations sit at 0.1–0.4 per band, which drawn linearly reads as a dotted line.
+ * Keeps 0 at 0 and 1 at 1; the analysis is unaffected.
+ */
+private fun displayed(level: Float): Float = level.coerceIn(0f, 1f).pow(DISPLAY_EXPONENT)
+
+private const val DISPLAY_EXPONENT = 0.6f
 
 /** Slightly longer than the ~33 ms publish interval, so steps read as motion (iOS: 0.12 s). */
 private const val FRAME_EASE_MILLIS = 120

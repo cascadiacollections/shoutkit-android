@@ -357,6 +357,8 @@ ballistics. Both clients pass the spec's golden vectors, so they draw the same b
 - **Consumer.** `LiveLevelMeter` collects `LiveAudioLevels.levels` only while the stream is live
   and the screen is started. Collection adds a meter to the set and cancellation removes it, so
   the FFT runs only while the bars are visible.
+- **Drawing.** Bars and caps are drawn at `level^0.6` of the height (spec "Drawing (UI)"), so
+  typical 0.1–0.4 levels don't read as a dotted line.
 - **At rest.** Paused, buffering, failed, or no frame for 500 ms (Cast took over): the bars ease
   to zero and the peak caps reset.
 - **When hidden.** Settings → Playback → Show visualizer (on by default), or the system's animator
