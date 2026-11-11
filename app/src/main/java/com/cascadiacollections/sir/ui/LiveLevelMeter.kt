@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.cascadiacollections.android.audiolevels.AudioLevels
+import com.cascadiacollections.android.audiolevels.AutoGain
 import com.cascadiacollections.android.audiolevels.PeakHold
 import kotlin.math.pow
 import kotlinx.coroutines.delay
@@ -31,9 +32,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 
 /**
- * The Now Playing level meter: mirrored bars that grow out from a centre line, with peak caps,
- * easing over [FRAME_EASE_MILLIS] between frames — the same drawing as the iOS
- * `AudioLevelsView(style: .mirrored)`.
+ * The Now Playing level meter: frames scaled by [AutoGain], drawn as mirrored bars that grow out
+ * from a centre line, with peak caps, easing over [FRAME_EASE_MILLIS] between frames — the same
+ * drawing as the iOS `AudioLevelsView(style: .mirrored)`.
  *
  * Collects [levels] only while [active] and the screen is at least started, so the player's tap
  * runs only while someone can see the bars. When playback pauses, buffers or stops (or frames
@@ -48,9 +49,14 @@ internal fun LiveLevelMeter(active: Boolean, levels: Flow<AudioLevels>, modifier
     LaunchedEffect(active, levels, lifecycleOwner) {
         target = AudioLevels.silent()
         if (!active) return@LaunchedEffect
+        var gain = AutoGain()
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             levels.collectLatest { frame ->
-                target = frame
+                // Spec "Drawing (UI)": auto-gain first, so quiet and loud streams both fill the
+                // meter; then the level^0.6 curve at draw time.
+                val applied = gain.apply(frame, System.nanoTime())
+                gain = applied.gain
+                target = applied.levels
                 // No frame for a while (Cast took over, an offloaded format): rest, don't freeze.
                 delay(STALE_FRAME_MILLIS)
                 target = AudioLevels.silent()

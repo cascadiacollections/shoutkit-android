@@ -20,6 +20,7 @@ clients draw the same bars from the same audio.
 | `AudioLevelMeter` | An `AudioTapPlugin` that adds ballistics (attack 0.7, release 0.18) and a 33 ms publish cap |
 | `AudioTapPlugin` / `AudioTapPluginSet` | What an engine hands PCM to, and the thread-safe set it dispatches through |
 | `AudioTapPluginSet.levels()` | A cold `Flow<AudioLevels>`: a meter is added while collected, removed when collection stops |
+| `AutoGain` | Display auto-gain: scales frames against a reference (floor 0.3, decays 0.15/s) so quiet and loud streams both fill the meter |
 | `PeakHold` | Time-based peak caps: hold 600 ms, then fall at 0.9 full scale per second |
 
 ## Usage with Media3
