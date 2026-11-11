@@ -241,4 +241,6 @@
     <string name="showing_saved_stations">正在显示已保存的电台</string>
     <string name="browse_more_genres">更多类型</string>
     <string name="browse_fewer_genres">收起类型</string>
+    <string name="show_visualizer">显示可视化效果</string>
+    <string name="show_visualizer_summary">在“正在播放”页面显示实时音量条。开启系统的“移除动画”设置时会隐藏。</string>
 </resources>

@@ -102,6 +102,7 @@ class SettingsRepository(private val context: Context) :
     private val reportPlaysToDirectoryKey = booleanPreferencesKey("report_plays_to_directory")
     private val fetchAlbumArtworkKey = booleanPreferencesKey("fetch_album_artwork")
     private val spatialAudioKey = booleanPreferencesKey("spatial_audio")
+    private val showVisualizerKey = booleanPreferencesKey("show_visualizer")
     private val hasCompletedFirstRunKey = booleanPreferencesKey("has_completed_first_run")
     private val hiddenRecentStationIdsKey = stringSetPreferencesKey("hidden_recent_station_ids")
 
@@ -287,6 +288,20 @@ class SettingsRepository(private val context: Context) :
     suspend fun setFetchAlbumArtwork(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[fetchAlbumArtworkKey] = enabled
+        }
+    }
+
+    /**
+     * Whether Now Playing shows the live level meter. On by default, as in ShoutKit. The meter
+     * also hides itself when the system asks for reduced motion, whatever this says.
+     */
+    val showVisualizer: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[showVisualizerKey] ?: true
+    }
+
+    suspend fun setShowVisualizer(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[showVisualizerKey] = enabled
         }
     }
 

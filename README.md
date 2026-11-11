@@ -184,6 +184,7 @@ sibling iOS client:
 | `:cast` | On-demand Chromecast dynamic feature (Play flavor only) |
 | `:libs:media3-timeshift` | DVR/time-shift Media3 `DataSource` (publishable) |
 | `:libs:okhttp-streaming` | Streaming-tuned OkHttp client factory (publishable) |
+| `:libs:audio-levels` | Live level meter analysis, shared spec and golden vectors with iOS (publishable) |
 
 See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
 

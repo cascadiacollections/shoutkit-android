@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import com.cascadiacollections.sir.CastFeatureManager
 import com.cascadiacollections.sir.CastModuleState
+import com.cascadiacollections.sir.LiveAudioLevels
 import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioBrowserViewModel
 import com.cascadiacollections.sir.RadioUiState
@@ -71,6 +72,7 @@ fun SirAppShell(
     var showTrackHistory by remember { mutableStateOf(false) }
     var showRecentlyHeard by remember { mutableStateOf(false) }
     val chromecastEnabled by settingsRepository.chromecastEnabled.collectAsState(initial = false)
+    val showVisualizer by settingsRepository.showVisualizer.collectAsState(initial = true)
     val castModuleState by castFeatureManager.moduleState.collectAsState()
     val isWideLayout = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
     val layoutType = if (isWideLayout) {
@@ -170,6 +172,8 @@ fun SirAppShell(
                         state = uiState,
                         modifier = contentModifier,
                         isWideLayout = isWideLayout,
+                        showVisualizer = showVisualizer,
+                        audioLevels = LiveAudioLevels.levels,
                         onToggleFavorite = onToggleFavorite,
                         onToggle = onToggle
                     )

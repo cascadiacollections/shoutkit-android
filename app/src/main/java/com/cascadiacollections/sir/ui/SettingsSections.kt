@@ -36,6 +36,7 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
     val prewarm by settingsRepository.connectionPrewarmingEnabled.collectAsState(initial = false)
     val loopBroadcasts by settingsRepository.loopFinishedBroadcasts.collectAsState(initial = false)
     val spatialAudio by settingsRepository.spatialAudioEnabled.collectAsState(initial = false)
+    val showVisualizer by settingsRepository.showVisualizer.collectAsState(initial = true)
     val context = LocalContext.current
     val spatialSupported = remember { SpatialAudio.isSupported(context) }
 
@@ -81,6 +82,20 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
             }
         )
     }
+    // Read live by Now Playing. Not tied to battery saver: the meter is about ten small FFTs
+    // a second, and stopping it there made the bars look broken on iOS.
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.show_visualizer)) },
+        supportingContent = { Text(stringResource(R.string.show_visualizer_summary)) },
+        trailingContent = {
+            Switch(
+                checked = showVisualizer,
+                onCheckedChange = { enabled ->
+                    scope.launch { settingsRepository.setShowVisualizer(enabled) }
+                }
+            )
+        }
+    )
 }
 
 /** Settings → About, at the end of the screen. */

@@ -227,6 +227,8 @@
     <string name="loop_finished_broadcasts">Loop finished broadcasts</string>
     <string name="spatial_audio">Spatial Audio</string>
     <string name="spatial_audio_summary">Places the stream around you on supported headphones.</string>
+    <string name="show_visualizer">Show visualizer</string>
+    <string name="show_visualizer_summary">Live level bars on Now Playing. Hidden while the system\'s Remove animations setting is on.</string>
     <string name="loop_finished_broadcasts_summary">Replays a broadcast that ends, like an hourly newscast, instead of stopping. Live stations are unaffected.</string>
 
     <!-- Settings: About -->
