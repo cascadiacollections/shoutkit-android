@@ -117,6 +117,7 @@ sir/
 > later, separate step.
 
 ## Decision Log
+- `audio-levels` — extracted as `:libs:audio-levels` (MIT), the Android side of the iOS `AudioLevels` package. Pure Kotlin with its own FFT so it carries no heavy dependency; the Media3 `TeeAudioProcessor` glue (about 30 lines) stays in `:app` so the library doesn't depend on ExoPlayer. The Compose bars also stay in `:app` for now.
 - `ServiceUtils` — NOT extracted (too trivial, 5 lines of code)
 - `StreamConfig` — extracted into `:core:playback` (shared stream defaults for app + Wear)
 - `SettingsRepository` — NOT extracted (pattern is generic but DataStore wrappers are trivial; no unique value as library)

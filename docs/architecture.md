@@ -18,7 +18,8 @@ once.
 ├── :core:artwork         iTunes Search album-art lookup, generated station monograms
 ├── :cast                 on-demand dynamic feature (Chromecast)
 ├── :libs:media3-timeshift    DVR/time-shift DataSource (publishable)
-└── :libs:okhttp-streaming    streaming-tuned OkHttp client factory (publishable)
+├── :libs:okhttp-streaming    streaming-tuned OkHttp client factory (publishable)
+└── :libs:audio-levels        live level meter analysis, shared spec with iOS (publishable)
 
 :wear                     Wear OS companion
 :benchmark                macrobenchmark / baseline profiles
@@ -340,6 +341,34 @@ debounce, genre browse via `stationsByTag`, in-memory `StationSearchFilters`), s
 browse tab only borrows `RadioBrowserViewModel` for play/save. Every request goes through
 one `collectLatest` pipeline, and a generation counter guards each write, so a directory
 call that completes after being superseded can never repaint the screen.
+
+### Live level meter
+
+Now Playing's bars are real levels from the audio being played, not an animation. The analysis
+lives in the MIT `:libs:audio-levels` module and follows the iOS repo's
+[audio levels spec](https://github.com/cascadiacollections/shoutkit/blob/main/docs/audio-levels-spec.md):
+24 log bands from a 1024-point FFT, tilted +3 dB/octave, smoothed with fast-rise/slow-fall
+ballistics. Both clients pass the spec's golden vectors, so they draw the same bars.
+
+- **Tap.** `RadioPlaybackService` builds its player with `LiveAudioLevels.renderersFactory`,
+  whose `DefaultAudioSink` runs a `TeeAudioProcessor`. The tee hands decoded PCM to a process-wide
+  `AudioTapPluginSet`; with nothing subscribed it returns after checking the set is empty. The
+  service and the UI share a process, so no IPC is needed.
+- **Consumer.** `LiveLevelMeter` collects `LiveAudioLevels.levels` only while the stream is live
+  and the screen is started. Collection adds a meter to the set and cancellation removes it, so
+  the FFT runs only while the bars are visible.
+- **Drawing.** Per the spec's "Drawing (UI)" section, each frame first goes through `AutoGain`
+  (reference starts at 0.3, jumps to the loudest band, decays 0.15/s, never below 0.3; each band
+  is `min(1, band / reference)`), because stream loudness varies by 10 dB or more. Bars and caps
+  are then drawn at `level^0.6` of the height, so typical 0.1–0.4 levels don't read as a dotted
+  line.
+- **At rest.** Paused, buffering, failed, or no frame for 500 ms (Cast took over): the bars ease
+  to zero and the peak caps reset.
+- **When hidden.** Settings → Playback → Show visualizer (on by default), or the system's animator
+  duration scale at 0 ("Remove animations"). Battery saver does not stop it: on iOS, gating on
+  Low Power made the meter look broken, and the work is small.
+- **Latency.** The tee sits before the `AudioTrack` buffer, so bars lead the sound by that
+  buffer's depth (a few hundred ms at most). Not compensated yet; the ballistics hide most of it.
 
 ## Distribution flavors
 

@@ -435,7 +435,8 @@ class RadioPlaybackService : MediaLibraryService() {
         audioSessionId = generatedAudioSessionId
 
         // Create optimized ExoPlayer
-        val exoPlayer = ExoPlayer.Builder(context)
+        // The renderers factory tees decoded PCM to the Now Playing level meter (LiveAudioLevels).
+        val exoPlayer = ExoPlayer.Builder(context, LiveAudioLevels.renderersFactory(context))
             .setLoadControl(loadControl)
             .setBandwidthMeter(bandwidthMeter)
             .setMediaSourceFactory(mediaSourceFactory)

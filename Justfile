@@ -38,7 +38,7 @@ build-full:
 
 # Refactor safety baseline (matches CI's core local checks)
 verify:
-    ./gradlew assembleFossDebug testPlayDebugUnitTest testFossDebugUnitTest :wear:testDebugUnitTest :core:model:testDebugUnitTest :core:directory:testDebugUnitTest :core:playback:testDebugUnitTest :core:persistence:testDebugUnitTest :core:artwork:testDebugUnitTest detekt lintPlayDebug :wear:lintDebug --no-daemon --parallel --build-cache
+    ./gradlew assembleFossDebug testPlayDebugUnitTest testFossDebugUnitTest :wear:testDebugUnitTest :core:model:testDebugUnitTest :core:directory:testDebugUnitTest :core:playback:testDebugUnitTest :core:persistence:testDebugUnitTest :core:artwork:testDebugUnitTest :libs:audio-levels:testDebugUnitTest detekt lintPlayDebug :wear:lintDebug --no-daemon --parallel --build-cache
 
 # Static analysis: detekt (+ ktlint, Compose rules) and Android Lint across all modules
 lint:

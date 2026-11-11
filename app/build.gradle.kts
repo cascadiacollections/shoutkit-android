@@ -223,6 +223,9 @@ dependencies {
     // Shared OkHttp client factory for live audio streaming
     implementation(project(":libs:okhttp-streaming"))
 
+    // Live level meter analysis (shared spec with the iOS AudioLevels package)
+    implementation(project(":libs:audio-levels"))
+
     // Media3 with OkHttp for optimized HTTP streaming (no UI module - audio only)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.session)

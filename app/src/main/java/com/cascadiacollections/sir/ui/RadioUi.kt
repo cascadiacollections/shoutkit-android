@@ -4,14 +4,12 @@ package com.cascadiacollections.sir.ui
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,7 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.core.net.toUri
+import com.cascadiacollections.android.audiolevels.AudioLevels
 import com.cascadiacollections.sir.PlaybackStatus
 import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioUiState
@@ -71,7 +69,8 @@ import com.cascadiacollections.sir.displayedFailure
 import com.cascadiacollections.sir.status
 import com.cascadiacollections.sir.trackLine
 import com.cascadiacollections.sir.transportAction
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * The full-screen listen surface, including its own app bar.
@@ -179,6 +178,8 @@ fun ListenScreen(
     state: RadioUiState,
     modifier: Modifier = Modifier,
     isWideLayout: Boolean = false,
+    showVisualizer: Boolean = true,
+    audioLevels: Flow<AudioLevels> = emptyFlow(),
     onToggleFavorite: () -> Unit = {},
     onToggle: () -> Unit
 ) {
@@ -260,11 +261,10 @@ fun ListenScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    StreamVisualizer(
-                        isPlaying = state.isPlaying,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
+                    NowPlayingMeter(
+                        visible = showVisualizer,
+                        active = status == PlaybackStatus.LIVE,
+                        levels = audioLevels
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Row(
@@ -300,6 +300,22 @@ fun ListenScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * The live level meter, or a spacer of the same height when it is turned off in Settings or the
+ * system removes animations, so the transport row stays where it was.
+ */
+@Composable
+private fun NowPlayingMeter(visible: Boolean, active: Boolean, levels: Flow<AudioLevels>) {
+    val modifier = Modifier
+        .fillMaxWidth()
+        .height(48.dp)
+    if (visible && !rememberReduceMotion()) {
+        LiveLevelMeter(active = active, levels = levels, modifier = modifier)
+    } else {
+        Spacer(modifier = modifier)
     }
 }
 
@@ -394,59 +410,6 @@ private fun NowPlayingOverflow(trackViewUrl: String?) {
                         // No browser or Music app to handle it; nothing useful to do.
                     }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-internal fun StreamVisualizer(isPlaying: Boolean, modifier: Modifier = Modifier) {
-    val barColor = MaterialTheme.colorScheme.primaryContainer
-
-    var tick by remember { mutableStateOf(0f) }
-    LaunchedEffect(isPlaying) {
-        if (isPlaying) {
-            while (true) {
-                tick += 0.035f
-                delay(50L)
-            }
-        } else {
-            tick = 0f
-        }
-    }
-
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.Bottom
-    ) {
-        // Each bar: phase offset, primary speed, secondary speed (layered sine for less predictable motion)
-        val bars = listOf(
-            Triple(0.0f, 0.7f, 1.9f),
-            Triple(0.9f, 0.5f, 2.3f),
-            Triple(1.8f, 0.8f, 1.7f),
-            Triple(0.5f, 0.6f, 2.1f),
-            Triple(2.4f, 0.9f, 1.5f),
-            Triple(1.3f, 0.55f, 2.5f),
-            Triple(3.1f, 0.75f, 1.8f),
-            Triple(0.3f, 0.65f, 2.2f),
-            Triple(2.0f, 0.85f, 1.6f)
-        )
-        bars.forEach { (offset, speed1, speed2) ->
-            // Layer two sine waves at different frequencies for organic feel
-            val primary = kotlin.math.sin((tick * speed1 + offset).toDouble())
-            val secondary = kotlin.math.sin((tick * speed2 + offset * 1.7f).toDouble()) * 0.3
-            val h = ((primary + secondary + 1.3) / 2.6)
-                .toFloat()
-                .coerceIn(0.15f, 0.85f)
-            Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight(fraction = h)
-                    .background(
-                        barColor,
-                        RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)
-                    )
             )
         }
     }
