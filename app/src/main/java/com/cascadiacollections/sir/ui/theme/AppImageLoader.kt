@@ -3,6 +3,7 @@ package com.cascadiacollections.sir.ui.theme
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import com.cascadiacollections.sir.core.artwork.WebPageArtworkGuard
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 
@@ -12,6 +13,9 @@ import okhttp3.OkHttpClient
  * Coil's own default network engine builds a plain `OkHttpClient()` with no call
  * timeout at all, which would let a dead station artwork URL hang indefinitely rather
  * than failing fast into [com.cascadiacollections.sir.ui.StationRow]'s icon fallback.
+ *
+ * [WebPageArtworkGuard] fails a 200 response that is really a web page (a broadcaster's
+ * maintenance page on the old icon path) before Coil caches it or tries to decode it.
  */
 object AppImageLoader {
 
@@ -23,6 +27,7 @@ object AppImageLoader {
         OkHttpClient.Builder()
             .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .callTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .addInterceptor(WebPageArtworkGuard)
             .build()
     }
 
