@@ -3,25 +3,136 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ShoutKit for Android: free internet radio, no ads, no tracking</title>
-<meta name="description" content="ShoutKit is free, open-source internet radio for Android, with no ads, no account and no tracking. The FOSS build contains no Google services. Also on iPhone.">
+<title>ShoutKit for Android: free Christmas &amp; holiday radio, no ads</title>
+<meta name="description" content="Free, open-source internet radio for Android. Search Christmas and holiday music stations from around the world, with no ads, no account and no tracking. The FOSS APK contains no Google services. Also on iPhone.">
 <meta name="theme-color" content="#f3f0e6">
 <link rel="canonical" href="https://cascadiacollections.github.io/shoutkit-android/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ShoutKit">
-<meta property="og:title" content="ShoutKit: free internet radio, no ads, no tracking">
-<meta property="og:description" content="Free, open-source internet radio for Android and iPhone. No ads, no account, no tracking.">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="ShoutKit: free holiday radio, no ads, no tracking">
+<meta property="og:description" content="Free, open-source internet radio for Android and iPhone. Find Christmas and holiday stations for the trip or the family gathering. No ads, no account, no tracking.">
 <meta property="og:url" content="https://cascadiacollections.github.io/shoutkit-android/">
 <meta property="og:image" content="https://cascadiacollections.github.io/shoutkit-android/assets/social.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="ShoutKit: free internet radio. No ads, no account, no tracking.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ShoutKit: free internet radio, no ads, no tracking">
-<meta name="twitter:description" content="Free, open-source internet radio for Android and iPhone. No ads, no account, no tracking.">
+<meta name="twitter:title" content="ShoutKit: free holiday radio, no ads, no tracking">
+<meta name="twitter:description" content="Free, open-source internet radio for Android and iPhone. Christmas and holiday stations, with no ads, no account and no tracking.">
+<meta name="twitter:image:alt" content="ShoutKit: free internet radio. No ads, no account, no tracking.">
 <meta name="twitter:image" content="https://cascadiacollections.github.io/shoutkit-android/assets/social.png">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://cascadiacollections.github.io/shoutkit-android/#website",
+   "url": "https://cascadiacollections.github.io/shoutkit-android/",
+   "name": "ShoutKit for Android",
+   "description": "Free, open-source internet radio for Android and iPhone. No ads, no account, no tracking.",
+   "inLanguage": "en-US"
+  },
+  {
+   "@type": "MobileApplication",
+   "@id": "https://cascadiacollections.github.io/shoutkit-android/#app",
+   "name": "ShoutKit",
+   "applicationCategory": "MultimediaApplication",
+   "applicationSubCategory": "Internet radio player",
+   "operatingSystem": "Android 7.0 or later",
+   "url": "https://cascadiacollections.github.io/shoutkit-android/",
+   "downloadUrl": "https://github.com/cascadiacollections/shoutkit-android/releases",
+   "image": "https://cascadiacollections.github.io/shoutkit-android/assets/social.png",
+   "screenshot": [
+    "https://cascadiacollections.github.io/shoutkit-android/assets/listen.webp",
+    "https://cascadiacollections.github.io/shoutkit-android/assets/search.webp",
+    "https://cascadiacollections.github.io/shoutkit-android/assets/library.webp"
+   ],
+   "description": "Free, open-source internet radio for Android, as a signed FOSS APK with no Google services. Search stations from the Radio Browser community directory, including Christmas and holiday music. No ads, no account, no tracking.",
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "isAccessibleForFree": true,
+   "license": "https://github.com/cascadiacollections/shoutkit-android/blob/main/LICENSE",
+   "sameAs": [
+    "https://github.com/cascadiacollections/shoutkit-android"
+   ],
+   "author": {
+    "@type": "Organization",
+    "name": "Cascadia Collections",
+    "url": "https://github.com/cascadiacollections"
+   }
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://cascadiacollections.github.io/shoutkit-android/#faq",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "Is it really free?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. No ads, no subscription and no in-app purchases. The app is open source under the GPL-3.0, and the build on this page is free and will stay free."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Why would I pay for a store version?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "You don’t have to. Store pricing hasn’t been decided. If a store build ever costs something, you’d be paying for the convenience of installing and updating through that store, and helping fund development, not unlocking features. The differences between builds come from Google’s libraries. The Google Play build adds Chromecast and the Wear OS app, and includes Firebase Analytics and Crashlytics. The FOSS build on this page has none of them."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does it track me?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. There are no ads, no analytics, no crash reporting and no account. The app does talk to the services it needs: the Radio Browser directory (which by default is told when you start one of its stations, so popular stations rank higher), the stations you play, and Apple’s iTunes Search for album art. You can turn off the play counts and the artwork lookup in Settings. Details are on the privacy page."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Which stations can I listen to?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Thousands. Station search uses Radio Browser, a free, community-run directory that anyone can add to or correct. If a station isn’t listed, you can add it in ShoutKit by its stream URL."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does it work on Android TV, Android Auto and Wear OS?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Android TV and Android Auto work in this build. Android Auto only shows apps installed outside Google Play after you turn on Unknown sources in its developer settings. The Wear OS companion and Chromecast need Google libraries, so they come with the Google Play build."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Can I find Christmas and holiday music?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. Search for “Christmas”, “holiday” or “carols”, or open the filters to narrow by tag and country. Stations come from Radio Browser, so what you find depends on what broadcasters and volunteers have listed."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does radio use mobile data?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. Live streams need a connection and can use mobile data. Use Wi-Fi when you want to save your data allowance."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
 <script>
 // Every store and support URL lives here. Paste a confirmed https:// URL to turn
 // a "coming soon" button into a live link, or leave "" to keep it coming soon
@@ -36,6 +147,8 @@ window.SHOUTKIT_LINKS = {
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+<!-- Holiday promo: hides itself after data-until (script at the end of the page). -->
+<div class="promo-bar" id="promo-bar" data-until="2027-01-07">Holiday radio, free: Christmas music, New Year countdowns or a long drive over the break. <a href="#holidays">Tune in for the holidays →</a></div>
 <div class="wrap">
 <nav aria-label="Main">
 <a class="brand" href="./">
@@ -87,6 +200,30 @@ window.SHOUTKIT_LINKS = {
 <li>No account</li>
 <li>No tracking</li>
 </ul>
+<section id="holidays" class="holiday" aria-labelledby="holidays-title">
+<div class="sectionhead">
+<div>
+<p class="eyebrow">For the holidays</p>
+<h2 id="holidays-title">Holiday music, wherever the break takes you.</h2>
+</div>
+<p class="muted">Christmas, New Year, winter or summer holidays: find the stations that sound like the season, wherever you are.</p>
+</div>
+<div class="benefits holidaygrid">
+<article>
+<h3>Find the holiday stations</h3>
+<p class="muted">Search “Christmas”, “holiday” or “carols” in the Radio Browser directory, or filter by tag and country.</p>
+</article>
+<article>
+<h3>Radio for the long drive</h3>
+<p class="muted">Keeps playing in the background with controls on your lock screen, and the sleep timer pauses it when everyone dozes off.</p>
+</article>
+<article>
+<h3>Ready for the gathering</h3>
+<p class="muted">Save the family’s favorites, start one from the home screen widget, or play it on the living-room TV with the Android TV app.</p>
+</article>
+</div>
+<p class="small muted holidaynote">Stations come from a community directory, so what you find depends on what broadcasters list. Live streams need a connection and can use mobile data.</p>
+</section>
 <section id="why" aria-labelledby="why-title">
 <div class="sectionhead">
 <div>
@@ -106,7 +243,7 @@ window.SHOUTKIT_LINKS = {
 </article>
 <article>
 <h3>Open source</h3>
-<p class="muted">Every line is public under the GPL-3.0. Read it, build it, change it.</p>
+<p class="muted">Every line is public. The app is GPL-3.0 and its reusable libraries are MIT. Read it, build it, change it.</p>
 </article>
 <article>
 <h3>A good player</h3>
@@ -196,7 +333,7 @@ window.SHOUTKIT_LINKS = {
 </li>
 <li>
 <a class="button is-soon" data-link="play" data-live="Get it on Google Play" aria-disabled="true">Google Play · coming soon</a>
-<span class="small muted">Adds Chromecast and the Wear OS app, which need Google libraries.</span>
+<span class="small muted">Adds Chromecast and the Wear OS app, which need Google libraries, and includes Firebase Analytics and Crashlytics.</span>
 </li>
 <li>
 <a class="button" href="https://cascadiacollections.github.io/shoutkit/">Get ShoutKit on iPhone <span aria-hidden="true">→</span></a>
@@ -234,9 +371,9 @@ window.SHOUTKIT_LINKS = {
 <a href="https://github.com/cascadiacollections/shoutkit-android">shoutkit-android on GitHub</a>
 </li>
 <li>
-<h3>Toward reproducible builds</h3>
-<p class="muted">Working toward an F-Droid build that is byte-for-byte identical to the official APK.</p>
-<a href="https://github.com/cascadiacollections/shoutkit-android/pull/306">Follow the work</a>
+<h3>Reproducible builds</h3>
+<p class="muted">The FOSS APK is set up to build reproducibly, so F-Droid can check its build against the official APK.</p>
+<a href="https://github.com/cascadiacollections/shoutkit-android/pull/306">See how</a>
 </li>
 <li>
 <h3>License</h3>
@@ -273,7 +410,7 @@ window.SHOUTKIT_LINKS = {
 </details>
 <details>
 <summary>Why would I pay for a store version?</summary>
-<p class="muted">You don’t have to. Store pricing hasn’t been decided. If a store build ever costs something, you’d be paying for the convenience of installing and updating through that store, and helping fund development, not unlocking features. The only differences between builds come from Google’s libraries: Chromecast and the Wear OS app need them, so they ship only in the Google Play build.</p>
+<p class="muted">You don’t have to. Store pricing hasn’t been decided. If a store build ever costs something, you’d be paying for the convenience of installing and updating through that store, and helping fund development, not unlocking features. The differences between builds come from Google’s libraries. The Google Play build adds Chromecast and the Wear OS app, and includes Firebase Analytics and Crashlytics. The FOSS build on this page has none of them.</p>
 </details>
 <details>
 <summary>Does it track me?</summary>
@@ -285,7 +422,11 @@ window.SHOUTKIT_LINKS = {
 </details>
 <details>
 <summary>Does it work on Android TV, Android Auto and Wear OS?</summary>
-<p class="muted">Android TV and Android Auto work in this build. The Wear OS companion and Chromecast need Google libraries, so they come with the Google Play build.</p>
+<p class="muted">Android TV and Android Auto work in this build. Android Auto only shows apps installed outside Google Play after you turn on Unknown sources in its developer settings. The Wear OS companion and Chromecast need Google libraries, so they come with the Google Play build.</p>
+</details>
+<details>
+<summary>Can I find Christmas and holiday music?</summary>
+<p class="muted">Yes. Search for “Christmas”, “holiday” or “carols”, or open the filters to narrow by tag and country. Stations come from <a href="https://www.radio-browser.info">Radio Browser</a>, so what you find depends on what broadcasters and volunteers have listed.</p>
 </details>
 <details>
 <summary>Does radio use mobile data?</summary>
@@ -312,6 +453,13 @@ window.SHOUTKIT_LINKS = {
 </div>
 </footer>
 </div>
+<script>
+// Hide the holiday promo bar once its data-until date has passed.
+(() => {
+  const bar = document.getElementById("promo-bar");
+  if (bar && new Date() >= new Date(bar.dataset.until + "T00:00:00")) bar.hidden = true;
+})();
+</script>
 <script src="nightly.js" defer>
 </script>
 <script src="links.js" defer>
