@@ -160,3 +160,11 @@ footer{flex-direction:column}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}
 *,*:before,*:after{transition:none!important}
 }
+
+/* Holiday promo (seasonal): remove with #promo-bar and #holidays after the season. */
+.promo-bar{background:linear-gradient(90deg,#efe3c4,#efd2c6);border-bottom:1px solid var(--line);padding:10px 24px;text-align:center;font-size:.88rem;line-height:1.45}
+.promo-bar a{color:var(--accent-deep);font-weight:700}
+.promo-bar[hidden]{display:none}
+.holidaygrid{grid-template-columns:repeat(3,1fr)}
+.holidaynote{margin:28px 0 0}
+@media (max-width:900px){.holidaygrid{grid-template-columns:1fr}}
