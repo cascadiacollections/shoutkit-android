@@ -3,6 +3,14 @@
 # Default flavor for local development
 flavor := "foss"
 
+# Container runtime: Apple's `container` CLI on macOS, podman elsewhere.
+# Override with CONTAINER_ENGINE=docker (etc.).
+ENGINE := env("CONTAINER_ENGINE", if os() == "macos" { "container" } else { "podman" })
+# `container` has no SELinux relabel option, and the Qodana image is
+# amd64-only, so run it under Rosetta with more than the 1 GB default memory.
+_vol_label := if ENGINE == "container" { "" } else { ":z" }
+_qodana_opts := if ENGINE == "container" { "--platform linux/amd64 --rosetta --memory 4G " } else { "" }
+
 # Build debug APK
 build:
     ./gradlew assemble{{capitalize(flavor)}}Debug --no-daemon --console=rich --warning-mode=none
@@ -54,4 +62,4 @@ baseline:
 
 # Qodana (JetBrains IDE inspections) in a container; report at http://localhost:8080
 qodana:
-    podman run --rm -it -p 8080:8080 -v "$PWD":/data/project:z jetbrains/qodana-jvm-android:2026.2 --show-report
+    {{ENGINE}} run --rm -it {{_qodana_opts}}-p 8080:8080 -v "$PWD":/data/project{{_vol_label}} jetbrains/qodana-jvm-android:2026.2 --show-report
