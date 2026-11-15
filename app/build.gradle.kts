@@ -63,8 +63,12 @@ android {
 
     defaultConfig {
         applicationId = "com.cascadiacollections.sir"
-        versionCode = providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
-            .standardOutput.asText.get().trim().toIntOrNull() ?: 1
+        // Literal on purpose: F-Droid's checkupdates reads these two lines from this file at each
+        // v* tag (the recipe's UpdateCheckData), so they can't be computed at build time. Bump
+        // both in the release commit, before tagging it vX.Y.Z (CONTRIBUTING.md#releasing).
+        // versionCode must only go up: it continues the old `git rev-list --count HEAD` series
+        // (v1.2.1 = 496, v1.3.0 = 505, last computed main build = 510).
+        versionCode = 511
         versionName = "1.3.0"
 
         // Short commit for Settings → About. providers.exec keeps this configuration-cache
