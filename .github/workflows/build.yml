@@ -214,13 +214,16 @@ jobs:
 
   # Secrets can't be read in a job-level `if`, so this job turns "is the Play
   # service account configured?" into an output that deploy-internal gates on.
-  # Without the secret, deploy-internal is skipped rather than failing silently.
+  # Without the secret, deploy-internal is skipped rather than failing silently. It also
+  # reports whether the push bumped versionCode, since Play only takes each versionCode once.
   play-credentials:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions: {}
+    permissions:
+      contents: read # read the versionCode at HEAD and HEAD^
     outputs:
       configured: ${{ steps.check.outputs.configured }}
+      bumped: ${{ steps.bump.outputs.bumped }}
     steps:
       - name: Check for Play service account
         id: check
@@ -239,11 +242,33 @@ jobs:
             exit 1
           fi
           echo "configured=true" >> "$GITHUB_OUTPUT"
+      # versionCode is a literal bumped by the release commit, and Play rejects a versionCode it
+      # has already seen, so only a push that changes it uploads to the internal track.
+      - name: Checkout code
+        if: steps.check.outputs.configured == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Did this push bump versionCode?
+        id: bump
+        if: steps.check.outputs.configured == 'true'
+        run: |
+          code() { git show "$1:app/build.gradle.kts" | sed -n 's/^ *versionCode = \([0-9]*\).*/\1/p'; }
+          new=$(code HEAD)
+          old=$(code HEAD^ || true)
+          echo "versionCode: ${old:-none} -> $new"
+          if [ -n "$new" ] && [ "$new" != "$old" ]; then
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=Play deploy skipped::versionCode is unchanged ($new), so deploy-internal is skipped."
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          fi
 
   deploy-internal:
     needs: [build, play-credentials]
     runs-on: ubuntu-latest
-    if: needs.play-credentials.outputs.configured == 'true'
+    if: needs.play-credentials.outputs.configured == 'true' && needs.play-credentials.outputs.bumped == 'true'
     permissions:
       actions: read
 

@@ -46,8 +46,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.key.outputs.present == 'true'
         with:
-          # versionCode is `git rev-list --count HEAD`, so the build needs full history.
-          fetch-depth: 0
           persist-credentials: false
       - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
         if: steps.key.outputs.present == 'true'
@@ -91,7 +89,15 @@ jobs:
           aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -1)
           # The certificate digest is what F-Droid's AllowedAPKSigningKeys must list.
           "$apksigner" verify --print-certs "$apk"
-          "$aapt2" dump badging "$apk" | head -1
+          badging=$("$aapt2" dump badging "$apk" | head -1)
+          echo "$badging"
+          # F-Droid's checkupdates takes the version from app/build.gradle.kts at this tag, so
+          # a tag that doesn't match the bumped versionName would publish the wrong release.
+          name=$(sed -n "s/.* versionName='\([^']*\)'.*/\1/p" <<< "$badging")
+          if [ "$name" != "${TAG#v}" ]; then
+            echo "::error::Tag $TAG doesn't match versionName '$name' in app/build.gradle.kts"
+            exit 1
+          fi
           (cd dist && sha256sum -- *.apk > SHA256SUMS)
       - name: Attest build provenance
         if: steps.key.outputs.present == 'true'

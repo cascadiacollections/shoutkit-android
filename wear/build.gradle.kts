@@ -13,6 +13,9 @@ android {
         // Kotlin package) stays .wear.
         applicationId = "com.cascadiacollections.sir"
         missingDimensionStrategy("distribution", "play")
+        // Independent of the phone app's version (app/build.gradle.kts): Wear isn't shipped on
+        // F-Droid, whose recipe reads the version from app/build.gradle.kts only, and a watch
+        // artifact on the same Play listing needs a versionCode distinct from the phone's.
         versionCode = 1
         versionName = "1.0"
     }
