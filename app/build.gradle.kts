@@ -68,8 +68,8 @@ android {
         // both in the release commit, before tagging it vX.Y.Z (CONTRIBUTING.md#releasing).
         // versionCode must only go up: it continues the old `git rev-list --count HEAD` series
         // (v1.2.1 = 496, v1.3.0 = 505, last computed main build = 510).
-        versionCode = 511
-        versionName = "1.3.0"
+        versionCode = 512
+        versionName = "1.3.1"
 
         // Short commit for Settings → About. providers.exec keeps this configuration-cache
         // safe (the output is a tracked input); a missing git binary, or a source tree that
