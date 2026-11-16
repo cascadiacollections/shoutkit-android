@@ -1,0 +1,2 @@
+• Live level meter: the meter now follows the real audio signal
+• Fixed missing artwork when a server returned a web page instead of an image
