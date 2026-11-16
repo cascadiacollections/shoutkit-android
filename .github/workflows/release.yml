@@ -47,7 +47,7 @@ jobs:
         if: steps.key.outputs.present == 'true'
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         if: steps.key.outputs.present == 'true'
         with:
           # No tool cache in a release job: a cache written by another ref could poison it.
