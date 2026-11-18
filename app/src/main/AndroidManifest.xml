@@ -148,9 +148,13 @@
                 <data android:scheme="sir" android:host="play" />
             </intent-filter>
         </activity>
+        <!-- Exported so Android Auto, Automotive OS and other media surfaces can bind and browse.
+             Media browser hosts hold no common permission, so access is checked per controller in
+             onConnect instead (see ControllerPolicy). -->
         <service
             android:name=".RadioPlaybackService"
-            android:exported="false"
+            android:exported="true"
+            tools:ignore="ExportedService"
             android:foregroundServiceType="mediaPlayback"
             android:enabled="true">
             <intent-filter>
