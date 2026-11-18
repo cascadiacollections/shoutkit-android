@@ -107,7 +107,7 @@ jobs:
         run: ./gradlew detekt --no-daemon --continue
 
       - name: Build, Lint, and Test
-        run: ./gradlew assemblePlayRelease assembleFossRelease assemblePlayDebug bundlePlayRelease lintPlayDebug lintFossDebug :wear:lintDebug testPlayDebugUnitTest testFossDebugUnitTest :wear:testDebugUnitTest :core:model:testDebugUnitTest :core:directory:testDebugUnitTest :core:playback:testDebugUnitTest :core:persistence:testDebugUnitTest :core:artwork:testDebugUnitTest :libs:audio-levels:testDebugUnitTest jacocoTestReport --no-daemon --parallel --build-cache
+        run: ./gradlew assemblePlayRelease assembleFossRelease assemblePlayDebug bundlePlayRelease lintPlayDebug lintFossDebug :wear:lintDebug testPlayDebugUnitTest testFossDebugUnitTest :wear:testDebugUnitTest :core:model:testDebugUnitTest :core:directory:testDebugUnitTest :core:playback:testDebugUnitTest :core:persistence:testDebugUnitTest :core:artwork:testDebugUnitTest :libs:audio-levels:testDebugUnitTest :wear:bundleRelease jacocoTestReport --no-daemon --parallel --build-cache
         env:
           KEYSTORE_PATH: ${{ env.KEYSTORE_PATH }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -168,6 +168,39 @@ jobs:
               echo "| $(basename $f) | $SIZE |" >> $GITHUB_STEP_SUMMARY
             fi
           done
+
+      # Google Play's DEX code optimization requirement (from February 2027): bundles with
+      # more than 10 MB of DEX must reach 25% optimization, shrinking and obfuscation.
+      # Play Console's numbers are authoritative; this records each build's DEX size, R8's
+      # final scores (r8.json in the bundle, which Play reads) and the Configuration
+      # Analyzer's worst keep rules, and fails if a Play bundle drops below 30%. FOSS is
+      # reported but not gated: it turns obfuscation off on purpose.
+      - name: R8 optimization evidence
+        run: |
+          python3 .github/scripts/r8-evidence.py \
+            --artifact play-aab=app/build/outputs/bundle/playRelease/app-play-release.aab \
+            --artifact wear-aab=wear/build/outputs/bundle/release/wear-release.aab \
+            --artifact foss-apk=app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk \
+            --analyzer playRelease=app/build/outputs/mapping/playRelease/configanalyzer.html \
+            --analyzer wearRelease=wear/build/outputs/mapping/release/configanalyzer.html \
+            --analyzer fossRelease=app/build/outputs/mapping/fossRelease/configanalyzer.html \
+            --gate play-aab --gate wear-aab --min-score 30 \
+            --summary "$GITHUB_STEP_SUMMARY" --json r8-evidence.json
+
+      # Mapping files and R8's merged configuration, for retracing release stack traces and
+      # comparing keep-rule changes between builds. None of these contain secrets.
+      - name: Upload R8 evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: r8-evidence-${{ github.sha }}
+          path: |
+            r8-evidence.json
+            app/build/outputs/mapping/playRelease/
+            app/build/outputs/mapping/fossRelease/
+            wear/build/outputs/mapping/release/
+          retention-days: 30
+          if-no-files-found: warn
 
       - name: Upload Coverage Report
         if: always()
