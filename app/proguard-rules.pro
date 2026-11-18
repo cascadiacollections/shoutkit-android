@@ -45,11 +45,14 @@
 # ============================================
 # Media3 / ExoPlayer Rules
 # ============================================
-# Keep only what we need for audio streaming
--keep class androidx.media3.session.** { *; }
--keep class androidx.media3.common.** { *; }
--keep class androidx.media3.exoplayer.source.ProgressiveMediaSource { *; }
--keep class androidx.media3.datasource.okhttp.** { *; }
+# No package-wide keeps. Media3 ships consumer rules for the classes it loads by reflection
+# (media3-exoplayer's proguard.txt keeps the HlsMediaSource/DashMediaSource factory
+# constructors DefaultMediaSourceFactory looks up, and the extension renderers), and the
+# session's Parcelables are covered by AGP's default CREATOR rule. The four `-keep ... { *; }`
+# rules that were here (session.**, common.**, ProgressiveMediaSource, datasource.okhttp.**)
+# had no reflection target and blocked R8 from about 13,000 classes, fields and methods,
+# about 6.5% of the app. Removing them was checked against playback (progressive and HLS),
+# background playback, media controls and Cast; see the PR that removed them.
 -dontwarn androidx.media3.**
 
 
