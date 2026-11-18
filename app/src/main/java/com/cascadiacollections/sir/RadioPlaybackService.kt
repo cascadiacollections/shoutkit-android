@@ -471,6 +471,19 @@ class RadioPlaybackService : MediaLibraryService() {
                     session: MediaSession,
                     controller: MediaSession.ControllerInfo
                 ): MediaSession.ConnectionResult {
+                    // The service is exported for Android Auto; see ControllerPolicy.
+                    if (!ControllerPolicy.isAllowed(
+                            controllerPackage = controller.packageName,
+                            ownPackage = context.packageName,
+                            isTrusted = controller.isTrusted,
+                            isSystemSurface = session.isMediaNotificationController(controller) ||
+                                session.isAutomotiveController(controller) ||
+                                session.isAutoCompanionController(controller)
+                        )
+                    ) {
+                        Log.w(TAG, "Rejecting media controller ${controller.packageName}")
+                        return MediaSession.ConnectionResult.reject()
+                    }
                     // Allow play/pause/seek-back; disable other seeking for live radio
                     val availableCommands =
                         MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS.buildUpon()
