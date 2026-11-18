@@ -178,17 +178,6 @@
     </issue>
 
     <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
-        errorLine1="    var tick by remember { mutableStateOf(0f) }"
-        errorLine2="                           ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/cascadiacollections/sir/ui/RadioUi.kt"
-            line="406"
-            column="28"/>
-    </issue>
-
-    <issue
         id="Overdraw"
         message="Possible overdraw: Root element paints background `?android:attr/colorBackground` with a theme that also paints a background (inferred theme is `@style/Theme.Sir`)"
         errorLine1="    android:background=&quot;?android:attr/colorBackground&quot;>"
