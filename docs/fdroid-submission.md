@@ -100,8 +100,12 @@ None of this changes the FOSS APK (see #306).
 - New versions need nothing from you on F-Droid: `checkupdates` picks up each `vX.Y.Z` tag, as
   long as the tag's release carries the signed APK.
 
-## Not verified here
+## What was and was not verified
 
-The recipe has not been run through `fdroid lint`, `fdroid scanner` or `fdroid build`. An earlier
-draft with the same approach built reproducibly on fdroidserver (#306, #317), but this file was
-rewritten from those notes, so treat step 3 above as required.
+Verified locally on 2026-11-20: at `v1.3.1`, the tree with the recipe's `rm` and `prebuild`
+applied builds `:app:assembleFossRelease`, and its unsigned APK is byte-identical to the one
+from the untouched tree (SHA-256 `d602e7c6…2b86e3662`, same machine, JDK 21).
+
+Not verified: the recipe has not been run through `fdroid lint`, `fdroid scanner` or
+`fdroid build`, so step 3 above is required. If the scanner still flags the Google entries in
+`gradle/libs.versions.toml`, delete those lines in `prebuild` too.
