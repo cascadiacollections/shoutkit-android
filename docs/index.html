@@ -134,11 +134,13 @@
 }
 </script>
 <script>
-// Every store and support URL lives here. Paste a confirmed https:// URL to turn
-// a "coming soon" button into a live link, or leave "" to keep it coming soon
-// (sponsors stays hidden until set). The nightly APK link is not here: the
-// nightly workflow rewrites the data-nightly-download anchors directly.
+// Every channel URL lives here. A channel shows on the page only while its URL
+// is a confirmed https:// link; leave "" and its button stays hidden. The APK
+// download is not here: the nightly workflow rewrites the data-nightly-download
+// anchors, and nightly.js moves them to the latest tagged release once that
+// release carries a signed APK.
 window.SHOUTKIT_LINKS = {
+  releases: "https://github.com/cascadiacollections/shoutkit-android/releases",
   fdroid: "",   // https://f-droid.org/packages/com.cascadiacollections.sir/ once listed
   play: "",     // https://play.google.com/store/apps/details?id=com.cascadiacollections.sir once live
   sponsors: ""  // https://github.com/sponsors/KevinTCoughlin once the profile is live
@@ -184,8 +186,7 @@ window.SHOUTKIT_LINKS = {
 <a class="button" href="https://cascadiacollections.github.io/shoutkit/">Get ShoutKit on iPhone <span aria-hidden="true">→</span>
 </a>
 </div>
-<p class="small muted">Signed nightly APK · Android 7.0+ · <a class="inline" data-nightly-notes href="https://github.com/cascadiacollections/shoutkit-android/releases/tag/nightly-42974749610-1">Release notes &amp; checksums</a></p>
-<p class="small muted">F-Droid and Google Play: <a class="inline" href="#download">coming soon</a></p>
+<p class="small muted"><span data-release-text="Signed release {version}">Signed nightly APK</span> · Android 7.0+ · <a class="inline" data-nightly-notes href="https://github.com/cascadiacollections/shoutkit-android/releases/tag/nightly-42974749610-1">Release notes &amp; checksums</a></p>
 </div>
 <div class="heroart">
 <div class="phone">
@@ -325,14 +326,14 @@ window.SHOUTKIT_LINKS = {
 <ul class="stores">
 <li>
 <a class="button primary" data-nightly-download href="https://github.com/cascadiacollections/shoutkit-android/releases/download/nightly-42974749610-1/shoutkit-android-nightly.apk">Download the APK <span aria-hidden="true">↓</span></a>
-<span class="small muted">Available now. Signed nightly build from GitHub Releases. <a class="inline" data-nightly-notes href="https://github.com/cascadiacollections/shoutkit-android/releases/tag/nightly-42974749610-1">Notes &amp; SHA-256</a></span>
+<span class="small muted"><span data-release-text="Signed release {version} from GitHub Releases.">Signed nightly build from GitHub Releases.</span> <a class="inline" data-nightly-notes href="https://github.com/cascadiacollections/shoutkit-android/releases/tag/nightly-42974749610-1">Notes &amp; SHA-256</a><span data-link="releases" hidden> · <a class="inline" data-link="releases">All releases</a></span></span>
 </li>
-<li>
-<a class="button is-soon" data-link="fdroid" data-live="Get it on F-Droid" aria-disabled="true">F-Droid · coming soon</a>
+<li data-link="fdroid" hidden>
+<a class="button" data-link="fdroid">Get it on F-Droid</a>
 <span class="small muted">The same FOSS build, with updates through F-Droid.</span>
 </li>
-<li>
-<a class="button is-soon" data-link="play" data-live="Get it on Google Play" aria-disabled="true">Google Play · coming soon</a>
+<li data-link="play" hidden>
+<a class="button" data-link="play">Get it on Google Play</a>
 <span class="small muted">Adds Chromecast and the Wear OS app, which need Google libraries, and includes Firebase Analytics and Crashlytics.</span>
 </li>
 <li>
@@ -344,7 +345,7 @@ window.SHOUTKIT_LINKS = {
 <ol class="steps">
 <li>
 <strong>Download the APK.</strong>
-<span class="muted">Nightlies are development builds for early adopters. Check the release notes and checksums first if you like.</span>
+<span class="muted" data-release-text="Check the release notes and checksums first if you like.">Nightlies are development builds for early adopters. Check the release notes and checksums first if you like.</span>
 </li>
 <li>
 <strong>Install it.</strong>
@@ -352,7 +353,7 @@ window.SHOUTKIT_LINKS = {
 </li>
 <li>
 <strong>Find your first station.</strong>
-<span class="muted">Search the directory and save something you love. Later nightlies can install as updates over this one.</span>
+<span class="muted" data-release-text="Search the directory and save something you love. Later releases install as updates over this one.">Search the directory and save something you love. Later nightlies can install as updates over this one.</span>
 </li>
 </ol>
 </section>
@@ -394,8 +395,8 @@ window.SHOUTKIT_LINKS = {
 <p class="muted">ShoutKit doesn’t sell ads or data, so it’s funded by people who choose to chip in. Nothing is unlocked by paying; it’s simply a way to say thanks.</p>
 </div>
 <ul class="supportlist">
-<li data-link="sponsors" data-hide-until-live hidden><a data-link="sponsors" data-live="Sponsor on GitHub">Sponsor on GitHub</a> <span class="muted">Monthly or one-time.</span></li>
-<li><strong>Use a store build.</strong> <span class="muted">When the store versions arrive, installing from a store is another way to support development.</span></li>
+<li data-link="sponsors" hidden><a data-link="sponsors">Sponsor on GitHub</a> <span class="muted">Monthly or one-time.</span></li>
+<li data-link="play" hidden><strong>Use the Google Play build.</strong> <span class="muted">Installing from Google Play is another way to support development.</span></li>
 <li><a href="https://github.com/cascadiacollections/shoutkit-android/issues">Report a bug or suggest an idea</a> <span class="muted">Good reports make the app better for everyone.</span></li>
 <li><a href="https://github.com/cascadiacollections/shoutkit-android/blob/main/CONTRIBUTING.md">Contribute</a> <span class="muted">Code, translations and station fixes are welcome.</span></li>
 </ul>

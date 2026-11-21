@@ -41,6 +41,7 @@ jobs:
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::RELEASE_KEYSTORE_BASE64 is not set: no signed APK is attached to this release"
+            echo "Skipped: RELEASE_KEYSTORE_BASE64 is not set, so no signed APK was built or attached. Add the RELEASE_* secrets and re-run this job." >> "$GITHUB_STEP_SUMMARY"
             echo "present=false" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -88,7 +89,10 @@ jobs:
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
           aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -1)
           # The certificate digest is what F-Droid's AllowedAPKSigningKeys must list.
-          "$apksigner" verify --print-certs "$apk"
+          certs=$("$apksigner" verify --print-certs "$apk")
+          echo "$certs"
+          digest=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' <<< "$certs")
+          echo "AllowedAPKSigningKeys: \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
           badging=$("$aapt2" dump badging "$apk" | head -1)
           echo "$badging"
           # F-Droid's checkupdates takes the version from app/build.gradle.kts at this tag, so
@@ -113,6 +117,6 @@ jobs:
           set -euo pipefail
           if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
-              --title "Shoutkit ${TAG#v}" --generate-notes
+              --title "ShoutKit ${TAG#v}" --generate-notes
           fi
           gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
