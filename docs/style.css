@@ -43,8 +43,6 @@ a.inline{color:var(--ink)}
 .button:hover{transform:translateY(-2px)}
 .button.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 5px 0 #8a2a1c14}
 .button.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
-.button.is-soon{border-style:dashed;border-color:var(--muted);color:var(--muted);cursor:default}
-.button.is-soon:hover{transform:none}
 
 /* Hero */
 .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;padding:50px 0 80px}
