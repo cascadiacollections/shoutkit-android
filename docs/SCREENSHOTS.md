@@ -4,4 +4,4 @@ Captured October 11, 2026 from the repository’s FOSS debug APK on a local Pixe
 
 Listen shows KEXP 90.3 Seattle. Browse shows a live directory search for Brookdale Public Radio. Both were saved through the app UI for the Library screen. Stations are independent listening examples, without affiliation or endorsement.
 
-GitHub Pages serves gh-pages at its root. Publish docs/index.html, style.css, nightly.js, .nojekyll, assets/, and privacy/; do not copy internal architecture documents.
+GitHub Pages serves gh-pages at its root. Publish docs/index.html, style.css, nightly.js, links.js, promo.js, .nojekyll, assets/, and privacy/; do not copy internal architecture documents or promo.test.js.
