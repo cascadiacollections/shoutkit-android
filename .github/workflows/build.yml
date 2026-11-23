@@ -27,6 +27,8 @@ jobs:
       # Every file needs licensing info; REUSE.toml maps paths to licenses.
       - name: REUSE lint
         run: pipx run reuse==6.3.0 lint
+      - name: Marketing site promo tests
+        run: node --test docs/promo.test.js
       # setup-gradle validates the wrapper too, but Scorecard only recognises this action when
       # it checks the checked-in gradle-wrapper.jar.
       - name: Validate Gradle wrapper

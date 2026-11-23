@@ -149,6 +149,16 @@ window.SHOUTKIT_LINKS = {
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+<!-- Black Friday / Cyber Monday: promo.js reveals this inside the window. Hidden with no JS. -->
+<div class="bf-banner" id="bf-banner" role="region" aria-label="Black Friday and Cyber Monday" hidden>
+<div class="bf-banner-inner">
+<p>Black Friday through Cyber Monday: skip the checkout line. ShoutKit is free, with no ads, no account and no tracking.</p>
+<div class="bf-banner-actions">
+<a class="button primary" data-nightly-download href="https://github.com/cascadiacollections/shoutkit-android/releases/download/nightly-42974749610-1/shoutkit-android-nightly.apk">Download for Android <span aria-hidden="true">↓</span></a>
+<button type="button" class="bf-dismiss" data-promo-dismiss aria-label="Dismiss Black Friday promotion">Dismiss</button>
+</div>
+</div>
+</div>
 <!-- Holiday promo: hides itself after data-until (script at the end of the page). -->
 <div class="promo-bar" id="promo-bar" data-until="2027-01-07">Holiday radio, free: Christmas music, New Year countdowns or a long drive over the break. <a href="#holidays">Tune in for the holidays →</a></div>
 <div class="wrap">
@@ -201,6 +211,12 @@ window.SHOUTKIT_LINKS = {
 <li>No account</li>
 <li>No tracking</li>
 </ul>
+<section id="bf-promo" aria-labelledby="bf-promo-title" hidden>
+<p class="eyebrow">Black Friday through Cyber Monday</p>
+<h2 id="bf-promo-title">Skip the checkout line.</h2>
+<p class="muted bf-lead">The Android build on this page is free to download and free to keep. No ads, no account and no tracking. Stations and settings stay on your phone.</p>
+<a class="button primary" data-nightly-download href="https://github.com/cascadiacollections/shoutkit-android/releases/download/nightly-42974749610-1/shoutkit-android-nightly.apk">Download for Android <span aria-hidden="true">↓</span></a>
+</section>
 <section id="holidays" class="holiday" aria-labelledby="holidays-title">
 <div class="sectionhead">
 <div>
@@ -461,6 +477,7 @@ window.SHOUTKIT_LINKS = {
   if (bar && new Date() >= new Date(bar.dataset.until + "T00:00:00")) bar.hidden = true;
 })();
 </script>
+<script src="promo.js"></script>
 <script src="nightly.js" defer>
 </script>
 <script src="links.js" defer>
