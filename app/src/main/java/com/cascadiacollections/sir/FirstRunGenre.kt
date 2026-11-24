@@ -1,5 +1,6 @@
 package com.cascadiacollections.sir
 
+import java.net.URLDecoder
 import java.util.Calendar
 import java.util.Locale
 
@@ -59,3 +60,31 @@ fun seasonalFallback(today: Calendar = Calendar.getInstance()): String? =
  */
 fun firstRunPreselection(savedGenre: String?, today: Calendar = Calendar.getInstance()): String? =
     allowListedGenre(savedGenre) ?: seasonalFallback(today)
+
+/**
+ * Long enough for a real Play referrer (utm parameters plus a click id) and short
+ * enough to refuse a hostile payload before it is parsed.
+ */
+internal const val MAX_INSTALL_REFERRER_LENGTH = 2048
+
+/**
+ * The allow-listed `utm_content` of a Play Install Referrer string, or null.
+ * The rest of the string — source, campaign, click id, timestamps — is discarded.
+ */
+internal fun genreFromInstallReferrer(referrer: String?): String? =
+    allowListedGenre(decodeUtmContent(utmContent(referrer)))
+
+private fun utmContent(referrer: String?): String? {
+    if (referrer.isNullOrEmpty() || referrer.length > MAX_INSTALL_REFERRER_LENGTH) return null
+    return referrer.split('&').firstNotNullOfOrNull { part ->
+        val separator = part.indexOf('=')
+        if (separator > 0 && part.substring(0, separator) == "utm_content") {
+            part.substring(separator + 1)
+        } else {
+            null
+        }
+    }
+}
+
+private fun decodeUtmContent(encoded: String?): String? =
+    encoded?.let { runCatching { URLDecoder.decode(it, "UTF-8") }.getOrNull() }

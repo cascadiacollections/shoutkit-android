@@ -108,6 +108,7 @@ class SettingsRepository(private val context: Context) :
     private val showVisualizerKey = booleanPreferencesKey("show_visualizer")
     private val hasCompletedFirstRunKey = booleanPreferencesKey("has_completed_first_run")
     private val firstRunGenreKey = stringPreferencesKey("first_run_genre")
+    private val installReferrerCheckedKey = booleanPreferencesKey("install_referrer_checked")
     private val hiddenRecentStationIdsKey = stringSetPreferencesKey("hidden_recent_station_ids")
 
     val streamQuality: Flow<StreamQuality> = context.dataStore.data.map { prefs ->
@@ -362,6 +363,20 @@ class SettingsRepository(private val context: Context) :
 
     fun consumeBrowseGenre() {
         browseGenreRequestState.value = null
+    }
+
+    /**
+     * Whether this install has already consulted the Play Install Referrer.
+     * The referrer string itself is never stored; this flag only stops a second read.
+     */
+    val installReferrerChecked: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[installReferrerCheckedKey] ?: false
+    }
+
+    suspend fun setInstallReferrerChecked(checked: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[installReferrerCheckedKey] = checked
+        }
     }
 
     /**

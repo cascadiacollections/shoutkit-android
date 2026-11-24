@@ -270,6 +270,11 @@ dependencies {
     // Wearable Data Layer: sends the last-played station and recents to the Wear app.
     // Play only: it is part of proprietary Play services; the FOSS stub is inert.
     "playImplementation"(libs.play.services.wearable)
+
+    // Play Install Referrer: one allow-listed utm_content genre, stored on device.
+    // Play only: F-Droid treats this library as a non-free Google dependency.
+    // The FOSS build ships a no-op instead, and the recipe deletes this line.
+    "playImplementation"(libs.installreferrer)
     "playImplementation"(libs.kotlinx.coroutines.play.services)
 
     // Settings persistence

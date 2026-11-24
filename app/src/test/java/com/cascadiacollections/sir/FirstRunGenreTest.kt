@@ -57,6 +57,32 @@ class FirstRunGenreTest {
         assertThat(firstRunPreselection("x".repeat(80), christmasEve)).isEqualTo("christmas")
     }
 
+    @Test
+    fun `a referrer whose utm_content is rock preselects rock`() {
+        val summer = date(2026, Calendar.JULY, 1)
+        val referrer = "utm_source=gads&utm_medium=cpc&utm_content=rock&gclid=secret"
+        val genre = genreFromInstallReferrer(referrer)
+
+        assertThat(genre).isEqualTo("rock")
+        assertThat(firstRunPreselection(genre, summer)).isEqualTo("rock")
+    }
+
+    @Test
+    fun `a missing or invalid referrer does not invent a genre`() {
+        val christmasEve = date(2026, Calendar.DECEMBER, 24)
+        val summer = date(2026, Calendar.JULY, 1)
+
+        assertThat(genreFromInstallReferrer(null)).isNull()
+        assertThat(genreFromInstallReferrer("")).isNull()
+        assertThat(genreFromInstallReferrer("utm_source=gads&gclid=secret")).isNull()
+        assertThat(genreFromInstallReferrer("utm_content=pop")).isNull()
+        assertThat(genreFromInstallReferrer("utm_content=ROCK")).isEqualTo("rock")
+        assertThat(genreFromInstallReferrer("utm_content=" + "x".repeat(40))).isNull()
+        assertThat(genreFromInstallReferrer("x".repeat(MAX_INSTALL_REFERRER_LENGTH + 1))).isNull()
+        assertThat(firstRunPreselection(genreFromInstallReferrer("utm_content=nope"), summer)).isNull()
+        assertThat(firstRunPreselection(genreFromInstallReferrer(null), christmasEve)).isEqualTo("christmas")
+    }
+
     private fun date(year: Int, month: Int, day: Int): Calendar =
         Calendar.getInstance().apply { set(year, month, day, 0, 0, 0) }
 }

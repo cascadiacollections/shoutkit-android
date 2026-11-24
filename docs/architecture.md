@@ -383,6 +383,7 @@ packaging detail — they partition which features exist at all.
 | `:cast` dynamic feature | installable on demand | not offered |
 | Chromecast row in settings | shown | **absent** |
 | Wearable Data Layer (phone → watch station sync) | yes | **no** (inert stub) |
+| Install Referrer | yes | **no** |
 
 Everything else — playback, directory, persistence, Auto, tile, widget — is identical.
 
