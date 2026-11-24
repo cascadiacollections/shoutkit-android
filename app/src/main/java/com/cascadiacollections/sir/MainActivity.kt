@@ -42,6 +42,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.Player
@@ -59,6 +60,7 @@ import com.cascadiacollections.sir.ui.theme.SirTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 private const val ACTION_SHORTCUT_PLAY = "com.cascadiacollections.sir.SHORTCUT_PLAY"
 
@@ -134,7 +136,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleDeepLink(intent: Intent?) {
-        pendingStationId.value = StationDeepLink.stationId(intent) ?: return
+        StationDeepLink.stationId(intent)?.let { pendingStationId.value = it }
+        val genre = StationDeepLink.welcomeGenre(intent) ?: return
+        lifecycleScope.launch {
+            applyWelcomeGenre(genre, settingsRepository)
+        }
     }
 
     /**
@@ -296,6 +302,15 @@ fun RadioScreen(
     // so returning users never see it flash. A chosen genre opens Browse on that tag;
     // leaving the chips off keeps the Listen tab.
     val genreOwner = LocalViewModelStoreOwner.current
+    val linkedGenre by repository.browseGenreRequest.collectAsState()
+    LaunchedEffect(linkedGenre) {
+        val genre = linkedGenre ?: return@LaunchedEffect
+        genreOwner?.let { owner ->
+            selectBrowseGenre(genre, owner, AppDirectory.instance, repository)
+        }
+        selectedTab = SirTab.BROWSE
+        repository.consumeBrowseGenre()
+    }
     if (!showLicenses) {
         FirstRunWelcomeHost(
             repository = repository,

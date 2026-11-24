@@ -33,6 +33,37 @@ class StationDeepLinkTest {
     }
 
     @Test
+    fun `reads an allow-listed genre from a welcome link`() {
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome?genre=christmas"))).isEqualTo("christmas")
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome?genre=ROCK"))).isEqualTo("rock")
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome?utm_source=promo&genre=jazz"))).isEqualTo("jazz")
+    }
+
+    @Test
+    fun `ignores an unknown, empty, or overlong welcome genre`() {
+        assertThat(StationDeepLink.welcomeGenre(null)).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome"))).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome?genre="))).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome?genre=pop"))).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("sir://welcome?genre=" + "x".repeat(80)))).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("https://welcome?genre=rock"))).isNull()
+        assertThat(
+            StationDeepLink.welcomeGenre(Intent(Intent.ACTION_MAIN, Uri.parse("sir://welcome?genre=rock")))
+        ).isNull()
+    }
+
+    @Test
+    fun `a welcome link is not a station or play link, and those links are not a genre`() {
+        val welcome = view("sir://welcome?genre=rock")
+        assertThat(StationDeepLink.stationId(welcome)).isNull()
+        assertThat(StationDeepLink.playRequest(welcome)).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("sir://station/abc-123"))).isNull()
+        assertThat(StationDeepLink.welcomeGenre(view("sir://play"))).isNull()
+        assertThat(StationDeepLink.stationId(view("sir://station/abc-123"))).isEqualTo("abc-123")
+        assertThat(StationDeepLink.playRequest(view("sir://play"))).isEqualTo(PlayRequest.Resume)
+    }
+
+    @Test
     fun `ignores other links, actions and missing ids`() {
         assertThat(StationDeepLink.stationId(null)).isNull()
         assertThat(StationDeepLink.stationId(view("https://station/abc"))).isNull()
