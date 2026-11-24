@@ -65,7 +65,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="sir" android:host="station" />
-                <!-- sir://welcome?genre= : allow-listed genre only, handled in StationDeepLink. -->
+            </intent-filter>
+            <!-- sir://welcome?genre= : allow-listed genre only, handled in StationDeepLink.
+                 A separate filter so the station and welcome hosts are not cross-matched. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="sir" android:host="welcome" />
             </intent-filter>
             <!-- Voice search ("Play [station name]") when SIR isn't already the active
