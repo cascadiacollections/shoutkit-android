@@ -23,8 +23,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -344,6 +347,21 @@ class SettingsRepository(private val context: Context) :
         context.dataStore.edit { preferences ->
             if (genre == null) preferences.remove(firstRunGenreKey) else preferences[firstRunGenreKey] = genre
         }
+    }
+
+    /**
+     * A genre Browse should open right now. In memory only — a welcome link after
+     * the first run — and never written to DataStore.
+     */
+    private val browseGenreRequestState = MutableStateFlow<String?>(null)
+    val browseGenreRequest: StateFlow<String?> = browseGenreRequestState.asStateFlow()
+
+    fun offerBrowseGenre(genre: String) {
+        browseGenreRequestState.value = genre
+    }
+
+    fun consumeBrowseGenre() {
+        browseGenreRequestState.value = null
     }
 
     /**

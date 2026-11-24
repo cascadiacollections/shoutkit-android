@@ -65,6 +65,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="sir" android:host="station" />
+                <!-- sir://welcome?genre= : allow-listed genre only, handled in StationDeepLink. -->
+                <data android:scheme="sir" android:host="welcome" />
             </intent-filter>
             <!-- Voice search ("Play [station name]") when SIR isn't already the active
                  media app — see MainActivity.handlePlayFromSearch. -->

@@ -16,11 +16,15 @@ import kotlinx.coroutines.flow.first
  *   on that station.
  * - `sir://play/{id}` and `sir://play` (automation: routines, Tasker, pinned shortcuts)
  *   start playback without any UI; see [PlayStationActivity].
+ * - `sir://welcome?genre=` carries an allow-listed genre for the welcome chips, or
+ *   for Browse once the first run is done. A custom scheme does nothing when the
+ *   app is not installed.
  */
 internal object StationDeepLink {
     private const val SCHEME = "sir"
     private const val HOST_STATION = "station"
     private const val HOST_PLAY = "play"
+    private const val HOST_WELCOME = "welcome"
 
     /**
      * Station ids arrive from other apps, so anything longer than a URL could sensibly be
@@ -37,6 +41,20 @@ internal object StationDeepLink {
         val uri = intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data ?: return null
         if (uri.scheme != SCHEME || uri.host != HOST_STATION) return null
         return uri.lastPathSegment?.takeIf { it.isNotBlank() }
+    }
+
+    /**
+     * The allow-listed genre on `sir://welcome?genre=`, or null.
+     * Anything that is not that link, or not one of [FIRST_RUN_GENRES], is ignored.
+     * The raw query is not kept.
+     */
+    fun welcomeGenre(intent: Intent?): String? {
+        val uri = intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data
+        return if (uri?.scheme == SCHEME && uri.host == HOST_WELCOME) {
+            allowListedGenre(uri.getQueryParameter("genre"))
+        } else {
+            null
+        }
     }
 
     /** What an automation link asked for. */
