@@ -192,6 +192,7 @@
     <!-- First-run welcome -->
     <string name="welcome_title">欢迎使用 %1$s</string>
     <string name="welcome_message">无需账户，没有跟踪。找到电台，按下播放。</string>
+    <string name="welcome_genre_prompt">从一个风格开始</string>
     <string name="welcome_get_started">开始使用</string>
 
     <!-- Settings: Playback -->

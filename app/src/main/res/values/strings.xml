@@ -218,6 +218,7 @@
     <!-- First-run welcome. %1$s = app display name -->
     <string name="welcome_title">Welcome to %1$s</string>
     <string name="welcome_message">No accounts, no tracking. Find a station and press play.</string>
+    <string name="welcome_genre_prompt">Start with a genre</string>
     <string name="welcome_get_started">Get started</string>
 
     <!-- Settings: Playback -->

@@ -104,6 +104,7 @@ class SettingsRepository(private val context: Context) :
     private val spatialAudioKey = booleanPreferencesKey("spatial_audio")
     private val showVisualizerKey = booleanPreferencesKey("show_visualizer")
     private val hasCompletedFirstRunKey = booleanPreferencesKey("has_completed_first_run")
+    private val firstRunGenreKey = stringPreferencesKey("first_run_genre")
     private val hiddenRecentStationIdsKey = stringSetPreferencesKey("hidden_recent_station_ids")
 
     val streamQuality: Flow<StreamQuality> = context.dataStore.data.map { prefs ->
@@ -327,6 +328,21 @@ class SettingsRepository(private val context: Context) :
     suspend fun setHasCompletedFirstRun(completed: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[hasCompletedFirstRunKey] = completed
+        }
+    }
+
+    /**
+     * Genre preset for the first-run welcome, or null when nothing has set one.
+     * Callers store only an allow-listed tag; this value never leaves the device.
+     */
+    val firstRunGenre: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[firstRunGenreKey]
+    }
+
+    /** Persists [genre], or clears the preset when [genre] is null. */
+    suspend fun setFirstRunGenre(genre: String?) {
+        context.dataStore.edit { preferences ->
+            if (genre == null) preferences.remove(firstRunGenreKey) else preferences[firstRunGenreKey] = genre
         }
     }
 

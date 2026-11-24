@@ -31,7 +31,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -41,11 +40,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.Player
+import com.cascadiacollections.sir.core.directory.RadioDirectory
+import com.cascadiacollections.sir.core.directory.Tag
+import com.cascadiacollections.sir.core.persistence.RecentShelfStore
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
 import com.cascadiacollections.sir.core.persistence.TrackHistoryRepository
-import com.cascadiacollections.sir.ui.FirstRunWelcome
+import com.cascadiacollections.sir.ui.FirstRunWelcomeHost
 import com.cascadiacollections.sir.ui.LicensesScreen
 import com.cascadiacollections.sir.ui.RadioUi
 import com.cascadiacollections.sir.ui.SirAppShell
@@ -54,7 +59,6 @@ import com.cascadiacollections.sir.ui.theme.SirTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 private const val ACTION_SHORTCUT_PLAY = "com.cascadiacollections.sir.SHORTCUT_PLAY"
 
@@ -288,15 +292,20 @@ fun RadioScreen(
         LicensesScreen(onBack = { showLicenses = false })
     }
 
-    // First-run welcome. Starts as null (unknown) rather than false so returning users
-    // never see it flash while DataStore loads.
-    val hasCompletedFirstRun by repository.hasCompletedFirstRun
-        .collectAsState<Boolean, Boolean?>(initial = null)
-    val welcomeScope = rememberCoroutineScope()
-    if (hasCompletedFirstRun == false && !showLicenses) {
-        FirstRunWelcome(onDone = {
-            welcomeScope.launch { repository.setHasCompletedFirstRun(true) }
-        })
+    // First-run welcome. The host waits until DataStore says the welcome is still due,
+    // so returning users never see it flash. A chosen genre opens Browse on that tag;
+    // leaving the chips off keeps the Listen tab.
+    val genreOwner = LocalViewModelStoreOwner.current
+    if (!showLicenses) {
+        FirstRunWelcomeHost(
+            repository = repository,
+            onChooseGenre = { genre ->
+                genreOwner?.let { owner ->
+                    selectBrowseGenre(genre, owner, AppDirectory.instance, repository)
+                }
+                selectedTab = SirTab.BROWSE
+            }
+        )
     }
 
     // Metered network warning dialog (shown once per session on cellular)
@@ -312,6 +321,24 @@ fun RadioScreen(
             }
         )
     }
+}
+
+/**
+ * Selects [genre] on the activity's [SearchViewModel], the same instance Browse uses,
+ * so the chip confirmed on the welcome is already loaded when that tab appears.
+ * Allow-listed again here: this is the last step before a directory lookup.
+ */
+internal fun selectBrowseGenre(
+    genre: String,
+    owner: ViewModelStoreOwner,
+    directory: RadioDirectory,
+    shelf: RecentShelfStore
+) {
+    val allowed = allowListedGenre(genre) ?: return
+    ViewModelProvider(
+        owner,
+        SearchViewModel.Factory(directory, shelf)
+    )[SearchViewModel::class.java].selectGenre(Tag(allowed))
 }
 
 // --- Player extension ---
