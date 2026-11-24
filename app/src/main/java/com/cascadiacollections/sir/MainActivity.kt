@@ -73,6 +73,9 @@ class MainActivity : ComponentActivity() {
     // so holding the Activity here would leak it for the life of those collectors.
     private val settingsRepository by lazy { SettingsRepository(applicationContext) }
 
+    // Play reads the Install Referrer; FOSS is a no-op. Flavor source set picks the class.
+    private val campaignGenreSource by lazy { CampaignGenreSourceImpl(applicationContext) }
+
     // Surfaces a sir://station/{id} deep link into the Compose tree, mirroring how
     // CastDeviceDetector bridges its own StateFlow into RadioScreen via collectAsState().
     private val pendingStationId = MutableStateFlow<String?>(null)
@@ -104,7 +107,7 @@ class MainActivity : ComponentActivity() {
             finish()
             return
         }
-        handleDeepLink(intent)
+        handleDeepLink(intent, readInstallReferrer = true)
 
         enableEdgeToEdge()
         setContent {
@@ -125,7 +128,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleDeepLink(intent)
+        handleDeepLink(intent, readInstallReferrer = false)
         handlePlayFromSearch(intent)
     }
 
@@ -135,11 +138,15 @@ class MainActivity : ComponentActivity() {
         castFeatureManager.release()
     }
 
-    private fun handleDeepLink(intent: Intent?) {
+    private fun handleDeepLink(intent: Intent?, readInstallReferrer: Boolean) {
         StationDeepLink.stationId(intent)?.let { pendingStationId.value = it }
-        val genre = StationDeepLink.welcomeGenre(intent) ?: return
+        val genre = StationDeepLink.welcomeGenre(intent)
+        if (genre == null && !readInstallReferrer) return
         lifecycleScope.launch {
-            applyWelcomeGenre(genre, settingsRepository)
+            // The welcome link is explicit for this launch, so it is applied before
+            // the referrer and the referrer will not overwrite it.
+            if (genre != null) applyWelcomeGenre(genre, settingsRepository)
+            if (readInstallReferrer) applyInstallReferrer(settingsRepository, campaignGenreSource)
         }
     }
 
