@@ -1,7 +1,9 @@
 package com.cascadiacollections.sir
 
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -28,6 +30,21 @@ class SettingsRepositoryFirstRunTest {
         repo.setHasCompletedFirstRun(true)
 
         assertThat(repo().hasCompletedFirstRun.first()).isTrue()
+    }
+
+    @Test
+    fun `first run genre persists and clears`() = runBlocking {
+        val repo = repo()
+        repo.setFirstRunGenre(null)
+        assertThat(repo.firstRunGenre.first()).isNull()
+
+        repo.setFirstRunGenre("rock")
+
+        assertThat(repo().firstRunGenre.first()).isEqualTo("rock")
+
+        repo.setFirstRunGenre(null)
+
+        assertThat(repo().firstRunGenre.first()).isNull()
     }
 
     @Test
