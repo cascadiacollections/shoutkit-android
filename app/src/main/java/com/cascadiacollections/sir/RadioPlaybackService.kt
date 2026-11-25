@@ -1568,6 +1568,11 @@ class RadioPlaybackService : MediaLibraryService() {
         if (endpointResolution?.first != source.url) endpointResolution = null
         timeShift.reset()
         playbackMode = PlaybackMode.Live
+        // The track belongs to the stream it came from. The resolver keeps the previous track
+        // through updates that carry none, which is right within one station and wrong across
+        // two: a station that sends no titles went on showing the last one's song.
+        streamMetadata = StreamMetadata()
+        albumArt.onTrackChanged(artist = null, title = null)
         return buildMediaItem()
     }
 

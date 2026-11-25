@@ -113,9 +113,13 @@ internal fun RadioUiState.withSessionExtras(extras: Bundle?): RadioUiState {
 internal fun RadioUiState.withMediaMetadata(metadata: MediaMetadata): RadioUiState {
     val extras = metadata.extras
     val resolved = extras?.getBoolean(RadioPlaybackService.EXTRA_HAS_RESOLVED_TRACK) == true
+    // The artist has its own flag: a stream can send a title and no artist, and the service
+    // then fills the session's artist with "Live stream", which is not one.
+    val resolvedArtist = resolved &&
+        extras?.getBoolean(RadioPlaybackService.EXTRA_HAS_RESOLVED_ARTIST) == true
     return copy(
         trackTitle = metadata.title?.toString()?.takeIf { resolved },
-        artist = metadata.artist?.toString()?.takeIf { resolved },
+        artist = metadata.artist?.toString()?.takeIf { resolvedArtist },
         albumArtUrl = extras?.getString(RadioPlaybackService.EXTRA_ALBUM_ART_URL)?.takeIf {
             resolved
         },
