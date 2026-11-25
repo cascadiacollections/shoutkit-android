@@ -12,6 +12,9 @@ Facts the posts rely on, so they stay true:
   Search for album art (can be turned off).
 - iPhone is a public TestFlight beta, not an App Store release.
 - Mention F-Droid only as "submitted" or "listed", whichever is true on the day.
+- F-Droid builds and signs the Android FOSS app (com.cascadiacollections.sir.foss). It installs
+  separately from the Play app. The GitHub Releases APK is that same FOSS app signed with our
+  key, so it does not update the F-Droid install.
 
 Links:
 
@@ -42,8 +45,9 @@ Links:
 >
 > Details people here usually ask about:
 >
-> - The Android APK is a FOSS build with no Google Play services, Firebase, analytics or crash
->   reporting. The build is reproducible, so you can check the APK against the source.
+> - The Android APK on GitHub Releases is a FOSS build with no Google Play services, Firebase,
+>   analytics or crash reporting. F-Droid builds and signs its own copy, which installs
+>   separately from the Play app.
 > - The app talks to Radio Browser, to the stations you play, and to Apple's iTunes Search for
 >   album art. Radio Browser is told when you start a station so popular ones rank higher. Both
 >   that and the artwork lookup can be turned off in Settings.
@@ -63,7 +67,7 @@ Links:
 
 **Title:**
 
-> ShoutKit: internet radio with no account and no tracking, open source, reproducible build [F-Droid status]
+> ShoutKit: internet radio with no account and no tracking, open source [F-Droid status]
 
 Replace `[F-Droid status]` with "(F-Droid inclusion requested)" or "(now on F-Droid)".
 
@@ -79,9 +83,9 @@ Replace `[F-Droid status]` with "(F-Droid inclusion requested)" or "(now on F-Dr
 > What F-Droid users will care about:
 >
 > - The FOSS flavor has no Google Play services, Firebase, analytics or crash reporting.
-> - The build is reproducible. The F-Droid recipe asks F-Droid to verify its build against the
->   developer-signed APK and ship that one, so the GitHub and F-Droid APKs are the same file and
->   update each other.
+> - F-Droid builds and signs that app. Its id is com.cascadiacollections.sir.foss, so it
+>   installs separately from the Play version. The GitHub Releases APK is the same FOSS app
+>   with our signature, so it does not update the F-Droid install.
 > - Network use: Radio Browser, the stations themselves, and Apple's iTunes Search for album
 >   art, which is why the recipe declares NonFreeNet. Artwork lookup and Radio Browser play
 >   counts can both be turned off in Settings.
@@ -111,8 +115,8 @@ Replace `[F-Droid status]` with "(F-Droid inclusion requested)" or "(now on F-Dr
 >   You can also add any stream by its URL.
 > - The apps are GPL-3.0. The parts that could be useful to other projects are split out as MIT
 >   libraries.
-> - The Android FOSS build has no Google services and builds reproducibly. iPhone is a public
->   TestFlight beta.
+> - The Android FOSS build has no Google services. F-Droid builds and signs its own copy,
+>   which installs separately from Play. iPhone is a public TestFlight beta.
 > - It is free. Nothing is locked behind payment.
 >
 > Android: https://github.com/cascadiacollections/shoutkit-android
