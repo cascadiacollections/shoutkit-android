@@ -3,7 +3,6 @@ package com.cascadiacollections.sir.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
@@ -29,13 +28,13 @@ class StationRowTest {
     private val stationWithArtwork = stationWithoutArtwork.copy(favicon = "https://example.com/a.png")
 
     @Test
-    fun `a station without artwork falls back to the play icon`() {
+    fun `a station without artwork falls back to the monogram`() {
         composeRule.setContent {
             SirTheme { StationRow(station = stationWithoutArtwork, isPlaying = false, onPlay = {}) }
         }
 
         composeRule.onNodeWithText("Station A").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Play station").assertIsDisplayed()
+        composeRule.onNodeWithText("SA").assertIsDisplayed()
     }
 
     @Test
@@ -48,7 +47,7 @@ class StationRowTest {
     }
 
     @Test
-    fun `a failing artwork load falls back to the play icon`() {
+    fun `a failing artwork load falls back to the monogram`() {
         // A real ImageLoader (not SirTheme's), wired to an engine that always fails, so
         // the fallback is exercised deterministically rather than depending on an
         // actual network request's timing.
@@ -71,7 +70,7 @@ class StationRowTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription("Play station").assertIsDisplayed()
+        composeRule.onNodeWithText("SA").assertIsDisplayed()
     }
 
     @Test
@@ -83,6 +82,27 @@ class StationRowTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription("Play station").assertIsDisplayed()
+        composeRule.onNodeWithText("SA").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the subtitle is genre and bitrate, without the station name again`() {
+        val station = stationWithoutArtwork.copy(tags = "rock,indie", codec = "MP3", bitrate = 128)
+        composeRule.setContent {
+            SirTheme { StationRow(station = station, isPlaying = false, onPlay = {}) }
+        }
+
+        composeRule.onNodeWithText("Station A").assertIsDisplayed()
+        composeRule.onNodeWithText("Rock · 128 kbps").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the selected station keeps its artwork and says now playing`() {
+        composeRule.setContent {
+            SirTheme { StationRow(station = stationWithoutArtwork, isPlaying = true, onPlay = {}) }
+        }
+
+        composeRule.onNodeWithText("SA").assertIsDisplayed()
+        composeRule.onNodeWithText("Now playing").assertIsDisplayed()
     }
 }

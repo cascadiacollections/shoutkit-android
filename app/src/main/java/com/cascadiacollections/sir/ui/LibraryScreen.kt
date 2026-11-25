@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Badge
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -185,12 +189,7 @@ fun LibraryScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
             )
-            ImportExportRow(
-                onImport = { importLauncher.launch(arrayOf("*/*")) },
-                onExport = {},
-                onExportBackup = {},
-                exportEnabled = false
-            )
+            ImportStationsButton(onImport = { importLauncher.launch(arrayOf("*/*")) })
             HorizontalDivider()
             RecentlyHeardRow(count = 0, onClick = onOpenRecentlyHeard)
         }
@@ -203,22 +202,18 @@ fun LibraryScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionHeader(stringResource(R.string.saved_stations), Modifier.weight(1f))
                     if (savedOrder.size > 1) {
-                        TextButton(
-                            onClick = { reordering = !reordering },
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
+                        TextButton(onClick = { reordering = !reordering }) {
                             Text(stringResource(if (reordering) R.string.done else R.string.reorder_stations))
                         }
                     }
+                    ImportExportMenu(
+                        onImport = { importLauncher.launch(arrayOf("*/*")) },
+                        onExport = { exportLauncher.launch("sir_stations.m3u") },
+                        onExportBackup = {
+                            backupLauncher.launch(FavoritesBackupCodec.DEFAULT_FILE_NAME)
+                        }
+                    )
                 }
-                ImportExportRow(
-                    onImport = { importLauncher.launch(arrayOf("*/*")) },
-                    onExport = { exportLauncher.launch("sir_stations.m3u") },
-                    onExportBackup = {
-                        backupLauncher.launch(FavoritesBackupCodec.DEFAULT_FILE_NAME)
-                    },
-                    exportEnabled = true
-                )
             }
             itemsIndexed(savedOrder, key = { _, station -> savedKey(station) }) { index, station ->
                 ReorderableItem(reorderState, key = savedKey(station), enabled = reordering) { isDragging ->
@@ -286,12 +281,7 @@ fun LibraryScreen(
             }
         } else {
             item(key = "import-row") {
-                ImportExportRow(
-                    onImport = { importLauncher.launch(arrayOf("*/*")) },
-                    onExport = {},
-                    onExportBackup = {},
-                    exportEnabled = false
-                )
+                ImportStationsButton(onImport = { importLauncher.launch(arrayOf("*/*")) })
             }
         }
 
@@ -447,28 +437,53 @@ private fun SectionHeader(text: String, modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * Import and export for the saved stations, behind one "More options" button in the section
+ * header. Three unlabelled icons used to sit on a row of their own here; a menu names each
+ * action and gives the row back to the list.
+ */
 @Composable
-private fun ImportExportRow(
-    onImport: () -> Unit,
-    onExport: () -> Unit,
-    onExportBackup: () -> Unit,
-    exportEnabled: Boolean
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onImport) {
-            Icon(Icons.Default.FileUpload, contentDescription = stringResource(R.string.import_stations))
+private fun ImportExportMenu(onImport: () -> Unit, onExport: () -> Unit, onExportBackup: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.padding(end = 4.dp)) {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
-        IconButton(onClick = onExport, enabled = exportEnabled) {
-            Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.export_stations))
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.import_stations)) },
+                leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onImport()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.export_stations)) },
+                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onExport()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.export_favorites_backup)) },
+                leadingIcon = { Icon(Icons.Default.Backup, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onExportBackup()
+                }
+            )
         }
-        IconButton(onClick = onExportBackup, enabled = exportEnabled) {
-            Icon(Icons.Default.Backup, contentDescription = stringResource(R.string.export_favorites_backup))
-        }
+    }
+}
+
+/** With no saved stations there is nothing to export, so importing gets a labelled button. */
+@Composable
+private fun ImportStationsButton(onImport: () -> Unit) {
+    TextButton(onClick = onImport, modifier = Modifier.padding(horizontal = 4.dp)) {
+        Icon(Icons.Default.FileUpload, contentDescription = null)
+        Text(stringResource(R.string.import_stations), modifier = Modifier.padding(start = 8.dp))
     }
 }
 
