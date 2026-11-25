@@ -6,6 +6,7 @@ import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 import org.junit.Test
 
@@ -271,5 +272,75 @@ class CircularByteBufferTest {
         buf.clear()
 
         assertThat(buf.isEndOfStream()).isFalse()
+    }
+
+    @Test
+    fun `clear unblocks a reader waiting on an empty buffer`() {
+        val buf = CircularByteBuffer(100)
+        val result = AtomicInteger(Int.MIN_VALUE)
+        val finished = CountDownLatch(1)
+        thread(isDaemon = true) {
+            result.set(buf.read(ByteArray(16), 0, 16))
+            finished.countDown()
+        }
+        awaitWaiting(buf)
+
+        buf.clear()
+
+        assertThat(finished.await(2, TimeUnit.SECONDS), name = "reader stayed blocked after clear").isTrue()
+        assertThat(result.get()).isEqualTo(CircularByteBuffer.END_OF_STREAM)
+        // clear() retires the in-flight read without leaving the buffer ended.
+        assertThat(buf.isEndOfStream()).isFalse()
+        buf.write(byteArrayOf(9), 0, 1)
+        val dst = ByteArray(1)
+        assertThat(buf.read(dst, 0, 1)).isEqualTo(1)
+        assertThat(dst[0]).isEqualTo(9)
+    }
+
+    @Test
+    fun `resumeStream unblocks a reader waiting on the previous producer`() {
+        val buf = CircularByteBuffer(100)
+        val result = AtomicInteger(Int.MIN_VALUE)
+        val finished = CountDownLatch(1)
+        thread(isDaemon = true) {
+            result.set(buf.read(ByteArray(16), 0, 16))
+            finished.countDown()
+        }
+        awaitWaiting(buf)
+
+        val epoch = buf.resumeStream()
+
+        assertThat(finished.await(2, TimeUnit.SECONDS), name = "reader stayed blocked after resume").isTrue()
+        assertThat(result.get()).isEqualTo(CircularByteBuffer.END_OF_STREAM)
+        assertThat(buf.isEndOfStream()).isFalse()
+        buf.write(byteArrayOf(3), 0, 1)
+        assertThat(buf.read(ByteArray(1), 0, 1)).isEqualTo(1)
+        buf.signalEndOfStream(epoch)
+        assertThat(buf.read(ByteArray(1), 0, 1)).isEqualTo(CircularByteBuffer.END_OF_STREAM)
+    }
+
+    @Test
+    fun `an end-of-stream signal from an older producer does not end the resumed stream`() {
+        val buf = CircularByteBuffer(100)
+        val previous = buf.resumeStream()
+        val current = buf.resumeStream()
+        buf.write(byteArrayOf(4), 0, 1)
+
+        buf.signalEndOfStream(previous)
+
+        assertThat(buf.isEndOfStream()).isFalse()
+        val dst = ByteArray(1)
+        assertThat(buf.read(dst, 0, 1)).isEqualTo(1)
+        assertThat(dst[0]).isEqualTo(4)
+        buf.signalEndOfStream(current)
+        assertThat(buf.read(dst, 0, 1)).isEqualTo(CircularByteBuffer.END_OF_STREAM)
+    }
+
+    private fun awaitWaiting(buf: CircularByteBuffer) {
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
+        while (!buf.hasWaitingReader()) {
+            if (System.nanoTime() >= deadline) throw AssertionError("reader did not block")
+            Thread.yield()
+        }
     }
 }

@@ -47,6 +47,11 @@ class TimeShiftDataSource(
 
     private var readerThread: Thread? = null
 
+    // Epoch from [CircularByteBuffer.resumeStream] for the producer this source started.
+    // close() and the producer thread both signal end-of-stream with it, so a producer that
+    // exits only after a newer source has resumed the buffer cannot end that newer stream.
+    private var streamEpoch: Long? = null
+
     // The open resource has a known length and is read directly, bypassing the buffer.
     private var passThrough = false
 
@@ -63,7 +68,9 @@ class TimeShiftDataSource(
         passThrough = false
 
         // A previous data source over this buffer may have ended it; this one is live again.
-        buffer.resumeStream()
+        // Resuming also releases a reader still blocked on the previous producer.
+        val epoch = buffer.resumeStream()
+        streamEpoch = epoch
 
         readerThread = thread(isDaemon = true, name = threadName) {
             val chunk = ByteArray(chunkSize)
@@ -81,8 +88,10 @@ class TimeShiftDataSource(
                 Log.w(TAG, "TimeShift reader stopped", e)
             } finally {
                 // Whether the upstream ended, failed or was interrupted, no more bytes
-                // are coming — release any consumer blocked waiting for them.
-                buffer.signalEndOfStream()
+                // are coming from this producer. A newer source may already own the buffer
+                // by the time a stalled socket actually unblocks, so this signal is scoped
+                // to [epoch] and is ignored if that source has moved on.
+                buffer.signalEndOfStream(epoch)
             }
         }
 
@@ -113,7 +122,12 @@ class TimeShiftDataSource(
         }
         readerThread?.interrupt()
         readerThread = null
-        buffer.signalEndOfStream()
+        // Unblock a consumer parked in buffer.read() on another thread. A producer that
+        // ignores interruption stays inside upstream.read(), so it never reaches its own
+        // end-of-stream signal; this one is what lets that reader return. Scoped to the
+        // epoch from open(), so a late close cannot end a stream a newer source resumed.
+        streamEpoch?.let { buffer.signalEndOfStream(it) }
+        streamEpoch = null
         upstream.close()
     }
 
