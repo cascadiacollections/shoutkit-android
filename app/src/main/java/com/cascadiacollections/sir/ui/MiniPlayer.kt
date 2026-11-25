@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.cascadiacollections.android.audiolevels.AudioLevels
 import com.cascadiacollections.sir.PlaybackStatus
 import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioUiState
@@ -26,7 +28,8 @@ import com.cascadiacollections.sir.displayedFailure
 import com.cascadiacollections.sir.status
 import com.cascadiacollections.sir.trackLine
 import com.cascadiacollections.sir.transportAction
-
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 /**
  * Compact now-playing bar shown above the navigation bar on every tab except listen,
  * so playback stays reachable while browsing.
@@ -42,7 +45,14 @@ import com.cascadiacollections.sir.transportAction
  * I'm hearing" large.
  */
 @Composable
-fun MiniPlayer(state: RadioUiState, onToggle: () -> Unit, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun MiniPlayer(
+    state: RadioUiState,
+    onToggle: () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showVisualizer: Boolean = false,
+    audioLevels: Flow<AudioLevels> = emptyFlow()
+) {
     val isIdle = !state.isConnected
     val stationName = state.station?.name?.takeIf { it.isNotBlank() }
         ?: stringResource(R.string.station_name)
@@ -107,6 +117,20 @@ fun MiniPlayer(state: RadioUiState, onToggle: () -> Unit, onClick: () -> Unit, m
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+                // Five bars folded from the same 24-band stream Now Playing draws, as in the
+                // iOS mini player (spec, "Compact meters"). Hidden by the Settings switch or
+                // when the system removes animations.
+                if (showVisualizer && !rememberReduceMotion()) {
+                    LiveLevelMeter(
+                        active = state.status == PlaybackStatus.LIVE,
+                        levels = audioLevels,
+                        modifier = Modifier.size(width = 22.dp, height = 16.dp),
+                        displayBandCount = MINI_METER_BARS,
+                        showPeaks = false,
+                        barSpacing = 2.dp,
+                        minimumBarHeight = 2.dp
+                    )
+                }
                 IconButton(onClick = onToggle, enabled = !isIdle) {
                     Icon(
                         imageVector = action.icon,
@@ -117,3 +141,6 @@ fun MiniPlayer(state: RadioUiState, onToggle: () -> Unit, onClick: () -> Unit, m
         }
     }
 }
+
+/** The mini player's bar count, as on iOS. */
+private const val MINI_METER_BARS = 5

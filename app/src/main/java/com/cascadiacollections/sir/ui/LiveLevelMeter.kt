@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -40,14 +41,27 @@ import kotlinx.coroutines.flow.collectLatest
  * runs only while someone can see the bars. When playback pauses, buffers or stops (or frames
  * stop arriving), the bars ease to rest and the caps drop with them.
  *
+ * [displayBandCount] folds the 24-band frames into that many bars, after the gain, for a compact
+ * meter fed by the same stream (spec, "Compact meters"); `null` draws every band. The defaults
+ * are the iOS view's: peak caps on, 3 dp between bars, bars at least 3 dp tall.
+ *
  * Decorative: it has no semantics, since the status badge already says the stream is live.
  */
 @Composable
-internal fun LiveLevelMeter(active: Boolean, levels: Flow<AudioLevels>, modifier: Modifier = Modifier) {
-    var target by remember { mutableStateOf(AudioLevels.silent()) }
+internal fun LiveLevelMeter(
+    active: Boolean,
+    levels: Flow<AudioLevels>,
+    modifier: Modifier = Modifier,
+    displayBandCount: Int? = null,
+    showPeaks: Boolean = true,
+    barSpacing: Dp = 3.dp,
+    minimumBarHeight: Dp = 3.dp
+) {
+    val bandCount = displayBandCount ?: AudioLevels.DEFAULT_BAND_COUNT
+    var target by remember(bandCount) { mutableStateOf(AudioLevels.silent(bandCount)) }
     val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(active, levels, lifecycleOwner) {
-        target = AudioLevels.silent()
+    LaunchedEffect(active, levels, lifecycleOwner, bandCount) {
+        target = AudioLevels.silent(bandCount)
         if (!active) return@LaunchedEffect
         var gain = AutoGain()
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -56,30 +70,34 @@ internal fun LiveLevelMeter(active: Boolean, levels: Flow<AudioLevels>, modifier
                 // meter; then the level^0.6 curve at draw time.
                 val applied = gain.apply(frame, System.nanoTime())
                 gain = applied.gain
-                target = applied.levels
+                target = applied.levels.resampled(bandCount)
                 // No frame for a while (Cast took over, an offloaded format): rest, don't freeze.
                 delay(STALE_FRAME_MILLIS)
-                target = AudioLevels.silent()
+                target = AudioLevels.silent(bandCount)
             }
         }
-        target = AudioLevels.silent()
+        target = AudioLevels.silent(bandCount)
     }
 
-    var from by remember { mutableStateOf(MeterFrame.REST) }
-    var to by remember { mutableStateOf(MeterFrame.REST) }
-    var peakHold by remember { mutableStateOf(PeakHold()) }
+    var from by remember(bandCount) { mutableStateOf(MeterFrame.rest(bandCount)) }
+    var to by remember(bandCount) { mutableStateOf(MeterFrame.rest(bandCount)) }
+    var peakHold by remember(bandCount) { mutableStateOf(PeakHold(bandCount)) }
     val progress = remember { Animatable(1f) }
     LaunchedEffect(target) {
         peakHold = peakHold.update(target, System.nanoTime())
         from = MeterFrame.lerp(from, to, progress.value)
-        to = MeterFrame(target.toFloatArray(), FloatArray(peakHold.size) { peakHold[it] })
+        val peaks = if (showPeaks) FloatArray(peakHold.size) { peakHold[it] } else FloatArray(0)
+        to = MeterFrame(target.toFloatArray(), peaks)
+        // Settling to rest takes longer than a step between frames, as on iOS, so the bars
+        // sink when playback stops instead of snapping flat.
+        val duration = if (target.isSilent) REST_EASE_MILLIS else FRAME_EASE_MILLIS
         progress.snapTo(0f)
-        progress.animateTo(1f, tween(durationMillis = FRAME_EASE_MILLIS, easing = EaseOut))
+        progress.animateTo(1f, tween(durationMillis = duration, easing = EaseOut))
     }
 
     val color = MaterialTheme.colorScheme.primary
     Canvas(modifier = modifier) {
-        drawMirroredBars(MeterFrame.lerp(from, to, progress.value), color)
+        drawMirroredBars(MeterFrame.lerp(from, to, progress.value), color, barSpacing, minimumBarHeight)
     }
 }
 
@@ -104,8 +122,7 @@ internal fun rememberReduceMotion(): Boolean {
 /** Bar levels and peak caps, as drawn. */
 private class MeterFrame(val levels: FloatArray, val peaks: FloatArray) {
     companion object {
-        val REST = MeterFrame(FloatArray(AudioLevels.DEFAULT_BAND_COUNT), FloatArray(AudioLevels.DEFAULT_BAND_COUNT))
-
+        fun rest(bandCount: Int) = MeterFrame(FloatArray(bandCount), FloatArray(bandCount))
         fun lerp(start: MeterFrame, stop: MeterFrame, fraction: Float): MeterFrame {
             fun mix(a: FloatArray, b: FloatArray) = FloatArray(b.size) {
                 val origin = a.getOrElse(it) { 0f }
@@ -116,11 +133,11 @@ private class MeterFrame(val levels: FloatArray, val peaks: FloatArray) {
     }
 }
 
-private fun DrawScope.drawMirroredBars(frame: MeterFrame, color: Color) {
+private fun DrawScope.drawMirroredBars(frame: MeterFrame, color: Color, barSpacing: Dp, minimumBarHeight: Dp) {
     val count = frame.levels.size
     if (count == 0) return
-    val spacing = BAR_SPACING.toPx()
-    val minimumHeight = MINIMUM_BAR_HEIGHT.toPx()
+    val spacing = barSpacing.toPx()
+    val minimumHeight = minimumBarHeight.toPx()
     val capHeight = maxOf(MINIMUM_CAP_HEIGHT.toPx(), minimumHeight * CAP_TO_BAR_RATIO)
     val barWidth = ((size.width - spacing * (count - 1)) / count).coerceAtLeast(1f)
     val radius = CornerRadius(barWidth / 2, barWidth / 2)
@@ -152,9 +169,10 @@ private const val DISPLAY_EXPONENT = 0.6f
 
 /** Slightly longer than the ~33 ms publish interval, so steps read as motion (iOS: 0.12 s). */
 private const val FRAME_EASE_MILLIS = 120
+
+/** How long the bars take to settle when metering stops (iOS `restAnimation`: 0.6 s). */
+private const val REST_EASE_MILLIS = 600
 private const val STALE_FRAME_MILLIS = 500L
-private val BAR_SPACING = 3.dp
-private val MINIMUM_BAR_HEIGHT = 3.dp
 private val MINIMUM_CAP_HEIGHT = 1.5.dp
 private const val CAP_TO_BAR_RATIO = 0.6f
 private const val CAP_ALPHA = 0.55f

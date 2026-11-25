@@ -68,6 +68,7 @@ class TvActivity : ComponentActivity() {
 
                 TvHomeScreen(
                     radio = radioState,
+                    audioLevels = LiveAudioLevels.levels,
                     recents = browserState.recentStations.take(RECENT_LIMIT),
                     popular = popular,
                     onStationSelected = { station: Station ->

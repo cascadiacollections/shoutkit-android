@@ -357,13 +357,17 @@ ballistics. Both clients pass the spec's golden vectors, so they draw the same b
 - **Consumer.** `LiveLevelMeter` collects `LiveAudioLevels.levels` only while the stream is live
   and the screen is started. Collection adds a meter to the set and cancellation removes it, so
   the FFT runs only while the bars are visible.
+- **Where.** Three places, as on iOS: Now Playing (24 mirrored bars with peak caps), the mini
+  player (5 bars folded from the same frames with `AudioLevels.resampled`, no caps, 22 x 16 dp),
+  and the Android TV banner (24 bars, 260 x 32 dp). The mini player is hidden on the listen tab,
+  so normally one meter runs at a time.
 - **Drawing.** Per the spec's "Drawing (UI)" section, each frame first goes through `AutoGain`
   (reference starts at 0.3, jumps to the loudest band, decays 0.15/s, never below 0.3; each band
   is `min(1, band / reference)`), because stream loudness varies by 10 dB or more. Bars and caps
   are then drawn at `level^0.6` of the height, so typical 0.1–0.4 levels don't read as a dotted
   line.
 - **At rest.** Paused, buffering, failed, or no frame for 500 ms (Cast took over): the bars ease
-  to zero and the peak caps reset.
+  to zero over 600 ms (frame-to-frame steps take 120 ms) and the peak caps reset.
 - **When hidden.** Settings → Playback → Show visualizer (on by default), or the system's animator
   duration scale at 0 ("Remove animations"). Battery saver does not stop it: on iOS, gating on
   Low Power made the meter look broken, and the work is small.
