@@ -40,13 +40,20 @@ class CircularByteBuffer(val capacity: Int) {
      * If the buffer is full and the write cursor overtakes the read cursor,
      * the read cursor is pushed forward (oldest unread data is discarded).
      *
+     * [epoch] is the generation this producer started in, as returned by [resumeStream].
+     * A write from an older generation is dropped, so a producer that is still draining
+     * a socket after [clear] or [resumeStream] cannot append the previous station onto
+     * the buffer the new producer owns. Omit [epoch] to write as the current generation.
+     *
      * @param src Source byte array to read from.
      * @param offset Starting offset in [src].
      * @param length Number of bytes to write. Values ≤ 0 are ignored.
+     * @param epoch Generation this producer started in, or null for the current one.
      */
-    fun write(src: ByteArray, offset: Int, length: Int) {
+    fun write(src: ByteArray, offset: Int, length: Int, epoch: Long? = null) {
         if (length <= 0) return
         lock.withLock {
+            if (epoch != null && epoch != generation) return
             var srcOffset = offset
             var remaining = length
             // Only the last [capacity] bytes are retained. Skipping the prefix keeps
@@ -128,6 +135,11 @@ class CircularByteBuffer(val capacity: Int) {
      * re-read. The actual seek distance is clamped to the amount of data available
      * behind the read cursor.
      *
+     * A [read] parked at the live edge (the buffer is empty because playback has caught
+     * the producer) wakes and returns the replayed bytes. Without the signal it would
+     * stay blocked until the next [write], so a stalled upstream would make replay wait
+     * even though the audio is already in the buffer.
+     *
      * @param bytes Number of bytes to seek backward.
      */
     fun seekBack(bytes: Int) {
@@ -135,6 +147,7 @@ class CircularByteBuffer(val capacity: Int) {
             val maxSeekBack = seekBackAvailable()
             val actual = bytes.coerceAtMost(maxSeekBack)
             readOffset -= actual
+            if (actual > 0) dataAvailable.signalAll()
         }
     }
 
