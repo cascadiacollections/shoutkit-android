@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -55,6 +57,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.core.net.toUri
@@ -194,7 +197,6 @@ fun ListenScreen(
     val trackLine = state.trackLine() ?: stringResource(R.string.track_live_radio)
     val status = state.status
     val failure = state.displayedFailure
-    val action = state.transportAction
 
     Column(modifier = modifier) {
         if (state.isBuffering) {
@@ -203,102 +205,180 @@ fun ListenScreen(
             )
         }
         // Measured before the scroll container (inside it the height is unbounded), so the
-        // artwork shrinks on short windows — landscape, split screen — instead of pushing
-        // the transport controls off screen.
+        // layout can follow the window: a short, wide one (a phone held sideways) puts the
+        // artwork beside the controls, and a short, narrow one (split screen) shrinks the
+        // artwork. Either way the transport controls stay on screen.
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val artworkSize = min(maxArtworkSize, maxHeight * ARTWORK_HEIGHT_FRACTION)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = horizontalPadding, vertical = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            val windowHeight = maxHeight
+            val windowWidth = maxWidth
+            val sideBySide = windowHeight < SIDE_BY_SIDE_MAX_HEIGHT && windowWidth >= SIDE_BY_SIDE_MIN_WIDTH
+            val artwork: @Composable (Dp) -> Unit = { size ->
+                NowPlayingArtwork(
+                    albumArtUrl = state.albumArtUrl,
+                    station = state.station,
+                    stationName = stationName,
+                    size = size,
+                    shape = RoundedCornerShape(28.dp)
+                )
+            }
+            val details: @Composable (Dp) -> Unit = { spacing ->
+                NowPlayingDetails(
+                    stationName = stationName,
+                    trackLine = trackLine,
+                    status = status,
+                    failure = failure,
+                    spacing = spacing
+                )
+            }
+            val transport: @Composable () -> Unit = {
+                TransportRow(state = state, onToggleFavorite = onToggleFavorite, onToggle = onToggle)
+            }
+            if (sideBySide) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        // At least the window's height, so the row is centred in it.
+                        .heightIn(min = windowHeight)
+                        .padding(horizontal = horizontalPadding, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterHorizontally)
                 ) {
-                    NowPlayingArtwork(
-                        albumArtUrl = state.albumArtUrl,
-                        station = state.station,
-                        stationName = stationName,
-                        size = artworkSize,
-                        shape = RoundedCornerShape(28.dp)
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    StatusBadge(status = status, failure = failure)
-                    // One accessibility element: "<station>, <track>".
+                    val heightLimit = windowHeight - SIDE_BY_SIDE_ARTWORK_INSET
+                    val widthLimit = windowWidth * SIDE_BY_SIDE_ARTWORK_WIDTH_FRACTION
+                    artwork(min(maxArtworkSize, min(heightLimit, widthLimit)))
                     Column(
                         modifier = Modifier
-                            .padding(top = 12.dp)
-                            .semantics(mergeDescendants = true) {},
+                            .weight(1f, fill = false)
+                            .widthIn(max = SIDE_BY_SIDE_CONTROLS_MAX_WIDTH),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = stationName,
-                            style = MaterialTheme.typography.headlineMedium,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                        details(8.dp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        NowPlayingMeter(
+                            visible = showVisualizer,
+                            active = status == PlaybackStatus.LIVE,
+                            levels = audioLevels,
+                            height = 32.dp
                         )
-                        Text(
-                            text = trackLine,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp),
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        transport()
                     }
-                    if (failure != null && status == PlaybackStatus.FAILED) {
-                        Text(
-                            text = stringResource(failure.displayMessageRes(short = false)),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 12.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    NowPlayingMeter(
-                        visible = showVisualizer,
-                        active = status == PlaybackStatus.LIVE,
-                        levels = audioLevels
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = horizontalPadding, vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        FavoriteButton(
-                            isFavorite = state.isFavorite,
-                            enabled = state.canFavorite,
-                            onToggle = onToggleFavorite
+                        artwork(min(maxArtworkSize, windowHeight * ARTWORK_HEIGHT_FRACTION))
+                        Spacer(modifier = Modifier.height(20.dp))
+                        details(12.dp)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        NowPlayingMeter(
+                            visible = showVisualizer,
+                            active = status == PlaybackStatus.LIVE,
+                            levels = audioLevels
                         )
-                        LargeFloatingActionButton(
-                            onClick = onToggle,
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ) {
-                            Icon(
-                                imageVector = action.icon,
-                                contentDescription = stringResource(action.labelRes),
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-                        NowPlayingOverflow(trackViewUrl = state.trackViewUrl)
-                    }
-                    state.sleepTimerLabel?.let { label ->
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 8.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        transport()
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * The status badge over the station name and track line, then the typed failure's long text
+ * when playback has failed. [spacing] is the gap under the badge and above the failure text.
+ */
+@Composable
+private fun NowPlayingDetails(
+    stationName: String,
+    trackLine: String,
+    status: PlaybackStatus,
+    failure: StreamFailure?,
+    spacing: Dp
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        StatusBadge(status = status, failure = failure)
+        // One accessibility element: "<station>, <track>".
+        Column(
+            modifier = Modifier
+                .padding(top = spacing)
+                .semantics(mergeDescendants = true) {},
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stationName,
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = trackLine,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        if (failure != null && status == PlaybackStatus.FAILED) {
+            Text(
+                text = stringResource(failure.displayMessageRes(short = false)),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = spacing)
+            )
+        }
+    }
+}
+
+/** Favourite, the play button (Play / Pause / Cancel / Retry) and the overflow; the sleep timer under them. */
+@Composable
+private fun TransportRow(state: RadioUiState, onToggleFavorite: () -> Unit, onToggle: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        val action = state.transportAction
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            FavoriteButton(
+                isFavorite = state.isFavorite,
+                enabled = state.canFavorite,
+                onToggle = onToggleFavorite
+            )
+            LargeFloatingActionButton(
+                onClick = onToggle,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Icon(
+                    imageVector = action.icon,
+                    contentDescription = stringResource(action.labelRes),
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+            NowPlayingOverflow(trackViewUrl = state.trackViewUrl)
+        }
+        state.sleepTimerLabel?.let { label ->
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -308,10 +388,10 @@ fun ListenScreen(
  * system removes animations, so the transport row stays where it was.
  */
 @Composable
-private fun NowPlayingMeter(visible: Boolean, active: Boolean, levels: Flow<AudioLevels>) {
+private fun NowPlayingMeter(visible: Boolean, active: Boolean, levels: Flow<AudioLevels>, height: Dp = 48.dp) {
     val modifier = Modifier
         .fillMaxWidth()
-        .height(48.dp)
+        .height(height)
     if (visible && !rememberReduceMotion()) {
         LiveLevelMeter(active = active, levels = levels, modifier = modifier)
     } else {
@@ -319,8 +399,26 @@ private fun NowPlayingMeter(visible: Boolean, active: Boolean, levels: Flow<Audi
     }
 }
 
-/** At most this share of the window height goes to the artwork. */
+/** Stacked layout: at most this share of the window height goes to the artwork. */
 private const val ARTWORK_HEIGHT_FRACTION = 0.4f
+
+/**
+ * Below this height the stacked column cannot fit even with its smallest artwork, so a window
+ * that is also at least [SIDE_BY_SIDE_MIN_WIDTH] wide puts the artwork beside the controls.
+ */
+private val SIDE_BY_SIDE_MAX_HEIGHT = 480.dp
+
+/** The narrowest window with room for the artwork and the transport row side by side. */
+private val SIDE_BY_SIDE_MIN_WIDTH = 480.dp
+
+/** Side by side: the artwork leaves this much of the window height free... */
+private val SIDE_BY_SIDE_ARTWORK_INSET = 32.dp
+
+/** ...and takes at most this share of the window width. */
+private const val SIDE_BY_SIDE_ARTWORK_WIDTH_FRACTION = 0.35f
+
+/** Side by side: the controls column stops growing here, so the level meter stays a meter. */
+private val SIDE_BY_SIDE_CONTROLS_MAX_WIDTH = 360.dp
 
 /** Connecting… / Reconnecting… / Live / the failure's short text. Nothing while idle. */
 @Composable
