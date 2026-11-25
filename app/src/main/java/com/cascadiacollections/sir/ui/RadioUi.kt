@@ -258,8 +258,7 @@ fun ListenScreen(
                         NowPlayingMeter(
                             visible = showVisualizer,
                             active = status == PlaybackStatus.LIVE,
-                            levels = audioLevels,
-                            height = 32.dp
+                            levels = audioLevels
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         transport()
@@ -388,16 +387,22 @@ private fun TransportRow(state: RadioUiState, onToggleFavorite: () -> Unit, onTo
  * system removes animations, so the transport row stays where it was.
  */
 @Composable
-private fun NowPlayingMeter(visible: Boolean, active: Boolean, levels: Flow<AudioLevels>, height: Dp = 48.dp) {
+private fun NowPlayingMeter(visible: Boolean, active: Boolean, levels: Flow<AudioLevels>) {
+    // The iOS Now Playing frame: at most 260 wide, 28 tall. Wider than that, 24 bars turn
+    // into blocks.
     val modifier = Modifier
+        .widthIn(max = NOW_PLAYING_METER_MAX_WIDTH)
         .fillMaxWidth()
-        .height(height)
+        .height(NOW_PLAYING_METER_HEIGHT)
     if (visible && !rememberReduceMotion()) {
         LiveLevelMeter(active = active, levels = levels, modifier = modifier)
     } else {
         Spacer(modifier = modifier)
     }
 }
+
+private val NOW_PLAYING_METER_MAX_WIDTH = 260.dp
+private val NOW_PLAYING_METER_HEIGHT = 28.dp
 
 /** Stacked layout: at most this share of the window height goes to the artwork. */
 private const val ARTWORK_HEIGHT_FRACTION = 0.4f

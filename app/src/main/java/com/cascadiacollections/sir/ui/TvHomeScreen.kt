@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -42,13 +43,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.cascadiacollections.android.audiolevels.AudioLevels
+import com.cascadiacollections.sir.PlaybackStatus
 import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioUiState
 import com.cascadiacollections.sir.TransportAction
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.genreLabel
+import com.cascadiacollections.sir.status
 import com.cascadiacollections.sir.trackLine
 import com.cascadiacollections.sir.transportAction
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /** The Popular shelf's load state. */
 sealed interface TvPopular {
@@ -71,7 +77,8 @@ fun TvHomeScreen(
     onStationSelected: (Station) -> Unit,
     onTogglePlayback: () -> Unit,
     onStop: () -> Unit,
-    onRetryPopular: () -> Unit = {}
+    onRetryPopular: () -> Unit = {},
+    audioLevels: Flow<AudioLevels> = emptyFlow()
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(
@@ -79,7 +86,7 @@ fun TvHomeScreen(
             verticalArrangement = Arrangement.spacedBy(36.dp)
         ) {
             item(key = "now-playing") {
-                NowPlayingBanner(radio, onTogglePlayback, onStop)
+                NowPlayingBanner(radio, audioLevels, onTogglePlayback, onStop)
             }
             if (recents.isNotEmpty()) {
                 item(key = "recents") {
@@ -112,7 +119,12 @@ fun TvHomeScreen(
 }
 
 @Composable
-private fun NowPlayingBanner(radio: RadioUiState, onTogglePlayback: () -> Unit, onStop: () -> Unit) {
+private fun NowPlayingBanner(
+    radio: RadioUiState,
+    audioLevels: Flow<AudioLevels>,
+    onTogglePlayback: () -> Unit,
+    onStop: () -> Unit
+) {
     val stationName = radio.station?.name?.takeIf {
         it.isNotBlank()
     } ?: stringResource(R.string.station_name)
@@ -137,6 +149,16 @@ private fun NowPlayingBanner(radio: RadioUiState, onTogglePlayback: () -> Unit, 
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            // The same 24-band meter as the phone's Now Playing, sized for the ten-foot screen
+            // as the tvOS banner's is. Only once a station is chosen, and not when the system
+            // removes animations.
+            if (radio.station != null && !rememberReduceMotion()) {
+                LiveLevelMeter(
+                    active = radio.status == PlaybackStatus.LIVE,
+                    levels = audioLevels,
+                    modifier = Modifier.size(width = 260.dp, height = 32.dp)
+                )
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(top = 8.dp)) {
                 val action = radio.transportAction
                 Button(onClick = onTogglePlayback, modifier = Modifier.focusRequester(playFocus).focusScale()) {
