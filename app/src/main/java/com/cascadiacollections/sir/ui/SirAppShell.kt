@@ -172,7 +172,9 @@ fun SirAppShell(
                         MiniPlayer(
                             state = uiState,
                             onToggle = onToggle,
-                            onClick = { onSelectTab(SirTab.LISTEN) }
+                            onClick = { onSelectTab(SirTab.LISTEN) },
+                            showVisualizer = showVisualizer,
+                            audioLevels = LiveAudioLevels.levels
                         )
                     }
                 },
