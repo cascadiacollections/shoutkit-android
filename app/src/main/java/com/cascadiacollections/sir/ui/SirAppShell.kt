@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +43,8 @@ import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioBrowserViewModel
 import com.cascadiacollections.sir.RadioUiState
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
+import com.cascadiacollections.sir.core.playback.SleepTimerDuration
+import kotlinx.coroutines.launch
 
 /**
  * The four-tab app shell.
@@ -75,6 +78,8 @@ fun SirAppShell(
     var showRecentlyHeard by remember { mutableStateOf(false) }
     val chromecastEnabled by settingsRepository.chromecastEnabled.collectAsState(initial = false)
     val showVisualizer by settingsRepository.showVisualizer.collectAsState(initial = true)
+    val sleepTimer by settingsRepository.sleepTimerDuration.collectAsState(initial = SleepTimerDuration.OFF)
+    val scope = rememberCoroutineScope()
     val castModuleState by castFeatureManager.moduleState.collectAsState()
     val isWideLayout = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
     val layoutType = if (isWideLayout) {
@@ -137,7 +142,8 @@ fun SirAppShell(
                                     )
                                 }
                             }
-                            if (uiState.trackHistory.isNotEmpty()) {
+                            // The history belongs to what is playing, so it lives with the player.
+                            if (selectedTab == SirTab.LISTEN && uiState.trackHistory.isNotEmpty()) {
                                 IconButton(onClick = { showTrackHistory = true }) {
                                     Icon(
                                         imageVector = Icons.Default.History,
@@ -148,6 +154,9 @@ fun SirAppShell(
                             }
                             if (chromecastEnabled && castModuleState !is CastModuleState.Unavailable) {
                                 CastButton()
+                            }
+                            if (selectedTab == SirTab.LISTEN) {
+                                NowPlayingOverflow(trackViewUrl = uiState.trackViewUrl)
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
@@ -181,17 +190,23 @@ fun SirAppShell(
                         showVisualizer = showVisualizer,
                         audioLevels = LiveAudioLevels.levels,
                         onToggleFavorite = onToggleFavorite,
+                        sleepTimer = sleepTimer,
+                        onSleepTimer = { duration ->
+                            scope.launch { applySleepTimer(context, settingsRepository, duration) }
+                        },
                         onToggle = onToggle
                     )
 
                     SirTab.BROWSE -> BrowseScreen(
                         viewModel = browserViewModel,
                         shelfStore = settingsRepository,
+                        playbackAudible = uiState.isPlaying,
                         modifier = contentModifier
                     )
 
                     SirTab.LIBRARY -> LibraryScreen(
                         viewModel = browserViewModel,
+                        playbackAudible = uiState.isPlaying,
                         onOpenRecentlyHeard = { showRecentlyHeard = true },
                         modifier = contentModifier
                     )

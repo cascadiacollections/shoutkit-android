@@ -2,8 +2,10 @@
 
 package com.cascadiacollections.sir.ui
 
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +24,7 @@ import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
@@ -88,8 +91,6 @@ fun SettingsContent(
     val reportPlays by settingsRepository.reportPlaysToDirectory.collectAsState(initial = true)
     val fetchAlbumArtwork by settingsRepository.fetchAlbumArtwork.collectAsState(initial = true)
 
-    var sleepTimerExpanded by remember { mutableStateOf(false) }
-    var equalizerExpanded by remember { mutableStateOf(false) }
     var customStreamText by remember { mutableStateOf(customStreamUrl ?: "") }
     var streamPresetExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(customStreamUrl) {
@@ -126,54 +127,12 @@ fun SettingsContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
         )
-        ExposedDropdownMenuBox(
-            expanded = sleepTimerExpanded,
-            onExpandedChange = { sleepTimerExpanded = it },
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            OutlinedTextField(
-                value = stringResource(sleepTimerDuration.labelRes),
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = sleepTimerExpanded)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-            )
-            ExposedDropdownMenu(
-                expanded = sleepTimerExpanded,
-                onDismissRequest = { sleepTimerExpanded = false }
-            ) {
-                SleepTimerDuration.entries.forEach { duration ->
-                    DropdownMenuItem(
-                        text = { Text(stringResource(duration.labelRes)) },
-                        onClick = {
-                            sleepTimerExpanded = false
-                            scope.launch {
-                                settingsRepository.setSleepTimerDuration(duration)
-                                context.startService(
-                                    Intent(context, RadioPlaybackService::class.java).apply {
-                                        action = RadioPlaybackService.ACTION_SET_SLEEP_TIMER
-                                        putExtra(RadioPlaybackService.EXTRA_SLEEP_TIMER_MINUTES, duration.minutes)
-                                    }
-                                )
-                                val message = if (duration == SleepTimerDuration.OFF) {
-                                    resources.getString(R.string.sleep_timer_off)
-                                } else {
-                                    resources.getString(
-                                        R.string.sleep_timer_set,
-                                        resources.getString(duration.labelRes)
-                                    )
-                                }
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    )
-                }
-            }
-        }
+        ChoiceChipRow(
+            options = SleepTimerDuration.entries,
+            selected = sleepTimerDuration,
+            label = { stringResource(it.labelRes) },
+            onSelect = { duration -> scope.launch { applySleepTimer(context, settingsRepository, duration) } }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -184,49 +143,25 @@ fun SettingsContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
         )
-        ExposedDropdownMenuBox(
-            expanded = equalizerExpanded,
-            onExpandedChange = { equalizerExpanded = it },
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            OutlinedTextField(
-                value = if (equalizerUseCustomBands) {
-                    stringResource(R.string.equalizer_preset_custom)
-                } else {
-                    stringResource(equalizerPreset.labelRes)
-                },
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = equalizerExpanded)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-            )
-            ExposedDropdownMenu(
-                expanded = equalizerExpanded,
-                onDismissRequest = { equalizerExpanded = false }
-            ) {
-                EqualizerPreset.entries.forEach { preset ->
-                    DropdownMenuItem(
-                        text = { Text(stringResource(preset.labelRes)) },
-                        onClick = {
-                            equalizerExpanded = false
-                            scope.launch {
-                                settingsRepository.setEqualizerPreset(preset)
-                                context.startService(
-                                    Intent(context, RadioPlaybackService::class.java).apply {
-                                        action = RadioPlaybackService.ACTION_SET_EQUALIZER
-                                        putExtra(RadioPlaybackService.EXTRA_EQUALIZER_PRESET, preset.ordinal)
-                                    }
-                                )
-                            }
+        // A chip per preset. While the sliders hold a curve of the listener's own, none is
+        // selected and "Custom" leads the row; picking a preset replaces that curve.
+        ChoiceChipRow(
+            options = EqualizerPreset.entries,
+            selected = equalizerPreset.takeUnless { equalizerUseCustomBands },
+            label = { stringResource(it.labelRes) },
+            leadingLabel = stringResource(R.string.equalizer_preset_custom).takeIf { equalizerUseCustomBands },
+            onSelect = { preset ->
+                scope.launch {
+                    settingsRepository.setEqualizerPreset(preset)
+                    context.startService(
+                        Intent(context, RadioPlaybackService::class.java).apply {
+                            action = RadioPlaybackService.ACTION_SET_EQUALIZER
+                            putExtra(RadioPlaybackService.EXTRA_EQUALIZER_PRESET, preset.ordinal)
                         }
                     )
                 }
             }
-        }
+        )
 
         EqualizerBandSliders(
             gains = equalizerBandGains,
@@ -560,4 +495,64 @@ private fun EqualizerBandSliders(
             }
         }
     }
+}
+
+/**
+ * One choice out of a few, as a row of chips that scrolls sideways when it runs out of width:
+ * every option is visible and one tap away, where a dropdown hid them behind a field.
+ * [leadingLabel], when set, is a selected chip ahead of the options for a state none of them
+ * names (the equalizer's "Custom").
+ */
+@Composable
+private fun <T> ChoiceChipRow(
+    options: List<T>,
+    selected: T?,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    leadingLabel: String? = null
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (leadingLabel != null) {
+            FilterChip(selected = true, onClick = {}, label = { Text(leadingLabel) })
+        }
+        options.forEach { option ->
+            FilterChip(
+                selected = option == selected,
+                onClick = { onSelect(option) },
+                label = { Text(label(option)) }
+            )
+        }
+    }
+}
+
+/**
+ * Sets the sleep timer everywhere it has to be set: the persisted choice, the playback
+ * service's running timer, and a toast saying what happened. Shared by Settings and the
+ * button beside the play control.
+ */
+internal suspend fun applySleepTimer(
+    context: Context,
+    settingsRepository: SettingsRepository,
+    duration: SleepTimerDuration
+) {
+    settingsRepository.setSleepTimerDuration(duration)
+    context.startService(
+        Intent(context, RadioPlaybackService::class.java).apply {
+            action = RadioPlaybackService.ACTION_SET_SLEEP_TIMER
+            putExtra(RadioPlaybackService.EXTRA_SLEEP_TIMER_MINUTES, duration.minutes)
+        }
+    )
+    val message = if (duration == SleepTimerDuration.OFF) {
+        context.getString(R.string.sleep_timer_off)
+    } else {
+        context.getString(R.string.sleep_timer_set, context.getString(duration.labelRes))
+    }
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }

@@ -28,7 +28,8 @@ import com.cascadiacollections.sir.core.model.Station
  *
  * The artwork is the same tile the mini player and Now Playing use: the station's favicon,
  * or its monogram when there is none. The station that is selected keeps its artwork and is
- * marked by its name in the primary colour over "Now playing".
+ * marked by its name in the primary colour over "Now playing", or "Paused" when [isAudible] is
+ * false: [isPlaying] says which station is selected, not whether it is sounding.
  */
 @Composable
 fun StationRow(
@@ -38,8 +39,10 @@ fun StationRow(
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
     subtitle: String? = defaultSubtitle(station),
+    isAudible: Boolean = true,
     trailing: @Composable (() -> Unit)? = null
 ) {
+    val selectedLabel = if (isAudible) R.string.station_now_playing else R.string.station_paused
     ListItem(
         modifier = modifier.combinedClickable(
             enabled = station.isPlayable,
@@ -55,7 +58,7 @@ fun StationRow(
         },
         supportingContent = when {
             isPlaying -> {
-                { Text(stringResource(R.string.station_now_playing)) }
+                { Text(stringResource(selectedLabel)) }
             }
 
             subtitle.isNullOrEmpty() -> null

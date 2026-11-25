@@ -105,4 +105,16 @@ class StationRowTest {
         composeRule.onNodeWithText("SA").assertIsDisplayed()
         composeRule.onNodeWithText("Now playing").assertIsDisplayed()
     }
+
+    @Test
+    fun `the selected station says paused when nothing is sounding`() {
+        composeRule.setContent {
+            SirTheme {
+                StationRow(station = stationWithoutArtwork, isPlaying = true, isAudible = false, onPlay = {})
+            }
+        }
+
+        composeRule.onNodeWithText("Paused").assertIsDisplayed()
+        composeRule.onNodeWithText("Now playing").assertDoesNotExist()
+    }
 }

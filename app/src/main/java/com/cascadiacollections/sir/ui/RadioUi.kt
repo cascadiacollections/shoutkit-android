@@ -21,6 +21,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
@@ -67,6 +69,7 @@ import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioUiState
 import com.cascadiacollections.sir.canFavorite
 import com.cascadiacollections.sir.core.model.Station
+import com.cascadiacollections.sir.core.playback.SleepTimerDuration
 import com.cascadiacollections.sir.core.playback.StreamFailure
 import com.cascadiacollections.sir.displayedFailure
 import com.cascadiacollections.sir.status
@@ -184,6 +187,8 @@ fun ListenScreen(
     showVisualizer: Boolean = true,
     audioLevels: Flow<AudioLevels> = emptyFlow(),
     onToggleFavorite: () -> Unit = {},
+    sleepTimer: SleepTimerDuration = SleepTimerDuration.OFF,
+    onSleepTimer: ((SleepTimerDuration) -> Unit)? = null,
     onToggle: () -> Unit
 ) {
     // Widen margins on medium/expanded screens (Pixel 10 Pro Fold, tablets) so the
@@ -231,7 +236,13 @@ fun ListenScreen(
                 )
             }
             val transport: @Composable () -> Unit = {
-                TransportRow(state = state, onToggleFavorite = onToggleFavorite, onToggle = onToggle)
+                TransportRow(
+                    state = state,
+                    sleepTimer = sleepTimer,
+                    onToggleFavorite = onToggleFavorite,
+                    onSleepTimer = onSleepTimer,
+                    onToggle = onToggle
+                )
             }
             if (sideBySide) {
                 Row(
@@ -345,9 +356,19 @@ private fun NowPlayingDetails(
     }
 }
 
-/** Favourite, the play button (Play / Pause / Cancel / Retry) and the overflow; the sleep timer under them. */
+/**
+ * Favourite, the play button (Play / Pause / Cancel / Retry) and the sleep timer, with the
+ * timer's countdown under them. The two side buttons are the same size, so the play button
+ * sits in the middle of the row; without [onSleepTimer] an empty slot keeps it there.
+ */
 @Composable
-private fun TransportRow(state: RadioUiState, onToggleFavorite: () -> Unit, onToggle: () -> Unit) {
+private fun TransportRow(
+    state: RadioUiState,
+    sleepTimer: SleepTimerDuration,
+    onToggleFavorite: () -> Unit,
+    onSleepTimer: ((SleepTimerDuration) -> Unit)?,
+    onToggle: () -> Unit
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val action = state.transportAction
         Row(
@@ -370,7 +391,11 @@ private fun TransportRow(state: RadioUiState, onToggleFavorite: () -> Unit, onTo
                     modifier = Modifier.size(36.dp)
                 )
             }
-            NowPlayingOverflow(trackViewUrl = state.trackViewUrl)
+            if (onSleepTimer != null) {
+                SleepTimerButton(selected = sleepTimer, onSelect = onSleepTimer)
+            } else {
+                Spacer(modifier = Modifier.size(48.dp))
+            }
         }
         state.sleepTimerLabel?.let { label ->
             Text(
@@ -478,16 +503,49 @@ private fun FavoriteButton(isFavorite: Boolean, enabled: Boolean, onToggle: () -
 }
 
 /**
- * The overflow menu. Its only entry is "Open in Apple Music" — ShoutKit's one external link —
- * so the button is only shown when the album-art lookup found the track's page. An empty
- * slot of the same size keeps the play button centred either way.
+ * The sleep timer, one tap from the play button: a menu of the same durations Settings offers,
+ * with the current one ticked. The moon takes the primary colour while a timer is running.
  */
 @Composable
-private fun NowPlayingOverflow(trackViewUrl: String?) {
-    if (trackViewUrl == null) {
-        Spacer(modifier = Modifier.size(48.dp))
-        return
+private fun SleepTimerButton(selected: SleepTimerDuration, onSelect: (SleepTimerDuration) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Default.Bedtime,
+                contentDescription = stringResource(R.string.sleep_timer),
+                tint = if (selected.isActive) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            SleepTimerDuration.entries.forEach { duration ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(duration.labelRes)) },
+                    trailingIcon = {
+                        if (duration == selected) Icon(Icons.Default.Check, contentDescription = null)
+                    },
+                    onClick = {
+                        expanded = false
+                        onSelect(duration)
+                    }
+                )
+            }
+        }
     }
+}
+
+/**
+ * The app bar's overflow on the listen tab. Its only entry is "Open in Apple Music" —
+ * ShoutKit's one external link — so it is only shown when the album-art lookup found the
+ * track's page.
+ */
+@Composable
+internal fun NowPlayingOverflow(trackViewUrl: String?) {
+    if (trackViewUrl == null) return
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     Box {

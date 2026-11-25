@@ -56,6 +56,28 @@ class SettingsRepositoryRecentShelfTest {
     }
 
     @Test
+    fun `restoring a removed recent puts it back where it was`() = runBlocking {
+        val repo = repo()
+        listOf("a", "b", "c").forEach { repo.selectStation(station(it)) }
+        repo.removeRecentStation("b")
+
+        repo.restoreRecentStation(station("b"), index = 1)
+
+        assertThat(repo.recentStations.first().map { it.id }).containsExactly("c", "b", "a")
+    }
+
+    @Test
+    fun `restoring a recent that is already there, or past the end, is safe`() = runBlocking {
+        val repo = repo()
+        listOf("a", "b").forEach { repo.selectStation(station(it)) }
+
+        repo.restoreRecentStation(station("a"), index = 0)
+        repo.restoreRecentStation(station("z"), index = 99)
+
+        assertThat(repo.recentStations.first().map { it.id }).containsExactly("b", "a", "z")
+    }
+
+    @Test
     fun `removing an unknown recent changes nothing`() = runBlocking {
         val repo = repo()
         repo.selectStation(station("a"))
