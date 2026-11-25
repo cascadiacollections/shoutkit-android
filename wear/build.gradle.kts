@@ -40,7 +40,7 @@ dependencies {
     // Wear Compose Material 3
     implementation(libs.wear.compose.material3)
     implementation(libs.wear.compose.foundation)
-    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.material.icons.core)
 
     // Wear Tile (RadioTileService): androidx.wear.tiles.TileService base class, with the
     // layout built via androidx.wear.protolayout builders (the newer, non-deprecated API).

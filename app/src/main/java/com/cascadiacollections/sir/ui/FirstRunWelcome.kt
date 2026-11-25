@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -34,6 +33,7 @@ import com.cascadiacollections.sir.allowListedGenre
 import com.cascadiacollections.sir.core.directory.Tag
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
 import com.cascadiacollections.sir.firstRunPreselection
+import com.cascadiacollections.sir.ui.icons.Radio
 import kotlinx.coroutines.launch
 
 /**

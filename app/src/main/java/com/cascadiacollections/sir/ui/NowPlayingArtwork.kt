@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Text
@@ -36,6 +35,7 @@ import com.cascadiacollections.sir.TransportAction
 import com.cascadiacollections.sir.core.artwork.StationMonogram
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.core.playback.StreamFailure
+import com.cascadiacollections.sir.ui.icons.Pause
 
 /**
  * Album art when the iTunes lookup found some, otherwise the station's own artwork,

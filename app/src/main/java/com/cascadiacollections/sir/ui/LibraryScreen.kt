@@ -20,12 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.QueueMusic
-import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DropdownMenu
@@ -77,6 +72,11 @@ import com.cascadiacollections.sir.core.persistence.FavoritesBackupCodec
 import com.cascadiacollections.sir.core.persistence.StationCollections
 import com.cascadiacollections.sir.core.persistence.TopTracks
 import com.cascadiacollections.sir.core.persistence.TopTracksTimeframe
+import com.cascadiacollections.sir.ui.icons.Backup
+import com.cascadiacollections.sir.ui.icons.DragHandle
+import com.cascadiacollections.sir.ui.icons.FileDownload
+import com.cascadiacollections.sir.ui.icons.FileUpload
+import com.cascadiacollections.sir.ui.icons.QueueMusic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

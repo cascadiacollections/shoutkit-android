@@ -34,7 +34,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Badge
@@ -97,6 +96,7 @@ import com.cascadiacollections.sir.core.directory.StationSearchFilters
 import com.cascadiacollections.sir.core.directory.Tag
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.core.persistence.RecentShelfStore
+import com.cascadiacollections.sir.ui.icons.FilterList
 import kotlinx.coroutines.launch
 
 object BrowseScreenTestTags {
