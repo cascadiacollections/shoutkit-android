@@ -196,6 +196,7 @@ class NowPlayingStateTest {
             .setExtras(
                 Bundle().apply {
                     putBoolean(RadioPlaybackService.EXTRA_HAS_RESOLVED_TRACK, true)
+                    putBoolean(RadioPlaybackService.EXTRA_HAS_RESOLVED_ARTIST, true)
                     putString(RadioPlaybackService.EXTRA_ALBUM_ART_URL, "https://a/600x600bb.jpg")
                     putString(RadioPlaybackService.EXTRA_TRACK_VIEW_URL, "https://music.apple.com/t")
                 }
@@ -206,6 +207,24 @@ class NowPlayingStateTest {
         assertThat(state.artist).isEqualTo("Daft Punk")
         assertThat(state.albumArtUrl).isEqualTo("https://a/600x600bb.jpg")
         assertThat(state.trackViewUrl).isEqualTo("https://music.apple.com/t")
+    }
+
+    @Test
+    fun `a title without an artist does not show the session's placeholder artist`() {
+        val metadata = MediaMetadata.Builder()
+            .setTitle("KEXP 90.3 FM")
+            .setArtist("Live stream")
+            .setExtras(
+                Bundle().apply {
+                    putBoolean(RadioPlaybackService.EXTRA_HAS_RESOLVED_TRACK, true)
+                    putBoolean(RadioPlaybackService.EXTRA_HAS_RESOLVED_ARTIST, false)
+                }
+            )
+            .build()
+        val state = connected.withMediaMetadata(metadata)
+        assertThat(state.trackTitle).isEqualTo("KEXP 90.3 FM")
+        assertThat(state.artist).isNull()
+        assertThat(state.trackLine()).isEqualTo("KEXP 90.3 FM")
     }
 
     // ---- Track line ----
