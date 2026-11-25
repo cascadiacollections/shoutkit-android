@@ -34,9 +34,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LargeFloatingActionButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -205,7 +206,7 @@ fun ListenScreen(
 
     Column(modifier = modifier) {
         if (state.isBuffering) {
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -492,6 +493,9 @@ private fun FavoriteButton(isFavorite: Boolean, enabled: Boolean, onToggle: () -
     IconToggleButton(
         checked = isFavorite,
         onCheckedChange = { onToggle() },
+        // Material 3 Expressive: the button's shape morphs between round and squared as the
+        // station is saved and unsaved, and squeezes while pressed.
+        shapes = IconButtonDefaults.toggleableShapes(),
         enabled = enabled,
         modifier = Modifier.semantics { stateDescription = stateText }
     ) {

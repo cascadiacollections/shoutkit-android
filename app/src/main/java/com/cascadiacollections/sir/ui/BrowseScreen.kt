@@ -1,4 +1,8 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalLayoutApi::class
+)
 
 package com.cascadiacollections.sir.ui
 
@@ -36,15 +40,16 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -359,7 +364,7 @@ private fun ListenNowContent(
                 state.popularStations.isEmpty() && (state.isLoadingPopular || state.isRefreshing) ->
                     item(key = "popular_loading", span = fullSpan) {
                         MessageBlock(stringResource(R.string.tuning_in)) {
-                            CircularProgressIndicator()
+                            LoadingIndicator()
                         }
                     }
 
@@ -610,7 +615,7 @@ private fun LoadingRow() {
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        LoadingIndicator()
     }
 }
 
