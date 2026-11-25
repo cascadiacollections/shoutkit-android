@@ -25,6 +25,16 @@ class CircularByteBuffer(val capacity: Int) {
     private var endOfStream = false
 
     /**
+     * Bumped by [clear] and [resumeStream]. A [read] that was already waiting belongs to the
+     * previous generation and must return [END_OF_STREAM] instead of parking again: the producer
+     * that was going to write may be stalled or already gone.
+     */
+    private var generation = 0L
+
+    /** [read] calls blocked in [dataAvailable]. Visible to tests so they can wait without sleeping. */
+    private var waitingReaders = 0
+
+    /**
      * Write bytes into the buffer from the producer thread.
      *
      * If the buffer is full and the write cursor overtakes the read cursor,
@@ -74,21 +84,28 @@ class CircularByteBuffer(val capacity: Int) {
      * @param offset Starting offset in [dst].
      * @param length Maximum number of bytes to read.
      * @return The number of bytes actually read, or [END_OF_STREAM] if the producer
-     *   signalled [signalEndOfStream] with no buffered data left, or if the reading
-     *   thread was interrupted.
+     *   signalled [signalEndOfStream] with no buffered data left, if [clear] or [resumeStream]
+     *   invalidated this call while it was waiting, or if the reading thread was interrupted.
      */
     fun read(dst: ByteArray, offset: Int, length: Int): Int {
         if (length <= 0) return 0
         lock.withLock {
+            val seen = generation
             while (availableInternal() == 0) {
-                if (endOfStream) return END_OF_STREAM
+                if (endOfStream || generation != seen) return END_OF_STREAM
+                waitingReaders++
                 try {
                     dataAvailable.await()
                 } catch (_: InterruptedException) {
                     Thread.currentThread().interrupt()
                     return END_OF_STREAM
+                } finally {
+                    waitingReaders--
                 }
             }
+            // [resumeStream] can invalidate a read that woke with bytes still buffered. Those
+            // bytes belong to the producer that just took over, not to this call.
+            if (generation != seen) return END_OF_STREAM
             val toRead = length.coerceAtMost(availableInternal())
             var remaining = toRead
             var dstPos = offset
@@ -134,12 +151,21 @@ class CircularByteBuffer(val capacity: Int) {
     /** Number of bytes available to read (ahead of read cursor). */
     fun available(): Int = lock.withLock { availableInternal() }
 
-    /** Reset the buffer to its initial empty state, clearing any end-of-stream signal. */
+    /**
+     * Reset the buffer to its initial empty state, clearing any end-of-stream signal.
+     *
+     * A [read] blocked on an empty buffer returns [END_OF_STREAM] instead of staying parked.
+     * [clear] itself does not leave the buffer ended: the next [read] waits for new data.
+     * Signalling without retiring the generation would wake the reader, see an empty buffer
+     * that is not ended, and park it again, so a stalled or already-finished producer would
+     * pin the loader thread for good.
+     */
     fun clear() {
         lock.withLock {
             writeOffset = 0L
             readOffset = 0L
             endOfStream = false
+            retireWaitersLocked()
         }
     }
 
@@ -151,18 +177,47 @@ class CircularByteBuffer(val capacity: Int) {
      * Data already in the buffer stays readable, so [seekBack] can still replay it.
      */
     fun signalEndOfStream() {
-        lock.withLock {
-            endOfStream = true
-            dataAvailable.signalAll()
-        }
+        lock.withLock { endStreamLocked(generation) }
     }
 
     /**
-     * Clear a previous [signalEndOfStream], so [read] blocks for new data again.
-     * Called when a new producer takes over the buffer (for example a stream reconnect).
+     * [signalEndOfStream] for the producer that started at [epoch], as returned by [resumeStream].
+     *
+     * A producer that exits after a newer one has taken the buffer (its thread reaches `finally`
+     * only once the socket actually closes) must not mark that newer stream ended.
      */
-    fun resumeStream() {
-        lock.withLock { endOfStream = false }
+    internal fun signalEndOfStream(epoch: Long) {
+        lock.withLock { endStreamLocked(epoch) }
+    }
+
+    /**
+     * Clear a previous [signalEndOfStream] so a new producer can use the buffer, and release
+     * any [read] still waiting on the old one.
+     *
+     * Returns the epoch the new producer must pass to [signalEndOfStream]. Buffered bytes stay
+     * readable; only the in-flight read is retired, so it cannot consume the new producer's
+     * bytes or stay blocked if that producer stalls.
+     */
+    fun resumeStream(): Long = lock.withLock {
+        endOfStream = false
+        retireWaitersLocked()
+        generation
+    }
+
+    /** True while a [read] is blocked waiting for data or for the stream to end. */
+    internal fun hasWaitingReader(): Boolean = lock.withLock { waitingReaders > 0 }
+
+    /** Unlocked: retire in-flight reads and wake them. Call only while holding [lock]. */
+    private fun retireWaitersLocked() {
+        generation += 1
+        dataAvailable.signalAll()
+    }
+
+    /** Unlocked. Call only while holding [lock]. */
+    private fun endStreamLocked(epoch: Long) {
+        if (epoch != generation) return
+        endOfStream = true
+        dataAvailable.signalAll()
     }
 
     /** True once [signalEndOfStream] has been called and not yet undone. */

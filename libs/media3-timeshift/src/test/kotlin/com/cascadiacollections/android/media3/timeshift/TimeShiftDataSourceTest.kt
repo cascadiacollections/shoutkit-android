@@ -10,6 +10,12 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import io.mockk.mockk
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.thread
+import kotlin.concurrent.withLock
 import org.junit.Test
 
 @UnstableApi
@@ -88,5 +94,77 @@ class TimeShiftDataSourceTest {
         assertThat(live.open(spec)).isEqualTo(C.LENGTH_UNSET.toLong())
         assertThat(readAll(live)).isEqualTo(listOf<Byte>(9, 8))
         live.close()
+    }
+
+    @Test
+    fun `close unblocks a reader while the upstream stays stalled`() {
+        val controller = TimeShiftController(capacityBytes = 1024, bytesPerSecond = 8)
+        val upstream = StuckUpstream()
+        val source = TimeShiftDataSource(upstream, controller)
+        assertThat(source.open(spec)).isEqualTo(C.LENGTH_UNSET.toLong())
+
+        val result = AtomicInteger(Int.MIN_VALUE)
+        val finished = CountDownLatch(1)
+        thread(isDaemon = true) {
+            result.set(source.read(ByteArray(16), 0, 16))
+            finished.countDown()
+        }
+        assertThat(upstream.enteredRead.await(2, TimeUnit.SECONDS)).isTrue()
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
+        while (!controller.buffer.hasWaitingReader()) {
+            if (System.nanoTime() >= deadline) throw AssertionError("reader did not block")
+            Thread.yield()
+        }
+
+        try {
+            source.close()
+            assertThat(
+                finished.await(2, TimeUnit.SECONDS),
+                name = "loader stayed blocked after close"
+            ).isTrue()
+            assertThat(result.get()).isEqualTo(C.RESULT_END_OF_INPUT)
+        } finally {
+            upstream.release()
+        }
+    }
+
+    /**
+     * An upstream read that does not return when interrupted or closed, the way a socket
+     * read behaves. Only an explicit [release] lets the producer thread exit, so a passing
+     * test cannot be explained by the producer's own end-of-stream signal.
+     */
+    private class StuckUpstream : DataSource {
+        private val lock = ReentrantLock()
+        private val releasedCondition = lock.newCondition()
+        val enteredRead = CountDownLatch(1)
+
+        @Volatile
+        private var released = false
+
+        override fun addTransferListener(transferListener: TransferListener) = Unit
+        override fun open(dataSpec: DataSpec): Long = C.LENGTH_UNSET.toLong()
+        override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+            enteredRead.countDown()
+            lock.withLock {
+                while (!released) {
+                    try {
+                        releasedCondition.await()
+                    } catch (_: InterruptedException) {
+                        // Ignored, as a blocking socket read ignores the loader interrupt.
+                    }
+                }
+            }
+            return C.RESULT_END_OF_INPUT
+        }
+
+        override fun getUri(): Uri? = null
+        override fun close() = Unit
+
+        fun release() {
+            lock.withLock {
+                released = true
+                releasedCondition.signalAll()
+            }
+        }
     }
 }

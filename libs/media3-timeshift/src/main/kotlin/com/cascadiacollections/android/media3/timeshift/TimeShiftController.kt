@@ -59,7 +59,12 @@ class TimeShiftController(capacityBytes: Int, private val bytesPerSecond: Int) {
         buffer.goLive()
     }
 
-    /** Drop all buffered audio, e.g. when switching to a different stream. */
+    /**
+     * Drop all buffered audio, e.g. when switching to a different stream.
+     *
+     * A reader blocked in the buffer returns end-of-stream, so resetting while the upstream
+     * is stalled cannot leave the loader thread parked in `read()`.
+     */
     fun reset() {
         buffer.clear()
     }

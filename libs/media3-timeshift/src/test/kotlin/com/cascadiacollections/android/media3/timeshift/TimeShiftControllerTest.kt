@@ -6,6 +6,10 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isTrue
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.thread
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import org.junit.Test
@@ -126,6 +130,28 @@ class TimeShiftControllerTest {
 
         controller.reset()
 
+        assertThat(controller.buffer.isEndOfStream()).isFalse()
+    }
+
+    @Test
+    fun `reset unblocks a reader waiting on an empty buffer`() {
+        val controller = controller()
+        val result = AtomicInteger(Int.MIN_VALUE)
+        val finished = CountDownLatch(1)
+        thread(isDaemon = true) {
+            result.set(controller.buffer.read(ByteArray(8), 0, 8))
+            finished.countDown()
+        }
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
+        while (!controller.buffer.hasWaitingReader()) {
+            if (System.nanoTime() >= deadline) throw AssertionError("reader did not block")
+            Thread.yield()
+        }
+
+        controller.reset()
+
+        assertThat(finished.await(2, TimeUnit.SECONDS), name = "reader stayed blocked after reset").isTrue()
+        assertThat(result.get()).isEqualTo(CircularByteBuffer.END_OF_STREAM)
         assertThat(controller.buffer.isEndOfStream()).isFalse()
     }
 }
