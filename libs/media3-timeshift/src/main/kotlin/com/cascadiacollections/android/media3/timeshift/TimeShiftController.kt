@@ -44,6 +44,9 @@ class TimeShiftController(capacityBytes: Int, private val bytesPerSecond: Int) {
     /**
      * Move playback backward by [duration].
      *
+     * A reader blocked at the live edge wakes and replays from the new cursor, including
+     * when the upstream is stalled and no new bytes are arriving.
+     *
      * @return true if the full [duration] was buffered and the seek was applied;
      *   false if not enough audio is buffered yet, in which case playback is unchanged.
      */

@@ -320,6 +320,69 @@ class CircularByteBufferTest {
     }
 
     @Test
+    fun `seekBack unblocks a reader parked at the live edge`() {
+        val buf = CircularByteBuffer(100)
+        val played = byteArrayOf(1, 2, 3, 4, 5)
+        buf.write(played, 0, played.size)
+        assertThat(buf.read(ByteArray(played.size), 0, played.size)).isEqualTo(played.size)
+
+        val dst = ByteArray(3)
+        val result = AtomicInteger(Int.MIN_VALUE)
+        val finished = CountDownLatch(1)
+        thread(isDaemon = true) {
+            result.set(buf.read(dst, 0, 3))
+            finished.countDown()
+        }
+        awaitWaiting(buf)
+
+        buf.seekBack(3)
+
+        assertThat(finished.await(2, TimeUnit.SECONDS), name = "reader stayed blocked after seekBack").isTrue()
+        assertThat(result.get()).isEqualTo(3)
+        assertThat(dst).isEqualTo(byteArrayOf(3, 4, 5))
+    }
+
+    @Test
+    fun `a write from an older producer is dropped`() {
+        val buf = CircularByteBuffer(100)
+        val previous = buf.resumeStream()
+        val current = buf.resumeStream()
+
+        buf.write(byteArrayOf(1, 2), 0, 2, previous)
+
+        assertThat(buf.available()).isEqualTo(0)
+        buf.write(byteArrayOf(9), 0, 1, current)
+        val dst = ByteArray(1)
+        assertThat(buf.read(dst, 0, 1)).isEqualTo(1)
+        assertThat(dst[0]).isEqualTo(9.toByte())
+    }
+
+    @Test
+    fun `a late producer cannot feed a reader waiting on the new generation`() {
+        val buf = CircularByteBuffer(100)
+        val previous = buf.resumeStream()
+        buf.resumeStream()
+
+        val dst = ByteArray(1)
+        val result = AtomicInteger(Int.MIN_VALUE)
+        val finished = CountDownLatch(1)
+        thread(isDaemon = true) {
+            result.set(buf.read(dst, 0, 1))
+            finished.countDown()
+        }
+        awaitWaiting(buf)
+
+        buf.write(byteArrayOf(7), 0, 1, previous)
+
+        assertThat(buf.available()).isEqualTo(0)
+        assertThat(buf.hasWaitingReader()).isTrue()
+        buf.write(byteArrayOf(8), 0, 1)
+        assertThat(finished.await(2, TimeUnit.SECONDS), name = "reader stayed blocked after the new write").isTrue()
+        assertThat(result.get()).isEqualTo(1)
+        assertThat(dst[0]).isEqualTo(8.toByte())
+    }
+
+    @Test
     fun `an end-of-stream signal from an older producer does not end the resumed stream`() {
         val buf = CircularByteBuffer(100)
         val previous = buf.resumeStream()

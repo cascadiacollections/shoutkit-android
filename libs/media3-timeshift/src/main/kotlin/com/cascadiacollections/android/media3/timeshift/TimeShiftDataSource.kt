@@ -79,7 +79,9 @@ class TimeShiftDataSource(
                     val bytesRead = upstream.read(chunk, 0, chunk.size)
                     if (bytesRead == C.RESULT_END_OF_INPUT) break
                     if (bytesRead > 0) {
-                        buffer.write(chunk, 0, bytesRead)
+                        // [epoch] drops this write once a newer source has taken the buffer,
+                        // so the tail of this station cannot land in front of the next one.
+                        buffer.write(chunk, 0, bytesRead, epoch)
                     }
                 }
             } catch (_: InterruptedException) {
