@@ -357,7 +357,7 @@ ballistics. Both clients pass the spec's golden vectors, so they draw the same b
 - **Consumer.** `LiveLevelMeter` collects `LiveAudioLevels.levels` only while the stream is live
   and the screen is started. Collection adds a meter to the set and cancellation removes it, so
   the FFT runs only while the bars are visible.
-- **Where.** Three places, as on iOS: Now Playing (24 mirrored bars with peak caps), the mini
+- **Where.** Three places, as on iOS: Now Playing (24 mirrored bars with peak caps, at most 260 dp wide and 28 dp tall), the mini
   player (5 bars folded from the same frames with `AudioLevels.resampled`, no caps, 22 x 16 dp),
   and the Android TV banner (24 bars, 260 x 32 dp). The mini player is hidden on the listen tab,
   so normally one meter runs at a time.
