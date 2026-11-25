@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -76,6 +75,7 @@ import com.cascadiacollections.sir.displayedFailure
 import com.cascadiacollections.sir.status
 import com.cascadiacollections.sir.trackLine
 import com.cascadiacollections.sir.transportAction
+import com.cascadiacollections.sir.ui.icons.Bedtime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 

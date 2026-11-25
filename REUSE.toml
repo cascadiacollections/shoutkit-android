@@ -46,3 +46,15 @@ path = "LICENSE-EXCEPTION.md"
 precedence = "override"
 SPDX-FileCopyrightText = "Cascadia Collections"
 SPDX-License-Identifier = "GPL-3.0-only"
+
+# Material icons copied from androidx.compose.material:material-icons-extended 1.7.8, so the
+# apps ship the 17 icons they use instead of the whole library. Apache-2.0, as each file's
+# header says; they keep those terms inside the GPL-3.0 apps.
+[[annotations]]
+path = [
+    "app/src/main/java/com/cascadiacollections/sir/ui/icons/**",
+    "wear/src/main/java/com/cascadiacollections/sir/wear/icons/**",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "The Android Open Source Project"
+SPDX-License-Identifier = "Apache-2.0"

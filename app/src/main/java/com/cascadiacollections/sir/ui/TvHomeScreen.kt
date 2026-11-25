@@ -16,10 +16,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -53,6 +51,8 @@ import com.cascadiacollections.sir.genreLabel
 import com.cascadiacollections.sir.status
 import com.cascadiacollections.sir.trackLine
 import com.cascadiacollections.sir.transportAction
+import com.cascadiacollections.sir.ui.icons.Pause
+import com.cascadiacollections.sir.ui.icons.Stop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 

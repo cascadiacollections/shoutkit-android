@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,6 +43,7 @@ import com.cascadiacollections.sir.RadioBrowserViewModel
 import com.cascadiacollections.sir.RadioUiState
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
 import com.cascadiacollections.sir.core.playback.SleepTimerDuration
+import com.cascadiacollections.sir.ui.icons.History
 import kotlinx.coroutines.launch
 
 /**

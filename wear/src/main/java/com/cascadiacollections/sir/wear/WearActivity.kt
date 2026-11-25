@@ -20,9 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +57,8 @@ import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TimeText
 import com.cascadiacollections.sir.core.model.Station
+import com.cascadiacollections.sir.wear.icons.Pause
+import com.cascadiacollections.sir.wear.icons.Stop
 import com.cascadiacollections.sir.wear.sync.StationSyncListenerService
 import com.cascadiacollections.sir.wear.sync.WatchStationStore
 import kotlinx.coroutines.launch

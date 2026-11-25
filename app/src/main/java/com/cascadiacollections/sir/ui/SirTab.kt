@@ -2,12 +2,12 @@ package com.cascadiacollections.sir.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.cascadiacollections.sir.R
+import com.cascadiacollections.sir.ui.icons.LibraryMusic
+import com.cascadiacollections.sir.ui.icons.PlayCircle
 
 /**
  * The top-level destinations of the app shell.
