@@ -1,8 +1,9 @@
 name: Release APK
 
 # On a v* tag: build the FOSS APK signed with the release key and attach it to that tag's
-# GitHub release. F-Droid's recipe points `Binaries:` at this file and, because the build
-# is reproducible, ships it with this signature instead of F-Droid's own. Without the
+# GitHub release. F-Droid builds and signs its own copy of this foss flavor
+# (com.cascadiacollections.sir.foss). That package installs separately from Play
+# (com.cascadiacollections.sir). This job does not publish to F-Droid. Without the
 # release key secrets the job warns and attaches nothing, so tagging never fails on them.
 #
 # Secrets (repository or `release` environment):
@@ -88,15 +89,13 @@ jobs:
           cp app/build/outputs/apk/foss/release/app-foss-release.apk "$apk"
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
           aapt2=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -1)
-          # The certificate digest is what F-Droid's AllowedAPKSigningKeys must list.
-          certs=$("$apksigner" verify --print-certs "$apk")
-          echo "$certs"
-          digest=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' <<< "$certs")
-          echo "AllowedAPKSigningKeys: \`$digest\`" >> "$GITHUB_STEP_SUMMARY"
+          # Confirm the APK is signed before it is attached to the GitHub release.
+          "$apksigner" verify --print-certs "$apk"
           badging=$("$aapt2" dump badging "$apk" | head -1)
           echo "$badging"
-          # F-Droid's checkupdates takes the version from app/build.gradle.kts at this tag, so
-          # a tag that doesn't match the bumped versionName would publish the wrong release.
+          # The release is named from the tag, which has to match versionName.
+          # F-Droid's checkupdates reads that same versionName from app/build.gradle.kts
+          # at this tag, then builds and signs its own package.
           name=$(sed -n "s/.* versionName='\([^']*\)'.*/\1/p" <<< "$badging")
           if [ "$name" != "${TAG#v}" ]; then
             echo "::error::Tag $TAG doesn't match versionName '$name' in app/build.gradle.kts"
