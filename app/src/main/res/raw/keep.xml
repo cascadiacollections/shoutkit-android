@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The Cast dynamic feature's manifest refers to this string, which keeps it through
-  resource shrinking. F-Droid builds without the :cast module, so keep it explicitly:
-  otherwise the two builds' resources.arsc differ and the APK isn't reproducible.
+  The Cast dynamic feature's manifest refers to cast_feature_title, which keeps it
+  through resource shrinking. F-Droid builds without the :cast module, so keep it
+  explicitly: otherwise the two builds' resources.arsc differ.
+
+  The shortcut labels and App Actions query arrays are referenced only from the
+  generated shortcuts.xml. Lint does not scan that file, so it would report them
+  unused. They are in the APK.
 -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@string/cast_feature_title" />
+    tools:keep="@string/cast_feature_title,@string/shortcut_play_long,@string/shortcut_whats_playing_short,@string/shortcut_favorite_short,@array/whats_playing_queries,@array/favorite_station_queries" />
