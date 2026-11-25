@@ -4,6 +4,7 @@ package com.cascadiacollections.sir.ui
 
 import android.content.Intent
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -85,9 +87,9 @@ fun SirAppShell(
     Box(modifier = modifier) {
         NavigationSuiteScaffold(
             modifier = Modifier.fillMaxSize(),
-            navigationSuiteItems = {
+            navigationItems = {
                 SirTab.entries.forEach { tab ->
-                    item(
+                    NavigationSuiteItem(
                         selected = tab == selectedTab,
                         onClick = { onSelectTab(tab) },
                         icon = {
@@ -96,11 +98,15 @@ fun SirAppShell(
                                 contentDescription = stringResource(tab.labelRes)
                             )
                         },
-                        label = { Text(stringResource(tab.labelRes)) }
+                        label = { Text(stringResource(tab.labelRes)) },
+                        navigationSuiteType = layoutType
                     )
                 }
             },
-            layoutType = layoutType
+            navigationSuiteType = layoutType,
+            // In the rail (landscape phones, tablets) the four tabs sit in the middle of the
+            // edge, within reach of a thumb, instead of bunched under the status bar.
+            navigationItemVerticalArrangement = Arrangement.Center
         ) {
             Scaffold(
                 topBar = {
