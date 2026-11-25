@@ -92,8 +92,8 @@
     <ID>TooGenericExceptionCaught:RadioViewModel.kt:RadioViewModel$error: Exception</ID>
     <ID>TooGenericExceptionCaught:WearStationPublisher.kt:WearStationPublisher$e: Exception</ID>
     <ID>TooManyFunctions:RadioBrowserViewModel.kt:RadioBrowserViewModel : ViewModel</ID>
-    <ID>ViewModelForwarding:SirAppShell.kt:BrowseScreen( viewModel = browserViewModel, shelfStore = settingsRepository, modifier = contentModifier )</ID>
-    <ID>ViewModelForwarding:SirAppShell.kt:LibraryScreen( viewModel = browserViewModel, onOpenRecentlyHeard = { showRecentlyHeard = true }, modifier = contentModifier )</ID>
+    <ID>ViewModelForwarding:SirAppShell.kt:BrowseScreen( viewModel = browserViewModel, shelfStore = settingsRepository, playbackAudible = uiState.isPlaying, modifier = contentModifier )</ID>
+    <ID>ViewModelForwarding:SirAppShell.kt:LibraryScreen( viewModel = browserViewModel, playbackAudible = uiState.isPlaying, onOpenRecentlyHeard = { showRecentlyHeard = true }, modifier = contentModifier )</ID>
     <ID>ViewModelInjection:MainActivity.kt:val browserViewModel: RadioBrowserViewModel = viewModel( factory = RadioBrowserViewModel.Factory( directory = AppDirectory.instance, settingsRepository = repository, trackHistoryRepository = TrackHistoryRepository(context.applicationContext) ) )</ID>
     <ID>ViewModelInjection:MainActivity.kt:val viewModel: RadioViewModel = viewModel( factory = RadioViewModel.Factory( application = context.applicationContext as Application, settingsRepository = repository ) )</ID>
   </CurrentIssues>

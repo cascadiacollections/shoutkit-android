@@ -121,6 +121,7 @@ fun BrowseScreen(
     viewModel: RadioBrowserViewModel,
     modifier: Modifier = Modifier,
     shelfStore: RecentShelfStore? = null,
+    playbackAudible: Boolean = true,
     searchViewModel: SearchViewModel = viewModel(
         factory = SearchViewModel.Factory(AppDirectory.instance, shelfStore)
     )
@@ -137,6 +138,7 @@ fun BrowseScreen(
         state = searchState,
         savedStationIds = savedIds,
         selectedStationId = browserState.selectedStationId,
+        playbackAudible = playbackAudible,
         onQueryChange = searchViewModel::onQueryChange,
         onSubmit = searchViewModel::submit,
         onSelectGenre = searchViewModel::selectGenre,
@@ -174,6 +176,7 @@ fun BrowseContent(
     onPlay: (Station) -> Unit,
     onToggleSaved: (Station, Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    playbackAudible: Boolean = true,
     onRefresh: () -> Unit = {},
     onRetryPopular: () -> Unit = {},
     onHideRecent: (Station) -> Unit = {},
@@ -253,6 +256,7 @@ fun BrowseContent(
                     state = state,
                     savedStationIds = savedStationIds,
                     selectedStationId = selectedStationId,
+                    playbackAudible = playbackAudible,
                     onSelectGenre = onSelectGenre,
                     onFiltersChange = onFiltersChange,
                     onRetry = onRetry,
@@ -420,7 +424,8 @@ private fun SearchResultRow(
     isPlaying: Boolean,
     onPlay: () -> Unit,
     onToggleSaved: (Station, Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isAudible: Boolean = true
 ) {
     val resources = LocalResources.current
     var menuOpen by remember { mutableStateOf(false) }
@@ -429,6 +434,7 @@ private fun SearchResultRow(
         StationRow(
             station = station,
             isPlaying = isPlaying,
+            isAudible = isAudible,
             onPlay = onPlay,
             onLongClick = { menuOpen = true }.takeIf { automationActions.isNotEmpty() },
             modifier = Modifier.semantics {
@@ -466,7 +472,8 @@ private fun SearchResultsList(
     onFiltersChange: (StationSearchFilters) -> Unit,
     onRetry: () -> Unit,
     onPlay: (Station) -> Unit,
-    onToggleSaved: (Station, Boolean) -> Unit
+    onToggleSaved: (Station, Boolean) -> Unit,
+    playbackAudible: Boolean = true
 ) {
     val resources = LocalResources.current
     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -484,6 +491,7 @@ private fun SearchResultsList(
                     station = station,
                     isSaved = station.id in savedStationIds,
                     isPlaying = station.id == selectedStationId,
+                    isAudible = playbackAudible,
                     onPlay = { onPlay(station) },
                     onToggleSaved = onToggleSaved
                 )

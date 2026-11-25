@@ -89,6 +89,7 @@
     <string name="auto_your_stations">Your Stations</string>
     <string name="auto_top_stations">Top Stations</string>
     <string name="station_now_playing">Now playing</string>
+    <string name="station_paused">Paused</string>
     <string name="play_station">Play station</string>
     <string name="play_default_stream">Back to SIR stream</string>
     <string name="clear_recent_stations">Clear history</string>

@@ -194,6 +194,24 @@ class RadioBrowserViewModel(
         }
     }
 
+    /**
+     * Undoes [removeStation]: saves [station] again and puts the favourites back in
+     * [orderedIds], the order they had before. Its play count is not restored.
+     */
+    fun restoreSavedStation(station: Station, orderedIds: List<String>) {
+        viewModelScope.launch {
+            settingsRepository.saveStation(station)
+            settingsRepository.reorderSavedStations(orderedIds)
+        }
+    }
+
+    /** Undoes [removeRecentStation], putting [station] back at [index]. */
+    fun restoreRecentStation(station: Station, index: Int) {
+        viewModelScope.launch {
+            settingsRepository.restoreRecentStation(station, index)
+        }
+    }
+
     fun isStationSaved(station: Station): Boolean = _uiState.value.savedStations.any {
         it.id == station.id
     }
