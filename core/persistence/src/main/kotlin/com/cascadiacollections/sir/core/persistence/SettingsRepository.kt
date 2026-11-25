@@ -525,6 +525,19 @@ class SettingsRepository(private val context: Context) :
     }
 
     /**
+     * Puts [station] back in the recently played list at [index], for undoing a removal.
+     * Does nothing when it is already there, for instance because it was played again.
+     */
+    suspend fun restoreRecentStation(station: Station, index: Int) {
+        context.dataStore.edit { preferences ->
+            val recents = StationCodec.decode(preferences[recentStationsKey])
+            if (recents.any { it.id == station.id }) return@edit
+            val restored = recents.toMutableList().apply { add(index.coerceIn(0, size), station) }
+            preferences[recentStationsKey] = StationCodec.encode(restored)
+        }
+    }
+
+    /**
      * Clears the recently played list, e.g. from the privacy settings.
      */
     suspend fun clearRecentStations() {

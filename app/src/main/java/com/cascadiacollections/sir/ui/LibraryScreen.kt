@@ -7,7 +7,9 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,11 +22,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Badge
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,15 +38,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -80,6 +95,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 fun LibraryScreen(
     viewModel: RadioBrowserViewModel,
     modifier: Modifier = Modifier,
+    playbackAudible: Boolean = true,
     onOpenRecentlyHeard: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -94,6 +110,45 @@ fun LibraryScreen(
     // The order shown while dragging. Re-seeded whenever the persisted list changes, which
     // (being a data-class list) only happens on a real change, not on unrelated writes.
     var savedOrder by remember(uiState.savedStations) { mutableStateOf(uiState.savedStations) }
+
+    // Removing is a swipe (or the edit sheet, or a TalkBack action), with no confirmation, so
+    // every removal can be undone from the snackbar. One at a time: a second removal replaces
+    // the first one's snackbar.
+    val snackbarHostState = remember { SnackbarHostState() }
+    // How many times each station has been brought back by Undo. Part of the row keys, so a
+    // restored row is a new row with a fresh swipe state (see [SwipeToRemove]).
+    val restoreCounts = remember { mutableStateMapOf<String, Int>() }
+    val savedKey: (Station) -> String = { "saved-${it.id}-${restoreCounts[it.id] ?: 0}" }
+    val undoLabel = stringResource(R.string.undo)
+    val removedMessage = stringResource(R.string.station_removed)
+    val offerUndo: (() -> Unit) -> Unit = { undo ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result = snackbarHostState.showSnackbar(
+                message = removedMessage,
+                actionLabel = undoLabel,
+                // Long: this is the only way back from a removal that took one swipe.
+                duration = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) undo()
+        }
+    }
+    val removeSaved: (Station) -> Unit = { station ->
+        val order = savedOrder.map { it.id }
+        viewModel.removeStation(station.id)
+        offerUndo {
+            restoreCounts[station.id] = (restoreCounts[station.id] ?: 0) + 1
+            viewModel.restoreSavedStation(station, order)
+        }
+    }
+    val removeRecent: (Station) -> Unit = { station ->
+        val index = uiState.recentStations.indexOfFirst { it.id == station.id }
+        viewModel.removeRecentStation(station.id)
+        offerUndo {
+            restoreCounts[station.id] = (restoreCounts[station.id] ?: 0) + 1
+            viewModel.restoreRecentStation(station, index.coerceAtLeast(0))
+        }
+    }
     val topTracks = remember(uiState.heardTracks, topTracksTimeframe) {
         TopTracks.rank(uiState.heardTracks, topTracksTimeframe, nowMillis = System.currentTimeMillis())
     }
@@ -169,6 +224,10 @@ fun LibraryScreen(
             station = station,
             actions = stationAutomationActions(station),
             onDismiss = { editingStation = null },
+            onRemove = {
+                editingStation = null
+                removeSaved(station)
+            },
             onSave = { updated ->
                 viewModel.saveStation(updated)
                 editingStation = null
@@ -185,214 +244,242 @@ fun LibraryScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
             )
-            ImportExportRow(
-                onImport = { importLauncher.launch(arrayOf("*/*")) },
-                onExport = {},
-                onExportBackup = {},
-                exportEnabled = false
-            )
+            ImportStationsButton(onImport = { importLauncher.launch(arrayOf("*/*")) })
             HorizontalDivider()
             RecentlyHeardRow(count = 0, onClick = onOpenRecentlyHeard)
         }
         return
     }
 
-    LazyColumn(state = lazyListState, modifier = modifier.fillMaxSize()) {
-        if (savedOrder.isNotEmpty()) {
-            item(key = "saved-header") {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionHeader(stringResource(R.string.saved_stations), Modifier.weight(1f))
-                    if (savedOrder.size > 1) {
-                        TextButton(
-                            onClick = { reordering = !reordering },
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Text(stringResource(if (reordering) R.string.done else R.string.reorder_stations))
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(state = lazyListState, modifier = Modifier.fillMaxSize()) {
+            if (savedOrder.isNotEmpty()) {
+                item(key = "saved-header") {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SectionHeader(stringResource(R.string.saved_stations), Modifier.weight(1f))
+                        if (savedOrder.size > 1) {
+                            TextButton(onClick = { reordering = !reordering }) {
+                                Text(stringResource(if (reordering) R.string.done else R.string.reorder_stations))
+                            }
+                        }
+                        ImportExportMenu(
+                            onImport = { importLauncher.launch(arrayOf("*/*")) },
+                            onExport = { exportLauncher.launch("sir_stations.m3u") },
+                            onExportBackup = {
+                                backupLauncher.launch(FavoritesBackupCodec.DEFAULT_FILE_NAME)
+                            }
+                        )
+                    }
+                }
+                itemsIndexed(savedOrder, key = { _, station -> savedKey(station) }) { index, station ->
+                    ReorderableItem(reorderState, key = savedKey(station), enabled = reordering) { isDragging ->
+                        val elevation by animateDpAsState(if (isDragging) 6.dp else 0.dp, label = "dragElevation")
+                        val moveUp = stringResource(R.string.move_up)
+                        val moveDown = stringResource(R.string.move_down)
+                        val removeLabel = stringResource(R.string.remove_station)
+                        SwipeToRemove(enabled = !reordering, onRemove = { removeSaved(station) }) {
+                            Surface(shadowElevation = elevation) {
+                                StationRow(
+                                    station = station,
+                                    isPlaying = station.id == uiState.selectedStationId,
+                                    isAudible = playbackAudible,
+                                    onPlay = { viewModel.playStation(station) },
+                                    onLongClick = if (reordering) null else ({ editingStation = station }),
+                                    modifier = Modifier.semantics {
+                                        customActions = listOfNotNull(
+                                            CustomAccessibilityAction(moveUp) {
+                                                viewModel.moveSavedStation(index, index - 1)
+                                                true
+                                            }.takeIf { index > 0 },
+                                            CustomAccessibilityAction(moveDown) {
+                                                viewModel.moveSavedStation(index, index + 1)
+                                                true
+                                            }.takeIf { index < savedOrder.lastIndex },
+                                            // A swipe is not something TalkBack can do, so removing
+                                            // is an action here too.
+                                            CustomAccessibilityAction(removeLabel) {
+                                                removeSaved(station)
+                                                true
+                                            }
+                                        )
+                                    },
+                                    trailing = if (reordering) {
+                                        {
+                                            IconButton(
+                                                onClick = {},
+                                                modifier = Modifier.draggableHandle(
+                                                    onDragStopped = {
+                                                        viewModel.reorderSavedStations(savedOrder.map { it.id })
+                                                    }
+                                                )
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.DragHandle,
+                                                    contentDescription = stringResource(R.string.drag_to_reorder)
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        null
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-                ImportExportRow(
-                    onImport = { importLauncher.launch(arrayOf("*/*")) },
-                    onExport = { exportLauncher.launch("sir_stations.m3u") },
-                    onExportBackup = {
-                        backupLauncher.launch(FavoritesBackupCodec.DEFAULT_FILE_NAME)
-                    },
-                    exportEnabled = true
-                )
+            } else {
+                item(key = "import-row") {
+                    ImportStationsButton(onImport = { importLauncher.launch(arrayOf("*/*")) })
+                }
             }
-            itemsIndexed(savedOrder, key = { _, station -> savedKey(station) }) { index, station ->
-                ReorderableItem(reorderState, key = savedKey(station), enabled = reordering) { isDragging ->
-                    val elevation by animateDpAsState(if (isDragging) 6.dp else 0.dp, label = "dragElevation")
-                    val moveUp = stringResource(R.string.move_up)
-                    val moveDown = stringResource(R.string.move_down)
-                    Surface(shadowElevation = elevation) {
+
+            if (uiState.recentStations.isNotEmpty()) {
+                item(key = "recent-header") {
+                    HorizontalDivider()
+                    SectionHeader(stringResource(R.string.recent_stations))
+                }
+                items(
+                    uiState.recentStations.take(StationCollections.RECENT_LIBRARY_LIMIT),
+                    key = { "recent-${it.id}-${restoreCounts[it.id] ?: 0}" }
+                ) { station ->
+                    val removeLabel = stringResource(R.string.remove_from_recents)
+                    SwipeToRemove(enabled = true, onRemove = { removeRecent(station) }) {
                         StationRow(
                             station = station,
                             isPlaying = station.id == uiState.selectedStationId,
+                            isAudible = playbackAudible,
                             onPlay = { viewModel.playStation(station) },
-                            onLongClick = if (reordering) null else ({ editingStation = station }),
                             modifier = Modifier.semantics {
-                                customActions = listOfNotNull(
-                                    CustomAccessibilityAction(moveUp) {
-                                        viewModel.moveSavedStation(index, index - 1)
+                                customActions = listOf(
+                                    CustomAccessibilityAction(removeLabel) {
+                                        removeRecent(station)
                                         true
-                                    }.takeIf { index > 0 },
-                                    CustomAccessibilityAction(moveDown) {
-                                        viewModel.moveSavedStation(index, index + 1)
-                                        true
-                                    }.takeIf { index < savedOrder.lastIndex }
+                                    }
                                 )
+                            }
+                        )
+                    }
+                }
+                item(key = "recent-clear") {
+                    TextButton(
+                        onClick = { viewModel.clearRecentStations() },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Text(stringResource(R.string.clear_recent_stations))
+                    }
+                }
+            }
+
+            if (uiState.heardTracks.isNotEmpty()) {
+                item(key = "top-header") {
+                    HorizontalDivider()
+                    SectionHeader(stringResource(R.string.top_tracks))
+                    TopTracksTimeframePicker(
+                        selected = topTracksTimeframe,
+                        onSelect = { topTracksTimeframe = it }
+                    )
+                }
+                if (topTracks.isEmpty()) {
+                    item(key = "top-empty") {
+                        Text(
+                            text = stringResource(R.string.top_tracks_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                } else {
+                    items(topTracks, key = {
+                        "top-${it.title.lowercase()}\u001F${it.artist.lowercase()}"
+                    }) { track ->
+                        ListItem(
+                            leadingContent = { TrackArtwork(track.artworkUrl) },
+                            headlineContent = {
+                                Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             },
-                            trailing = {
-                                if (reordering) {
-                                    IconButton(
-                                        onClick = {},
-                                        modifier = Modifier.draggableHandle(
-                                            onDragStopped = {
-                                                viewModel.reorderSavedStations(
-                                                    savedOrder.map {
-                                                        it.id
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    ) {
-                                        Icon(
-                                            Icons.Default.DragHandle,
-                                            contentDescription = stringResource(R.string.drag_to_reorder)
-                                        )
-                                    }
-                                } else {
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.removeStation(station.id)
-                                            Toast.makeText(
-                                                context,
-                                                resources.getString(R.string.station_removed),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Close,
-                                            contentDescription = stringResource(R.string.remove_station)
-                                        )
-                                    }
-                                }
+                            supportingContent = {
+                                Text(track.artist, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            },
+                            trailingContent = {
+                                Text(
+                                    text = stringResource(R.string.top_track_play_count, track.playCount),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         )
                     }
                 }
             }
-        } else {
-            item(key = "import-row") {
-                ImportExportRow(
-                    onImport = { importLauncher.launch(arrayOf("*/*")) },
-                    onExport = {},
-                    onExportBackup = {},
-                    exportEnabled = false
-                )
-            }
-        }
 
-        if (uiState.recentStations.isNotEmpty()) {
-            item(key = "recent-header") {
+            item(key = "recently-heard") {
                 HorizontalDivider()
-                SectionHeader(stringResource(R.string.recent_stations))
+                RecentlyHeardRow(count = uiState.heardTracks.size, onClick = onOpenRecentlyHeard)
             }
-            items(
-                uiState.recentStations.take(StationCollections.RECENT_LIBRARY_LIMIT),
-                key = { "recent-${it.id}" }
-            ) { station ->
-                StationRow(
-                    station = station,
-                    isPlaying = station.id == uiState.selectedStationId,
-                    onPlay = { viewModel.playStation(station) },
-                    trailing = {
-                        IconButton(onClick = { viewModel.removeRecentStation(station.id) }) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = stringResource(R.string.remove_from_recents)
-                            )
-                        }
+
+            // Escape hatch back to the app's own stream
+            if (uiState.selectedStationId != null) {
+                item(key = "default-stream") {
+                    HorizontalDivider()
+                    TextButton(
+                        onClick = { viewModel.playDefaultStream() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text(stringResource(R.string.play_default_stream))
                     }
-                )
-            }
-            item(key = "recent-clear") {
-                TextButton(
-                    onClick = { viewModel.clearRecentStations() },
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Text(stringResource(R.string.clear_recent_stations))
                 }
             }
         }
-
-        if (uiState.heardTracks.isNotEmpty()) {
-            item(key = "top-header") {
-                HorizontalDivider()
-                SectionHeader(stringResource(R.string.top_tracks))
-                TopTracksTimeframePicker(
-                    selected = topTracksTimeframe,
-                    onSelect = { topTracksTimeframe = it }
-                )
-            }
-            if (topTracks.isEmpty()) {
-                item(key = "top-empty") {
-                    Text(
-                        text = stringResource(R.string.top_tracks_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            } else {
-                items(topTracks, key = {
-                    "top-${it.title.lowercase()}\u001F${it.artist.lowercase()}"
-                }) { track ->
-                    ListItem(
-                        leadingContent = { TrackArtwork(track.artworkUrl) },
-                        headlineContent = {
-                            Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        },
-                        supportingContent = {
-                            Text(track.artist, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        },
-                        trailingContent = {
-                            Text(
-                                text = stringResource(R.string.top_track_play_count, track.playCount),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    )
-                }
-            }
-        }
-
-        item(key = "recently-heard") {
-            HorizontalDivider()
-            RecentlyHeardRow(count = uiState.heardTracks.size, onClick = onOpenRecentlyHeard)
-        }
-
-        // Escape hatch back to the app's own stream
-        if (uiState.selectedStationId != null) {
-            item(key = "default-stream") {
-                HorizontalDivider()
-                TextButton(
-                    onClick = { viewModel.playDefaultStream() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Text(stringResource(R.string.play_default_stream))
-                }
-            }
-        }
+        SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
 
-private fun savedKey(station: Station): String = "saved-${station.id}"
+/**
+ * A row that is removed by swiping it off either side, over a "delete" backdrop. The list
+ * drops the row when [onRemove] runs, so this only has to report the swipe once it settles.
+ *
+ * The swipe state is saved under the row's list key. A row that Undo brings back under the
+ * same key would come back already swiped away and remove itself again, which is why the
+ * list keys carry a restore count (see `restoreCounts` in [LibraryScreen]).
+ */
+@Composable
+private fun SwipeToRemove(
+    enabled: Boolean,
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val state = rememberSwipeToDismissBoxState()
+    val currentOnRemove by rememberUpdatedState(onRemove)
+    LaunchedEffect(state.currentValue) {
+        if (state.currentValue != SwipeToDismissBoxValue.Settled) currentOnRemove()
+    }
+    SwipeToDismissBox(
+        state = state,
+        modifier = modifier,
+        gesturesEnabled = enabled,
+        backgroundContent = {
+            val fromStart = state.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .padding(horizontal = 24.dp),
+                contentAlignment = if (fromStart) Alignment.CenterStart else Alignment.CenterEnd
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
+    ) {
+        content()
+    }
+}
 
 @Composable
 private fun TopTracksTimeframePicker(selected: TopTracksTimeframe, onSelect: (TopTracksTimeframe) -> Unit) {
@@ -447,28 +534,53 @@ private fun SectionHeader(text: String, modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * Import and export for the saved stations, behind one "More options" button in the section
+ * header. Three unlabelled icons used to sit on a row of their own here; a menu names each
+ * action and gives the row back to the list.
+ */
 @Composable
-private fun ImportExportRow(
-    onImport: () -> Unit,
-    onExport: () -> Unit,
-    onExportBackup: () -> Unit,
-    exportEnabled: Boolean
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onImport) {
-            Icon(Icons.Default.FileUpload, contentDescription = stringResource(R.string.import_stations))
+private fun ImportExportMenu(onImport: () -> Unit, onExport: () -> Unit, onExportBackup: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.padding(end = 4.dp)) {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
-        IconButton(onClick = onExport, enabled = exportEnabled) {
-            Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.export_stations))
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.import_stations)) },
+                leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onImport()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.export_stations)) },
+                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onExport()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.export_favorites_backup)) },
+                leadingIcon = { Icon(Icons.Default.Backup, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onExportBackup()
+                }
+            )
         }
-        IconButton(onClick = onExportBackup, enabled = exportEnabled) {
-            Icon(Icons.Default.Backup, contentDescription = stringResource(R.string.export_favorites_backup))
-        }
+    }
+}
+
+/** With no saved stations there is nothing to export, so importing gets a labelled button. */
+@Composable
+private fun ImportStationsButton(onImport: () -> Unit) {
+    TextButton(onClick = onImport, modifier = Modifier.padding(horizontal = 4.dp)) {
+        Icon(Icons.Default.FileUpload, contentDescription = null)
+        Text(stringResource(R.string.import_stations), modifier = Modifier.padding(start = 8.dp))
     }
 }
 

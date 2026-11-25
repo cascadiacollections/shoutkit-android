@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -50,7 +51,8 @@ internal fun EditStationSheet(
     onDismiss: () -> Unit,
     onSave: (Station) -> Unit,
     modifier: Modifier = Modifier,
-    actions: List<TileAction> = emptyList()
+    actions: List<TileAction> = emptyList(),
+    onRemove: (() -> Unit)? = null
 ) {
     var name by remember(station.id) { mutableStateOf(station.name) }
     var url by remember(station.id) { mutableStateOf(station.url) }
@@ -119,6 +121,14 @@ internal fun EditStationSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
+                // Removing is otherwise a swipe on the row; here it has a name.
+                if (onRemove != null) {
+                    TextButton(
+                        onClick = onRemove,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text(stringResource(R.string.remove_station)) }
+                    Spacer(Modifier.weight(1f))
+                }
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier.testTag(EditStationSheetTestTags.CANCEL_BUTTON)

@@ -16,9 +16,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import com.cascadiacollections.sir.RadioUiState
 import com.cascadiacollections.sir.core.model.Station
+import com.cascadiacollections.sir.core.playback.SleepTimerDuration
 import com.cascadiacollections.sir.core.playback.StreamFailure
 import com.cascadiacollections.sir.ui.theme.SirTheme
 import org.junit.Rule
@@ -242,10 +244,7 @@ class RadioUiTest {
         var url by mutableStateOf<String?>(null)
         composeRule.setContent {
             SirTheme {
-                ListenScreen(
-                    state = RadioUiState(isConnected = true, trackViewUrl = url),
-                    onToggle = {}
-                )
+                NowPlayingOverflow(trackViewUrl = url)
             }
         }
         composeRule.onNodeWithContentDescription("More options").assertDoesNotExist()
@@ -323,5 +322,24 @@ class RadioUiTest {
         }
         composeRule.onNodeWithContentDescription("Play").performClick()
         assertThat(toggled).isTrue()
+    }
+
+    @Test
+    fun `the sleep timer beside play offers the durations and reports the pick`() {
+        var picked: SleepTimerDuration? = null
+        composeRule.setContent {
+            SirTheme {
+                ListenScreen(
+                    state = RadioUiState(isConnected = true),
+                    onSleepTimer = { picked = it },
+                    onToggle = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Sleep Timer").performClick()
+        composeRule.onNodeWithText("30 minutes").performClick()
+
+        assertThat(picked).isEqualTo(SleepTimerDuration.THIRTY)
     }
 }
