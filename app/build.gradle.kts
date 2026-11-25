@@ -57,6 +57,9 @@ android {
         }
         create("foss") {
             dimension = "distribution"
+            // Own install, beside Play (com.cascadiacollections.sir). F-Droid and GitHub
+            // Releases both ship this flavor.
+            applicationIdSuffix = ".foss"
             proguardFiles("proguard-rules-foss.pro")
         }
     }
@@ -186,9 +189,28 @@ composeCompiler {
     metricsDestination = layout.buildDirectory.dir("compose_compiler")
 }
 
-// Disable google-services processing for FOSS builds (no Firebase)
+// shortcuts.xml names its target package. Manifest placeholders are not applied to res/xml,
+// so each variant gets a copy with ${applicationId} filled in (play unchanged, foss + .foss).
+androidComponents {
+    onVariants { variant ->
+        val taskName = "generate${variant.name.replaceFirstChar(Char::uppercase)}Shortcuts"
+        val generateShortcuts = tasks.register<GenerateShortcutResources>(taskName) {
+            applicationId.set(variant.applicationId)
+            template.set(layout.projectDirectory.file("src/main/shortcuts/shortcuts.xml"))
+            outputDirectory.set(layout.buildDirectory.dir("generated/res/${variant.name}/shortcuts"))
+        }
+        variant.sources.res?.addGeneratedSourceDirectory(
+            generateShortcuts,
+            GenerateShortcutResources::outputDirectory
+        )
+    }
+}
+
+// src/play/google-services.json describes the Play application id only. Foss is that id
+// plus ".foss", so the plugin's per-variant tasks must not run for it: they fail when the
+// json has no client for the foss package. The plugins are applied only when that file exists.
 tasks.configureEach {
-    if (name.contains("Foss") && name.contains("GoogleServices")) {
+    if (name.contains("Foss") && (name.contains("GoogleServices") || name.contains("Crashlytics"))) {
         enabled = false
     }
 }
@@ -352,4 +374,24 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     executionData.setFrom(
         fileTree(layout.buildDirectory) { include("jacoco/testPlayDebugUnitTest.exec") }
     )
+}
+
+/** Writes `res/xml/shortcuts.xml` with this variant's application id filled in. */
+abstract class GenerateShortcutResources : DefaultTask() {
+    @get:Input
+    abstract val applicationId: Property<String>
+
+    @get:InputFile
+    abstract val template: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val xmlDir = outputDirectory.get().asFile.resolve("xml")
+        xmlDir.mkdirs()
+        val text = template.get().asFile.readText().replace("\${applicationId}", applicationId.get())
+        xmlDir.resolve("shortcuts.xml").writeText(text)
+    }
 }

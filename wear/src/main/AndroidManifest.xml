@@ -62,7 +62,7 @@
         </service>
 
         <!-- Phone → watch sync of the last-played station and recents (Wearable Data Layer).
-             Delivery requires the phone app's applicationId and signing key. -->
+             Delivery requires the Play phone app's applicationId and signing key. -->
         <service
             android:name=".sync.StationSyncListenerService"
             android:exported="true">

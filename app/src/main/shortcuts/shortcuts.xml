@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Static shortcuts. Every one here takes a slot from the dynamic station shortcuts
-     (StationShortcuts.STATIC_SHORTCUT_COUNT must match; StaticShortcutsTest checks it). -->
+<!-- Static shortcuts. The targetPackage placeholder is filled with the variant's
+     application id when this file is generated into res/xml. Every <shortcut> takes a
+     slot from the dynamic station shortcuts (StationShortcuts.STATIC_SHORTCUT_COUNT
+     must match; StaticShortcutsTest checks it). -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -12,7 +14,7 @@
         android:shortcutLongLabel="@string/shortcut_play_long">
         <intent
             android:action="com.cascadiacollections.sir.SHORTCUT_PLAY"
-            android:targetPackage="com.cascadiacollections.sir"
+            android:targetPackage="${applicationId}"
             android:targetClass="com.cascadiacollections.sir.MainActivity" />
     </shortcut>
 
@@ -26,7 +28,7 @@
         android:shortcutLongLabel="@string/shortcut_whats_playing_long">
         <intent
             android:action="com.cascadiacollections.sir.action.WHATS_PLAYING"
-            android:targetPackage="com.cascadiacollections.sir"
+            android:targetPackage="${applicationId}"
             android:targetClass="com.cascadiacollections.sir.NowPlayingAnnounceActivity" />
     </shortcut>
 
@@ -40,14 +42,14 @@
         android:shortcutLongLabel="@string/shortcut_favorite_long">
         <intent
             android:action="com.cascadiacollections.sir.action.FAVORITE_CURRENT_STATION"
-            android:targetPackage="com.cascadiacollections.sir"
+            android:targetPackage="${applicationId}"
             android:targetClass="com.cascadiacollections.sir.FavoriteCurrentStationActivity" />
     </shortcut>
 
     <capability android:name="actions.intent.PLAY_MEDIA">
         <intent
             android:action="com.cascadiacollections.sir.SHORTCUT_PLAY"
-            android:targetPackage="com.cascadiacollections.sir"
+            android:targetPackage="${applicationId}"
             android:targetClass="com.cascadiacollections.sir.MainActivity" />
     </capability>
 
@@ -58,7 +60,7 @@
         app:queryPatterns="@array/whats_playing_queries">
         <intent
             android:action="com.cascadiacollections.sir.action.WHATS_PLAYING"
-            android:targetPackage="com.cascadiacollections.sir"
+            android:targetPackage="${applicationId}"
             android:targetClass="com.cascadiacollections.sir.NowPlayingAnnounceActivity" />
     </capability>
 
@@ -67,7 +69,7 @@
         app:queryPatterns="@array/favorite_station_queries">
         <intent
             android:action="com.cascadiacollections.sir.action.FAVORITE_CURRENT_STATION"
-            android:targetPackage="com.cascadiacollections.sir"
+            android:targetPackage="${applicationId}"
             android:targetClass="com.cascadiacollections.sir.FavoriteCurrentStationActivity" />
     </capability>
 </shortcuts>

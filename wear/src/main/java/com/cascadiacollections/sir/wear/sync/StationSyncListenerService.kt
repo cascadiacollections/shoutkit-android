@@ -26,7 +26,8 @@ private const val TAG = "StationSyncListener"
  * to re-render. Woken by the Data Layer, so the watch app need not be running.
  *
  * The Data Layer only delivers between apps sharing an applicationId and signing key,
- * which is why `:wear` uses the phone's applicationId.
+ * which is why `:wear` uses the Play phone app's applicationId. The foss phone build
+ * is a different id and does not ship this client.
  */
 class StationSyncListenerService : WearableListenerService() {
 

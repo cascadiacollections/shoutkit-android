@@ -1,7 +1,10 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Album artwork is looked up through Apple's iTunes Search API. It is on
+      by default and can be turned off in Settings.
 Categories:
-  - Radio
-  - Online Media Player
   - Multimedia
+  - Radio
 License: GPL-3.0-only
 AuthorName: Cascadia Collections
 WebSite: https://cascadiacollections.github.io/shoutkit-android/
@@ -11,14 +14,8 @@ Changelog: https://github.com/cascadiacollections/shoutkit-android/releases
 
 AutoName: ShoutKit
 
-AntiFeatures:
-  NonFreeNet:
-    en-US: Album artwork is looked up through Apple's iTunes Search API. It is on
-      by default and can be turned off in Settings.
-
 RepoType: git
 Repo: https://github.com/cascadiacollections/shoutkit-android.git
-Binaries: https://github.com/cascadiacollections/shoutkit-android/releases/download/v%v/shoutkit-android-%v.apk
 
 Builds:
   - versionName: 1.3.1
@@ -26,8 +23,9 @@ Builds:
     commit: a89fdefba8ee4f51dfcb227ab0051d07f91a5b51
     subdir: app
     sudo:
+      - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
       - apt-get update
-      - apt-get install -y openjdk-21-jdk-headless
+      - apt-get install -y -t trixie openjdk-21-jdk-headless
       - update-java-alternatives -a
     gradle:
       - foss
@@ -37,12 +35,10 @@ Builds:
       - benchmark
     prebuild:
       - sed -i -e '/include(":cast")/d' -e '/include(":wear")/d' -e '/include(":benchmark")/d'
-        ../settings.gradle.kts
+        -e '/foojay-resolver/d' ../settings.gradle.kts
       - sed -i -e '/libs.plugins.google.services/d' -e '/libs.plugins.firebase.crashlytics/d'
         ../build.gradle.kts build.gradle.kts
       - sed -i -e '/dynamicFeatures/d' -e '/"playImplementation"/d' build.gradle.kts
-
-AllowedAPKSigningKeys: REPLACE_WITH_RELEASE_CERTIFICATE_SHA256
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$

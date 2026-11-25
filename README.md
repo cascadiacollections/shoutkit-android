@@ -83,19 +83,22 @@ Shoutkit is free software. Every feature is in the free build.
 | Where | Price | Build | Notes |
 |-------|-------|-------|-------|
 | [GitHub Releases](https://github.com/cascadiacollections/shoutkit-android/releases) | Free | FOSS | Signed nightlies, see [Nightly APK](#nightly-apk) |
-| F-Droid | Free | FOSS | Built and signed by F-Droid |
-| Google Play | Paid | Play | Same app, plus Chromecast and the Wear OS companion. Buying it funds development. |
+| F-Droid | Free | FOSS | Built and signed by F-Droid. Separate install from the Play version. |
+| Google Play | Paid | Play | Chromecast and the Wear OS companion. Buying it funds development. |
 | Source | Free | Either | See [Building](#building) |
 
-Each channel signs with a different key, so Android won't update across channels. Switching from
-one to another means uninstalling first. Export your stations (Settings) before you do.
+Play (`com.cascadiacollections.sir`) and the FOSS builds (`com.cascadiacollections.sir.foss`)
+are different apps, so both can stay installed. F-Droid and GitHub Releases are the same FOSS
+app with different signing keys, so uninstall one before installing the other. Export your
+stations (Settings) before you do. With both apps installed, a `sir://` link asks which one
+to open.
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
-| **Play** | Google Play build with Firebase Crashlytics + Analytics, Chromecast, Wear OS |
-| **FOSS** | Fully open-source build, no proprietary Google services |
+| **Play** | Google Play build with Firebase Crashlytics + Analytics, Chromecast, Wear OS. Id `com.cascadiacollections.sir`. |
+| **FOSS** | Fully open-source build, no proprietary Google services. Id `com.cascadiacollections.sir.foss`. |
 
 ## Optimizations
 

@@ -18,6 +18,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertThat(appContext.packageName).isEqualTo("com.cascadiacollections.sir")
+        assertThat(appContext.packageName).isEqualTo(BuildConfig.APPLICATION_ID)
     }
 }
