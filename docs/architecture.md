@@ -521,11 +521,13 @@ playing.
     being in the foreground, may start the foreground service on every API level. With
     nothing synced yet it plays the SIR stream.
   - *applicationId.* The Data Layer only delivers between apps with the **same package
-    name and signing key**. `:wear` therefore uses the phone's applicationId,
+    name and signing key**. `:wear` therefore uses the Play phone app's applicationId,
     `com.cascadiacollections.sir` (it was `com.cascadiacollections.sir.wear`, which never
-    shipped); its namespace, and so its `R` class and Kotlin packages, stay `.wear`. Debug
-    builds share the local debug keystore, so sync works between debug installs; a release
-    Wear build must be signed with the phone's release key.
+    shipped). The foss phone flavor is `com.cascadiacollections.sir.foss` and does not
+    ship the Wearable client, so the watch stays on the Play id. The wear namespace, and
+    so its `R` class and Kotlin packages, stays `.wear`. Debug builds share the local
+    debug keystore, so sync works between debug installs; a release Wear build must be
+    signed with the phone's release key.
 
 ## Verification
 

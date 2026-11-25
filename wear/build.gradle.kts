@@ -7,10 +7,11 @@ android {
     namespace = "com.cascadiacollections.sir.wear"
 
     defaultConfig {
-        // The phone app's applicationId: the Wearable Data Layer only delivers between apps
-        // with the same package name and signing key, so the phone→watch station sync
-        // (StationSyncListenerService) needs the two to match. The namespace (R class,
-        // Kotlin package) stays .wear.
+        // The Play phone app's applicationId. The Wearable Data Layer only delivers between
+        // apps with the same package name and signing key, so phone→watch station sync
+        // (StationSyncListenerService) needs the two to match. The foss phone flavor is
+        // com.cascadiacollections.sir.foss and does not ship this client. The namespace
+        // (R class, Kotlin package) stays .wear.
         applicationId = "com.cascadiacollections.sir"
         missingDimensionStrategy("distribution", "play")
         // Independent of the phone app's version (app/build.gradle.kts): Wear isn't shipped on

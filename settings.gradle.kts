@@ -14,7 +14,8 @@ pluginManagement {
     }
 }
 plugins {
-    // Foojay toolchain resolver - auto-downloads Adoptium Eclipse Temurin JDK
+    // Auto-downloads a JDK 21 when Gradle is not already on one.
+    // F-Droid's recipe deletes the plugin line below. An empty plugins block is valid.
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 dependencyResolutionManagement {

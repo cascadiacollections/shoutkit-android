@@ -1,14 +1,18 @@
 # Submitting ShoutKit to F-Droid
 
-Status on 2026-11-20: not listed. `f-droid.org/packages/com.cascadiacollections.sir/` returns
-404, fdroiddata has no `metadata/com.cascadiacollections.sir.yml`, and neither fdroiddata merge
-requests nor the RFP tracker mention the app.
+Status on 2026-11-25: not listed. F-Droid builds and signs the F-Droid package itself.
+The application id is `com.cascadiacollections.sir.foss`, a separate install from the Play
+app (`com.cascadiacollections.sir`). `f-droid.org/packages/com.cascadiacollections.sir.foss/`
+returns 404, fdroiddata has no `metadata/com.cascadiacollections.sir.foss.yml`, and neither
+fdroiddata merge requests nor the RFP tracker mention the app.
 
-The recipe is [`fdroid/com.cascadiacollections.sir.yml`](fdroid/com.cascadiacollections.sir.yml).
-It builds the `foss` flavor at the `v1.3.1` tag and tells F-Droid to publish the APK from GitHub
-Releases with our signature once its own build matches it byte for byte (`Binaries:` plus
-`AllowedAPKSigningKeys:`). The listing text, icon and screenshots come from
-`fastlane/metadata/android/en-US/` in this repository; F-Droid reads them from the tagged source.
+The recipe is [`fdroid/com.cascadiacollections.sir.foss.yml`](fdroid/com.cascadiacollections.sir.foss.yml).
+It builds the `foss` flavor. Listing text, the icon and screenshots come from
+`fastlane/metadata/android/en-US/` in this repository. F-Droid scans that directory in the
+app's own checkout and attaches what it finds to the metadata id, so the `.foss` suffix does
+not need its own fastlane tree. This repo has no per-id layout (`fastlane/metadata/android/<id>/`
+is not used). fdroidserver's scan of `fastlane/metadata/android/<locale>/` at the repo root
+is what publishes the listing for `com.cascadiacollections.sir.foss`.
 
 ## What the recipe does to the source
 
@@ -17,95 +21,73 @@ and build lines that exist only for the Google Play build, so F-Droid's scanner 
 reference to Google Play services or Firebase:
 
 - deletes the `cast`, `wear` and `benchmark` modules and their `include(...)` lines;
+- deletes the Foojay toolchain resolver plugin line from `settings.gradle.kts`;
 - deletes the Google services and Crashlytics plugin lines from both build files;
 - deletes the `dynamicFeatures` line and every `"playImplementation"` dependency.
 
-None of this changes the FOSS APK (see #306).
+None of this changes the FOSS APK (see #306). The Foojay `sed` only deletes a matching line.
+If that line is already gone, the `plugins` block is left empty, which is valid.
 
-## Before you submit
+## Version and commit
 
-1. **Release key in CI.** Add these secrets to the repository, or to its `release` environment:
-   `RELEASE_KEYSTORE_BASE64`, `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`,
-   `RELEASE_KEY_PASSWORD`. To make the first value:
+`versionName`, `versionCode`, `commit`, `CurrentVersion` and `CurrentVersionCode` must be the
+first release that contains `applicationIdSuffix = ".foss"`. The file checked in here keeps the
+v1.3.1 shape (`1.3.1`, `512`, commit `a89fdefba8ee4f51dfcb227ab0051d07f91a5b51`), which is what
+`fdroid lint`, `fdroid scanner` and `fdroid checkupdates` were run against. That tag does not
+contain the suffix, so its application id is still `com.cascadiacollections.sir`.
 
-   ```bash
-   base64 < release.jks | tr -d '\n' | pbcopy
-   ```
-
-   If no release key exists yet, create one and back it up somewhere safe. Every later update
-   on F-Droid and GitHub must be signed with it.
-
-   ```bash
-   keytool -genkeypair -v -keystore release.jks -alias shoutkit -keyalg RSA -keysize 4096 -validity 10000
-   ```
-
-2. **Attach the signed APK to v1.3.1.** The tag's `Release APK` run skipped signing because the
-   secrets were missing. Re-run it now that they exist:
-
-   ```bash
-   gh run rerun 43810283100 --repo cascadiacollections/shoutkit-android
-   ```
-
-   The release should then carry `shoutkit-android-1.3.1.apk` and `SHA256SUMS`. If you would
-   rather not re-run an old tag, cut the next release (CONTRIBUTING.md, "Releasing") and change
-   the recipe's `versionName`, `versionCode`, `commit`, `CurrentVersion` and
-   `CurrentVersionCode` to match.
-
-3. **Put the certificate digest in the recipe.** The run's "Verify and name it" step prints
-   `Signer #1 certificate SHA-256 digest`, and newer runs also write it to the run summary.
-   Or read it from the APK:
-
-   ```bash
-   apksigner verify --print-certs shoutkit-android-1.3.1.apk | grep SHA-256
-   ```
-
-   Replace `REPLACE_WITH_RELEASE_CERTIFICATE_SHA256` with that value: lowercase hex, no colons.
+Replace those five fields when that release is cut. `commit` has to be the full 40-character
+hash of the tagged commit. A short hash or the tag name fails the build. The owner cuts the
+release. This tree does not tag one and does not publish one.
 
 ## Submit the merge request
 
-1. Fork <https://gitlab.com/fdroid/fdroiddata> and create a branch named
-   `com.cascadiacollections.sir`. Never commit to `master`.
-2. Copy the recipe to `metadata/com.cascadiacollections.sir.yml` in the fork.
-3. Check it locally with fdroidserver
+1. Cut the release that contains the suffix (CONTRIBUTING.md, "Releasing"), then set the five
+   version fields above to that tag.
+2. Fork <https://gitlab.com/fdroid/fdroiddata> and create a branch named
+   `com.cascadiacollections.sir.foss`. Never commit to `master`.
+3. Copy the recipe to `metadata/com.cascadiacollections.sir.foss.yml` in the fork.
+4. Check it locally with fdroidserver
    (`pip install git+https://gitlab.com/fdroid/fdroidserver.git`):
 
    ```bash
    fdroid readmeta
-   fdroid rewritemeta com.cascadiacollections.sir
-   fdroid lint com.cascadiacollections.sir
-   fdroid checkupdates com.cascadiacollections.sir
-   fdroid build -v -l com.cascadiacollections.sir
+   fdroid rewritemeta com.cascadiacollections.sir.foss
+   fdroid lint com.cascadiacollections.sir.foss
+   fdroid checkupdates com.cascadiacollections.sir.foss
+   fdroid build -v -l com.cascadiacollections.sir.foss
    ```
 
    `rewritemeta` should leave no diff and `lint` should print nothing. `build` needs the Android
-   SDK; you can skip it and let the fork's CI pipeline build instead.
-4. Commit as `New app: ShoutKit`, push the branch and wait for the fork's pipeline to pass.
-   The build job reports whether F-Droid's APK matches the one on GitHub Releases.
-5. Open a merge request against `fdroid/fdroiddata` `master` and fill in the "App inclusion"
-   template. Points reviewers ask about:
+   SDK. You can skip it and let the fork's CI pipeline build instead. F-Droid signs the APK
+   its build produces.
+5. Commit as `New app: ShoutKit`, push the branch and wait for the fork's pipeline to pass.
+6. Open a merge request against `fdroid/fdroiddata` `master`, titled `New app: ShoutKit`, and
+   fill in the "App inclusion" template. Points reviewers ask about:
    - License: the app is GPL-3.0-only with an additional permission for app stores
      (`LICENSE-EXCEPTION.md`); the `core` and `libs` modules are MIT.
    - The FOSS build has no Google Play services, Firebase, analytics or crash reporting.
    - Network use: Radio Browser (free, community-run) for the directory, and Apple's iTunes
      Search for album art, which is why the recipe declares `NonFreeNet`.
-   - The build is reproducible and the recipe asks F-Droid to ship the developer-signed APK.
-6. Answer review comments on the merge request. After it merges, the app appears on
+   - The application id is `com.cascadiacollections.sir.foss`, so the F-Droid package installs
+     beside Play. F-Droid signs the build.
+7. Answer review comments on the merge request. After it merges, the app appears on
    f-droid.org with the next index update, usually within a few days.
 
 ## After it is listed
 
 - Set `fdroid` in `window.SHOUTKIT_LINKS` (`docs/index.html`) to
-  `https://f-droid.org/packages/com.cascadiacollections.sir/`. The F-Droid button on the site
+  `https://f-droid.org/packages/com.cascadiacollections.sir.foss/`. The F-Droid button on the site
   stays hidden until then.
-- New versions need nothing from you on F-Droid: `checkupdates` picks up each `vX.Y.Z` tag, as
-  long as the tag's release carries the signed APK.
+- New versions need nothing further on the F-Droid side: `checkupdates` picks up each `vX.Y.Z`
+  tag, as long as `versionCode` and `versionName` in `app/build.gradle.kts` keep moving up.
+  F-Droid builds and signs each update from the tag.
 
 ## What was and was not verified
 
-Verified locally on 2026-11-20: at `v1.3.1`, the tree with the recipe's `rm` and `prebuild`
-applied builds `:app:assembleFossRelease`, and its unsigned APK is byte-identical to the one
-from the untouched tree (SHA-256 `d602e7c6…2b86e3662`, same machine, JDK 21).
+The recipe shape above was checked with `fdroid lint`, `fdroid scanner` and `fdroid checkupdates`
+against v1.3.1, before the application id suffix. Point `commit` at the first tag that contains
+the suffix, then run `fdroid build` (or the fork's CI) once before asking for review.
 
-Not verified: the recipe has not been run through `fdroid lint`, `fdroid scanner` or
-`fdroid build`, so step 3 above is required. If the scanner still flags the Google entries in
-`gradle/libs.versions.toml`, delete those lines in `prebuild` too.
+If the scanner still flags the Google entries in `gradle/libs.versions.toml`, delete those lines
+in `prebuild` too.

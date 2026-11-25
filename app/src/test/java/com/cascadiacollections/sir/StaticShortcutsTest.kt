@@ -10,12 +10,18 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.xmlpull.v1.XmlPullParser
 
-/** `res/xml/shortcuts.xml` against what the code assumes about it. */
+/** Generated `res/xml/shortcuts.xml` against what the code assumes about it. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class StaticShortcutsTest {
 
-    private data class Entry(val tag: String, val name: String?, val targetClass: String?, val action: String?)
+    private data class Entry(
+        val tag: String,
+        val name: String?,
+        val targetPackage: String?,
+        val targetClass: String?,
+        val action: String?
+    )
 
     /** Each `<shortcut>`/`<capability>` with the first `<intent>` inside it. */
     private fun entries(): List<Entry> {
@@ -39,6 +45,7 @@ class StaticShortcutsTest {
                         entries += Entry(
                             tag = tag,
                             name = name,
+                            targetPackage = parser.getAttributeValue(ANDROID_NS, "targetPackage"),
                             targetClass = parser.getAttributeValue(ANDROID_NS, "targetClass"),
                             action = parser.getAttributeValue(ANDROID_NS, "action")
                         )
@@ -49,6 +56,12 @@ class StaticShortcutsTest {
             }
         }
         return entries
+    }
+
+    @Test
+    fun `every intent targets this application id`() {
+        val packages = entries().map { it.targetPackage }.toSet()
+        assertThat(packages).isEqualTo(setOf(BuildConfig.APPLICATION_ID))
     }
 
     @Test
