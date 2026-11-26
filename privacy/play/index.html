@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShoutKit for Android: privacy (Google Play build)</title>
+<meta name="description" content="What the Google Play build of ShoutKit sends through Firebase Analytics, Crashlytics, and the Play Install Referrer, and what stays on the device.">
+<link rel="stylesheet" href="../../style.css">
+<link rel="icon" href="../../assets/icon.svg">
+<style>main{max-width:760px;margin:50px auto 90px}h1{font-size:clamp(3rem,7vw,5rem)}h2{font-size:1.6rem;margin-top:45px}main p,main li{color:var(--muted)}</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Main">
+<a class="brand" href="../../">← ShoutKit</a>
+<a href="https://github.com/cascadiacollections/shoutkit-android">Source ↗</a>
+</nav>
+<main>
+<div class="eyebrow">The Google Play edition</div>
+<h1>Privacy for<br>the Play build.</h1>
+<p>Updated November 26, 2026. This page describes the Google Play build of ShoutKit, developed by Cascadia Collections. Its application id is <code>com.cascadiacollections.sir</code>. The FOSS build, including F-Droid and the GitHub Releases APK, is a separate app (<code>com.cascadiacollections.sir.foss</code>) and is described on the <a href="../">FOSS privacy page</a>. That build does not include Firebase Analytics, Firebase Crashlytics, or the Play Install Referrer library.</p>
+
+<h2>What stays on your device</h2>
+<p>Preferences, saved stations, and recent listening are stored locally. ShoutKit does not require an account.</p>
+<p>On the first launch, the Play build reads the Play Install Referrer once. It keeps a genre only when the referrer's <code>utm_content</code> is one of the welcome genres: christmas, talk, rock, news, jazz, or country. That genre is saved on the device if the welcome has not already chosen one. A welcome link applied on that launch wins, and the referrer does not overwrite it. The click timestamp, the install timestamp, and the instant-experience flag are not read. The raw referrer string is not stored, so source, medium, campaign, term, and click id are not stored either. The app's own code does not send that saved genre anywhere. Firebase Analytics can still send the referrer's content parameter to Google, as described below. A missing Play Store, a service error, a timeout, or any other value leaves the genre unset. After that first check, the app does not read the referrer again.</p>
+
+<h2>Firebase Analytics</h2>
+<p>The Play build includes the Firebase Analytics SDK. The app does not log its own Analytics events, does not set user properties or a user id, and does not record the first-run genre as a user property. It also does not turn collection off. With the SDK included and collection left on, the SDK collects the data below and sends it to Google.</p>
+<p>The SDK collects an app-instance identifier, the Firebase installation id. Google describes that id as identifying the installation, not a person or a physical device. It also collects the advertising id when the device has one. Advertising-id collection stays on unless the app sets <code>google_analytics_adid_collection_enabled</code> to false. This app does not. The SDK's manifest adds the advertising-id permission, and the Android Ad Services advertising-id and attribution permissions. This project does not remove them. The FOSS build does not include the SDK, so it does not add those permissions.</p>
+<p>The SDK records automatic events that do not depend on another Google product: first open, session start, user engagement, screen view, app update, operating-system update, app removal, and app data cleared. Screen reporting stays on because the app does not disable it. Events can include the app version and the current screen. Because Crashlytics is included, Analytics can also record an <code>app_exception</code> event for a crash.</p>
+<p>On first open, the SDK attributes the install from the Play Install Referrer. Its manifest binds the Play Install Referrer service, and that read is separate from the genre read above. When the install carries campaign parameters, Google records a <code>firebase_campaign</code> event. Google's list of parameters for that event is source, medium, campaign, term, content, <code>gclid</code>, <code>aclid</code>, <code>cp1</code>, <code>anid</code>, click timestamp, and campaign info source. The app's own code still discards everything except an allow-listed genre, and still does not upload that genre.</p>
+<p>This build does not include AdMob, Cloud Messaging, Dynamic Links, In-App Messaging, or Play Billing. It does not collect the automatic events that belong to those products, such as ad impressions, notification opens, or purchase events. Settings has no switch for Analytics.</p>
+
+<h2>Firebase Crashlytics</h2>
+<p>The Play build includes Firebase Crashlytics. The app does not set custom keys, logs, user ids, or non-fatal errors. On a crash, the SDK collects stack traces, relevant application state, point-in-time device metadata, and a Crashlytics installation id used to count affected installations. Reports are sent to Google. Settings has no switch for Crashlytics.</p>
+<p>Crashlytics in this build depends on the Firebase installations SDK and the Firebase sessions SDK. Google's disclosure for installations says it collects the Firebase installation id and a Firebase user agent: operating-system version, device name, model, brand, and form factor, the app that installed ShoutKit, and which Firebase SDKs are included, with their versions. Google says that user agent is not linked to a user or device identifier. Google's disclosure for sessions says it collects app metadata (package name, operating-system information, SDK version, and network connection type), device manufacturer and model, and when the app was in the foreground. With Analytics also included, Google's disclosure says Crashlytics uses Analytics breadcrumb logs of actions immediately before a crash. Those breadcrumbs are the automatic Analytics events, not logs the app writes.</p>
+<p>Google's disclosure for these Firebase Android SDKs says the collected data is encrypted in transit using HTTPS.</p>
+
+<h2>What else connects to the internet</h2>
+<p>Station discovery uses the community Radio Browser directory and its mirrors, over HTTPS. By default, ShoutKit tells Radio Browser when you start one of its stations, so popular stations rank higher. That report is the station's Radio Browser id. You can turn it off in Settings. Audio streams connect to broadcasters' servers. Station images are fetched from their image hosts. These services receive connection information such as your IP address and standard request headers. Some station streams and images are served over plain HTTP. The app allows that so those stations can play.</p>
+<p>Optional album artwork lookup is on by default. While it is on, the current artist and track title are sent to Apple's iTunes Search service to find cover art. You can turn it off in Settings.</p>
+<p>The Play build can send the last-played station and recent stations to the Wear OS companion over the Wearable Data Layer. That companion does not include Firebase Analytics, Crashlytics, or the Play Install Referrer library. Chromecast in this build discovers receivers on the local network and plays the current stream on one. The FOSS build includes neither the watch sync nor Chromecast.</p>
+
+<h2>Permissions and playback</h2>
+<p>Network access supports directory browsing and audio streaming. Foreground media playback and wake locks keep audio running in the background. Notification permission shows playback controls. Network state helps the app handle connection changes and metered networks. Bluetooth permission supports headset reconnection behavior where available.</p>
+<p>The Play build also receives the permissions declared by the Firebase Analytics SDK and not removed by this project: the advertising id, the Ad Services advertising id, Ad Services attribution, and binding the Play Install Referrer service.</p>
+
+<h2>External services</h2>
+<p>Directory providers, broadcasters, artwork hosts, and Google, for the Firebase data above, operate independently and may have their own logging and privacy practices. Firebase's disclosure says the data those SDKs collect is not transferred to other third parties except subprocessors that assist Firebase, or when the developer instructs a transfer. This app does not link Firebase to another service in code.</p>
+
+<h2>Questions and changes</h2>
+<p>There is no account to delete. The app does not show the Firebase installation id or the Crashlytics installation id. To ask about Analytics or crash data, open an issue on the <a href="https://github.com/cascadiacollections/shoutkit-android/issues">project tracker</a>. Review the <a href="https://github.com/cascadiacollections/shoutkit-android">source code</a> for what this build includes. This page will be updated when the Play build's behavior changes. The FOSS build is covered on the <a href="../">FOSS privacy page</a>.</p>
+</main>
+<footer>
+<span>ShoutKit · Cascadia Collections</span>
+<a href="../../">Back to the app</a>
+</footer>
+</div>
+</body>
+</html>
