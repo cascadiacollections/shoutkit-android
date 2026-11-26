@@ -43,8 +43,6 @@ a.inline{color:var(--ink)}
 .button:hover{transform:translateY(-2px)}
 .button.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 5px 0 #8a2a1c14}
 .button.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
-.button.is-soon{border-style:dashed;border-color:var(--muted);color:var(--muted);cursor:default}
-.button.is-soon:hover{transform:none}
 
 /* Hero */
 .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;padding:50px 0 80px}
@@ -168,3 +166,31 @@ footer{flex-direction:column}
 .holidaygrid{grid-template-columns:repeat(3,1fr)}
 .holidaynote{margin:28px 0 0}
 @media (max-width:900px){.holidaygrid{grid-template-columns:1fr}}
+
+/* Black Friday / Cyber Monday. promo.js removes `hidden` inside the window.
+   Until then these nodes take no space, including when JavaScript is off. */
+.bf-banner{background:var(--ink);color:var(--paper)}
+.bf-banner[hidden],#bf-promo[hidden]{display:none}
+.bf-banner-inner{width:min(1180px,calc(100% - 48px));margin:auto;padding:14px 0;display:flex;align-items:center;justify-content:space-between;gap:12px 20px}
+.bf-banner p{margin:0;flex:1 1 280px;font-size:.92rem;line-height:1.45}
+.bf-banner-actions{display:flex;align-items:center;gap:4px;flex:none}
+.bf-banner .button{min-height:44px;padding:8px 16px;font-size:.88rem;white-space:nowrap}
+.bf-dismiss{appearance:none;background:transparent;color:var(--paper);border:0;border-radius:100px;min-height:44px;padding:8px 12px;font:inherit;font-size:.88rem;font-weight:650;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bf-banner a:focus-visible,.bf-banner button:focus-visible{outline:3px solid var(--paper);outline-offset:3px;border-radius:4px}
+#bf-promo{padding:56px 0}
+.bf-lead{max-width:62ch}
+@media(max-width:800px){
+.bf-banner-inner{flex-wrap:wrap;align-items:flex-start}
+.bf-banner-actions{flex-wrap:wrap}
+}
+@media(max-width:600px){
+.bf-banner-inner{width:calc(100% - 32px)}
+.bf-banner .button{white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){
+.bf-banner,.bf-banner *,#bf-promo,#bf-promo *{transition:none!important;animation:none!important}
+}
+@media(forced-colors:active){
+.bf-banner{border-bottom:1px solid CanvasText}
+.bf-banner .button,.bf-dismiss{border:1px solid ButtonText}
+}
