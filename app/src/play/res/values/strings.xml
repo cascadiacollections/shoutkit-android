@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Play Settings opens the Play privacy page. The FOSS flavor keeps the URL in src/main,
+         which describes a build with no Firebase. -->
+    <string name="privacy_policy_url" translatable="false">https://cascadiacollections.github.io/shoutkit-android/privacy/play/</string>
+</resources>

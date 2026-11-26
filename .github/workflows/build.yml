@@ -28,7 +28,7 @@ jobs:
       - name: REUSE lint
         run: pipx run reuse==6.3.0 lint
       - name: Marketing site promo tests
-        run: node --test docs/promo.test.js
+        run: node --test docs/promo.test.js docs/privacy.test.js
       # setup-gradle validates the wrapper too, but Scorecard only recognises this action when
       # it checks the checked-in gradle-wrapper.jar.
       - name: Validate Gradle wrapper

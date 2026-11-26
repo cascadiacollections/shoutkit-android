@@ -215,7 +215,9 @@ See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
 
 ## Privacy
 
-Shoutkit collects no personal data. All preferences are stored locally on-device. See the [Privacy Policy](https://cascadiacollections.github.io/shoutkit-android/privacy/).
+The FOSS build (F-Droid and GitHub Releases, `com.cascadiacollections.sir.foss`) has no Firebase and no Play Install Referrer. Preferences stay on the device. See the [FOSS privacy policy](https://cascadiacollections.github.io/shoutkit-android/privacy/).
+
+The Google Play build (`com.cascadiacollections.sir`) includes Firebase Analytics, Firebase Crashlytics, and a one-time Install Referrer read. See the [Play privacy policy](https://cascadiacollections.github.io/shoutkit-android/privacy/play/). What to enter in Play Console’s Data safety form is recorded in [docs/play-data-safety.md](docs/play-data-safety.md). The form itself is filled in by the maintainer, not from this repository.
 
 ## License
 
