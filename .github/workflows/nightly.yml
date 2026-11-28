@@ -67,7 +67,7 @@ jobs:
           printf '%s' "$NIGHTLY_KEYSTORE" | base64 --decode > "$RUNNER_TEMP/nightly.jks"
           echo "KEYSTORE_PATH=$RUNNER_TEMP/nightly.jks" >> "$GITHUB_ENV"
       - name: Build signed FOSS APK and run unit tests
-        run: ./gradlew :app:assembleFossRelease :app:testFossDebugUnitTest --no-daemon --build-cache
+        run: ./gradlew :app:assembleFossRelease :app:testFossDebugUnitTest --no-daemon --parallel --build-cache
         env:
           KEYSTORE_PASSWORD: android
           KEY_ALIAS: androiddebugkey

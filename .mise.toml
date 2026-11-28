@@ -1,2 +1,5 @@
 [tools]
+# Eclipse Adoptium Temurin is an LTS-patched OpenJDK 21 distribution (mise's `openjdk-21`
+# points to Oracle's unpatched 21.0.2 reference archive). build.gradle.kts intentionally leaves
+# the Gradle Java toolchain vendor unpinned so Debian OpenJDK on F-Droid works too.
 java = "temurin-21"

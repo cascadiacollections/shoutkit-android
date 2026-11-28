@@ -66,6 +66,14 @@ subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
         compilerOptions.allWarningsAsErrors.set(true)
     }
+    val parallelTestForks = (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 2)
+    tasks.withType<Test>().configureEach {
+        // Robolectric + MockK/ByteBuddy append to the bootstrap classpath, which disables
+        // AppCDS and logs an OpenJDK VM warning unless sharing is turned off.
+        jvmArgs("-Xshare:off")
+        maxHeapSize = "1024m"
+        maxParallelForks = parallelTestForks
+    }
 }
 
 // Static analysis for every module: detekt (+ ktlint formatting and Compose rules).
@@ -73,10 +81,11 @@ subprojects {
 // `./gradlew detekt` checks, `--auto-correct` applies formatting fixes, `detektBaseline` regenerates baselines.
 val detektRulePlugins = listOf(libs.detekt.rules.ktlint.wrapper, libs.compose.rules.detekt)
 val detektReportMerge = tasks.register<dev.detekt.gradle.report.ReportMergeTask>("detektReportMerge") {
+    description = "Merges detekt SARIF reports from all subprojects."
     output.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
 }
 subprojects {
-    apply(plugin = "dev.detekt")
+    pluginManager.apply("dev.detekt")
     extensions.configure<dev.detekt.gradle.extensions.DetektExtension> {
         buildUponDefaultConfig.set(true)
         parallel.set(true)

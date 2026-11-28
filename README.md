@@ -136,9 +136,9 @@ to open.
 
 ### Build Toolchain
 
-- **AGP 9.5.2** with configuration cache
-- **Eclipse Adoptium Temurin JDK 21** via Foojay resolver
-- **Gradle 9.9.1** with parallel builds and build cache
+- **AGP 9.5.3** with configuration cache
+- **OpenJDK 21 (Temurin)** via Foojay / mise
+- **Gradle 9.9.3** with parallel builds and build cache
 - **JaCoCo** coverage with 5% minimum threshold
 - **Baseline profiles** for AOT compilation
 - **Convention plugins** (`build-logic/`) for shared config

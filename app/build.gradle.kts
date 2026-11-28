@@ -10,8 +10,8 @@ plugins {
 
 // Apply Firebase plugins only when google-services.json is available (Play builds)
 if (file("src/play/google-services.json").exists()) {
-    apply(plugin = libs.plugins.google.services.get().pluginId)
-    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+    pluginManager.apply(libs.plugins.google.services.get().pluginId)
+    pluginManager.apply(libs.plugins.firebase.crashlytics.get().pluginId)
 }
 
 // Load keystore.properties for local development (CI uses env vars instead)
@@ -195,6 +195,7 @@ androidComponents {
     onVariants { variant ->
         val taskName = "generate${variant.name.replaceFirstChar(Char::uppercase)}Shortcuts"
         val generateShortcuts = tasks.register<GenerateShortcutResources>(taskName) {
+            description = "Generates variant-specific shortcuts.xml with the applicationId substituted."
             applicationId.set(variant.applicationId)
             template.set(layout.projectDirectory.file("src/main/shortcuts/shortcuts.xml"))
             outputDirectory.set(layout.buildDirectory.dir("generated/res/${variant.name}/shortcuts"))
@@ -349,6 +350,7 @@ dependencies {
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
+    description = "Generates JaCoCo coverage reports for playDebug unit tests."
     dependsOn("testPlayDebugUnitTest")
 
     reports {

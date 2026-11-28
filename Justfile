@@ -13,11 +13,11 @@ _qodana_opts := if ENGINE == "container" { "--platform linux/amd64 --rosetta --m
 
 # Build debug APK
 build:
-    ./gradlew assemble{{capitalize(flavor)}}Debug --no-daemon --console=rich --warning-mode=none
+    ./gradlew assemble{{capitalize(flavor)}}Debug --console=rich --warning-mode=none
 
 # Run unit tests
 test:
-    ./gradlew test{{capitalize(flavor)}}DebugUnitTest --no-daemon
+    ./gradlew test{{capitalize(flavor)}}DebugUnitTest --parallel --build-cache
 
 # Install debug build on connected device.
 # If android.device.serial is set in local.properties, targets that device;
@@ -28,9 +28,9 @@ install:
     serial=$(grep -m1 '^android.device.serial=' local.properties 2>/dev/null \
         | cut -d= -f2 | tr -d '[:space:]' || true)
     if [[ -n "$serial" ]]; then
-        ANDROID_SERIAL="$serial" ./gradlew :app:install{{capitalize(flavor)}}Debug --no-daemon
+        ANDROID_SERIAL="$serial" ./gradlew :app:install{{capitalize(flavor)}}Debug
     else
-        ./gradlew :app:install{{capitalize(flavor)}}Debug --no-daemon
+        ./gradlew :app:install{{capitalize(flavor)}}Debug
     fi
 
 # Build + install in one step
@@ -38,27 +38,27 @@ deploy: build install
 
 # Build FOSS variant
 build-foss:
-    ./gradlew assembleFossDebug --no-daemon --console=rich --warning-mode=none
+    ./gradlew assembleFossDebug --console=rich --warning-mode=none
 
 # Build Play variant (with Firebase)
 build-full:
-    ./gradlew assemblePlayDebug --no-daemon
+    ./gradlew assemblePlayDebug
 
 # Refactor safety baseline (matches CI's core local checks)
 verify:
-    ./gradlew assembleFossDebug testPlayDebugUnitTest testFossDebugUnitTest :wear:testDebugUnitTest :core:model:testDebugUnitTest :core:directory:testDebugUnitTest :core:playback:testDebugUnitTest :core:persistence:testDebugUnitTest :core:artwork:testDebugUnitTest :libs:audio-levels:testDebugUnitTest :libs:media3-timeshift:testDebugUnitTest :libs:okhttp-streaming:testDebugUnitTest detekt lintPlayDebug :wear:lintDebug --no-daemon --parallel --build-cache
+    ./gradlew assembleFossDebug testPlayDebugUnitTest testFossDebugUnitTest :wear:testDebugUnitTest :core:model:testDebugUnitTest :core:directory:testDebugUnitTest :core:playback:testDebugUnitTest :core:persistence:testDebugUnitTest :core:artwork:testDebugUnitTest :libs:audio-levels:testDebugUnitTest :libs:media3-timeshift:testDebugUnitTest :libs:okhttp-streaming:testDebugUnitTest detekt lintPlayDebug :wear:lintDebug --parallel --build-cache
 
 # Static analysis: detekt (+ ktlint, Compose rules) and Android Lint across all modules
 lint:
-    ./gradlew detekt lintPlayDebug lintFossDebug :wear:lintDebug --no-daemon --continue
+    ./gradlew detekt lintPlayDebug lintFossDebug :wear:lintDebug --parallel --build-cache --continue
 
 # Apply ktlint formatting fixes
 format:
-    ./gradlew detekt --auto-correct --no-daemon --continue
+    ./gradlew detekt --auto-correct --parallel --continue
 
 # Regenerate detekt and Android Lint baselines (only after triaging the findings!)
 baseline:
-    ./gradlew detektBaseline updateLintBaseline --no-daemon --continue
+    ./gradlew detektBaseline updateLintBaseline --continue
 
 # Qodana (JetBrains IDE inspections) in a container; report at http://localhost:8080
 qodana:
