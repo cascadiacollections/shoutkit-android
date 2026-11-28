@@ -13,7 +13,6 @@ internal fun Project.configureLint(lint: Lint, libs: VersionCatalog) {
         abortOnError = true
         warningsAsErrors = true
         checkReleaseBuilds = true
-        sarifReport = true
         // Version-bump nags are Renovate's/Dependabot's job, not a build failure.
         disable += setOf("OldTargetApi", "NewerVersionAvailable", "ObsoleteSdkInt", "GradleDependency", "AndroidGradlePluginVersion")
         // Off-by-default checks worth having.

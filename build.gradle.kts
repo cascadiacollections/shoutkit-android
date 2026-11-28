@@ -69,7 +69,7 @@ subprojects {
 // Findings that predate a rule live in each module's detekt-baseline.xml; new code must be clean.
 // `./gradlew detekt` checks, `--auto-correct` applies formatting fixes, `detektBaseline` regenerates baselines.
 val detektRulePlugins = listOf(libs.detekt.rules.ktlint.wrapper, libs.compose.rules.detekt)
-val detektReportMerge by tasks.registering(dev.detekt.gradle.report.ReportMergeTask::class) {
+val detektReportMerge = tasks.register<dev.detekt.gradle.report.ReportMergeTask>("detektReportMerge") {
     output.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
 }
 subprojects {

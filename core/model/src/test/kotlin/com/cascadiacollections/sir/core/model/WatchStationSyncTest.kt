@@ -46,7 +46,7 @@ class WatchStationSyncTest {
         val raw = """{"last":{"stationuuid":"a","name":"A","url":"https://a"},"recents":[],"schema":2}"""
         val decoded = WatchStationSync.decode(raw)
         assertThat(decoded.last!!.streamUrl).isEqualTo("https://a")
-        assertThat(decoded.last!!.isHls).isFalse()
+        assertThat(decoded.last.isHls).isFalse()
     }
 
     @Test

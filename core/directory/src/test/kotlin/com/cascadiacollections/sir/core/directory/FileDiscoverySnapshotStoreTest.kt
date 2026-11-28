@@ -6,12 +6,14 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.cascadiacollections.sir.core.model.Station
 import java.io.File
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class FileDiscoverySnapshotStoreTest {
 
     @get:Rule

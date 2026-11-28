@@ -8,11 +8,13 @@ import com.cascadiacollections.sir.core.directory.RadioDirectory
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.core.model.StationQuery
 import java.io.IOException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class StationPlayReporterTest {
 
     private val uuid = "96062a7b-0601-11e8-ae97-52543be04c81"

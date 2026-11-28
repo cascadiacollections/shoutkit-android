@@ -124,9 +124,6 @@ fun RecentlyHeardScreen(
                             }
                         },
                         leadingContent = { TrackArtwork(track.artworkUrl) },
-                        headlineContent = {
-                            Text(track.title.ifBlank { stringResource(R.string.unknown_track) })
-                        },
                         supportingContent = {
                             Text(
                                 listOfNotNull(
@@ -142,7 +139,9 @@ fun RecentlyHeardScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                    )
+                    ) {
+                        Text(track.title.ifBlank { stringResource(R.string.unknown_track) })
+                    }
                 }
             }
         }

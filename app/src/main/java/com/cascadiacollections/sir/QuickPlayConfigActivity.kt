@@ -149,8 +149,9 @@ private fun QuickPlayPicker(stations: List<Station>, pinnedId: String?, onPick: 
 @Composable
 private fun QuickPlayOption(label: String, selected: Boolean, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(label) },
-        leadingContent = { RadioButton(selected = selected, onClick = null) },
-        modifier = Modifier.clickable(onClick = onClick)
-    )
+        modifier = Modifier.clickable(onClick = onClick),
+        leadingContent = { RadioButton(selected = selected, onClick = null) }
+    ) {
+        Text(label)
+    }
 }

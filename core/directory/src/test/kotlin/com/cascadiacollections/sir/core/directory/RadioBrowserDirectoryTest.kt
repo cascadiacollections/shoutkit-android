@@ -15,12 +15,14 @@ import com.cascadiacollections.sir.core.model.StationQuery
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class RadioBrowserDirectoryTest {
 
     private val mirrors = listOf(

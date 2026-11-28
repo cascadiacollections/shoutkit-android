@@ -7,12 +7,14 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import java.io.IOException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 /** `getStations(ids)`: the batched `byuuid` lookup behind the saved-station refresh. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class RadioBrowserBatchLookupTest {
 
     private fun uuid(n: Int) = "%08x-0000-4000-8000-000000000000".format(n)

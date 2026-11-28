@@ -39,7 +39,6 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.media3.session.DefaultMediaNotificationProvider.NotificationIdProvider
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaConstants
 import androidx.media3.session.MediaLibraryService
@@ -501,7 +500,7 @@ class RadioPlaybackService : MediaLibraryService() {
                             .add(SessionCommand(ACTION_GO_LIVE, android.os.Bundle.EMPTY))
                             .add(SessionCommand(ACTION_TOGGLE_FAVORITE, android.os.Bundle.EMPTY))
                             .build()
-                    return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                    return MediaSession.ConnectionResult.AcceptedResultBuilder(session, controller)
                         .setAvailablePlayerCommands(availableCommands)
                         .setAvailableSessionCommands(availableSessionCommands)
                         .build()

@@ -15,6 +15,7 @@ data class AlbumArt(val artworkUrl: String, val trackViewUrl: String? = null)
  * the same song with different capitalisation, and each variant must hit the same cache
  * entry rather than spend another request.
  */
+@ConsistentCopyVisibility
 data class TrackKey private constructor(val artist: String, val title: String) {
     companion object {
         /** A key for the pair, or null when either half is blank and there is nothing to look up. */

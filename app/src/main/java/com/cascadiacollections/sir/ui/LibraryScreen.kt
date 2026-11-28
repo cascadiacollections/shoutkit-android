@@ -394,9 +394,6 @@ fun LibraryScreen(
                     }) { track ->
                         ListItem(
                             leadingContent = { TrackArtwork(track.artworkUrl) },
-                            headlineContent = {
-                                Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            },
                             supportingContent = {
                                 Text(track.artist, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             },
@@ -407,7 +404,9 @@ fun LibraryScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                        )
+                        ) {
+                            Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
                     }
                 }
             }
@@ -515,13 +514,14 @@ private fun RecentlyHeardRow(count: Int, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         leadingContent = { Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = null) },
-        headlineContent = { Text(stringResource(R.string.recently_heard)) },
         trailingContent = {
             if (count > 0) {
                 Badge { Text(count.toString()) }
             }
         }
-    )
+    ) {
+        Text(stringResource(R.string.recently_heard))
+    }
 }
 
 @Composable

@@ -1,6 +1,5 @@
 package com.cascadiacollections.sir
 
-import android.net.Uri
 import android.os.SystemClock
 import androidx.annotation.OptIn
 import androidx.media3.common.C
@@ -165,15 +164,11 @@ class PlaybackFailureMappingTest {
     }
 
     private fun loadError(exception: IOException, errorCount: Int) = LoadErrorHandlingPolicy.LoadErrorInfo(
-        LoadEventInfo(
+        LoadEventInfo.Builder(
             LoadEventInfo.getNewId(),
             DataSpec.Builder().setUri("https://stream.example/live").build(),
-            Uri.parse("https://stream.example/live"),
-            emptyMap(),
-            SystemClock.elapsedRealtime(),
-            0,
-            0
-        ),
+            SystemClock.elapsedRealtime()
+        ).build(),
         MediaLoadData(C.DATA_TYPE_MEDIA),
         exception,
         errorCount

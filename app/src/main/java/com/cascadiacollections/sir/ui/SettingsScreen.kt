@@ -34,6 +34,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -213,7 +214,6 @@ fun SettingsContent(
                 CastModuleState.NotInstalled, CastModuleState.Unavailable -> null
             }
             ListItem(
-                headlineContent = { Text(stringResource(R.string.enable_chromecast)) },
                 supportingContent = castStatusText?.let { { Text(it) } },
                 trailingContent = {
                     when (castModuleState) {
@@ -235,7 +235,9 @@ fun SettingsContent(
                         )
                     }
                 }
-            )
+            ) {
+                Text(stringResource(R.string.enable_chromecast))
+            }
 
             HorizontalDivider()
         }
@@ -248,7 +250,6 @@ fun SettingsContent(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
         )
         ListItem(
-            headlineContent = { Text(stringResource(R.string.report_plays)) },
             supportingContent = { Text(stringResource(R.string.report_plays_summary)) },
             trailingContent = {
                 Switch(
@@ -258,9 +259,10 @@ fun SettingsContent(
                     }
                 )
             }
-        )
+        ) {
+            Text(stringResource(R.string.report_plays))
+        }
         ListItem(
-            headlineContent = { Text(stringResource(R.string.fetch_album_artwork)) },
             supportingContent = { Text(stringResource(R.string.fetch_album_artwork_summary)) },
             trailingContent = {
                 Switch(
@@ -270,7 +272,9 @@ fun SettingsContent(
                     }
                 )
             }
-        )
+        ) {
+            Text(stringResource(R.string.fetch_album_artwork))
+        }
 
         // Privacy Policy
         TextButton(
@@ -483,13 +487,14 @@ private fun EqualizerBandSliders(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.width(72.dp)
                 )
+                val sliderState = rememberSliderState(value = gain, trackRange = -1f..1f)
+                sliderState.value = gain
                 Slider(
-                    value = gain,
+                    state = sliderState,
                     onValueChange = { updated ->
                         onGainsChange(gains.toMutableList().apply { this[index] = updated })
                     },
                     onValueChangeFinished = { onGainsSettled(latestGains) },
-                    valueRange = -1f..1f,
                     modifier = Modifier.weight(1f)
                 )
             }

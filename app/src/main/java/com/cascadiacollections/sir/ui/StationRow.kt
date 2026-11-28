@@ -50,12 +50,6 @@ fun StationRow(
             onClick = onPlay,
             onLongClick = onLongClick
         ),
-        headlineContent = {
-            Text(
-                text = station.name,
-                color = if (isPlaying) MaterialTheme.colorScheme.primary else Color.Unspecified
-            )
-        },
         supportingContent = when {
             isPlaying -> {
                 { Text(stringResource(selectedLabel)) }
@@ -77,7 +71,12 @@ fun StationRow(
             )
         },
         trailingContent = trailing
-    )
+    ) {
+        Text(
+            text = station.name,
+            color = if (isPlaying) MaterialTheme.colorScheme.primary else Color.Unspecified
+        )
+    }
 }
 
 @Composable

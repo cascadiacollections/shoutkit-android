@@ -43,7 +43,6 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
     SettingsSectionHeading(stringResource(R.string.playback_heading))
     // Read once at launch by SirApp, so a change takes effect from the next launch.
     ListItem(
-        headlineContent = { Text(stringResource(R.string.prewarm_connections)) },
         supportingContent = { Text(stringResource(R.string.prewarm_connections_summary)) },
         trailingContent = {
             Switch(
@@ -53,10 +52,11 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
                 }
             )
         }
-    )
+    ) {
+        Text(stringResource(R.string.prewarm_connections))
+    }
     // Read live by RadioPlaybackService, so a change applies to whatever is playing now.
     ListItem(
-        headlineContent = { Text(stringResource(R.string.loop_finished_broadcasts)) },
         supportingContent = { Text(stringResource(R.string.loop_finished_broadcasts_summary)) },
         trailingContent = {
             Switch(
@@ -66,11 +66,12 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
                 }
             )
         }
-    )
+    ) {
+        Text(stringResource(R.string.loop_finished_broadcasts))
+    }
     // Only where the device has a spatializer; read live by RadioPlaybackService.
     if (spatialSupported) {
         ListItem(
-            headlineContent = { Text(stringResource(R.string.spatial_audio)) },
             supportingContent = { Text(stringResource(R.string.spatial_audio_summary)) },
             trailingContent = {
                 Switch(
@@ -80,12 +81,13 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
                     }
                 )
             }
-        )
+        ) {
+            Text(stringResource(R.string.spatial_audio))
+        }
     }
     // Read live by Now Playing. Not tied to battery saver: the meter is about ten small FFTs
     // a second, and stopping it there made the bars look broken on iOS.
     ListItem(
-        headlineContent = { Text(stringResource(R.string.show_visualizer)) },
         supportingContent = { Text(stringResource(R.string.show_visualizer_summary)) },
         trailingContent = {
             Switch(
@@ -95,7 +97,9 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
                 }
             )
         }
-    )
+    ) {
+        Text(stringResource(R.string.show_visualizer))
+    }
 }
 
 /** Settings → About, at the end of the screen. */
@@ -106,7 +110,6 @@ internal fun AboutSettingsSection(onOpenLicenses: () -> Unit) {
     HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
     SettingsSectionHeading(stringResource(R.string.about_heading))
     ListItem(
-        headlineContent = { Text(stringResource(R.string.about_version)) },
         supportingContent = {
             Text(
                 stringResource(
@@ -117,7 +120,9 @@ internal fun AboutSettingsSection(onOpenLicenses: () -> Unit) {
                 )
             )
         }
-    )
+    ) {
+        Text(stringResource(R.string.about_version))
+    }
     AboutLink(R.string.about_source_code) { context.openUrl(R.string.about_source_code_url) }
     AboutLink(R.string.about_report_issue) { context.openUrl(R.string.about_report_issue_url) }
     // ShoutKit's "Support Holmdel" link. FOSS builds only: Google Play's payments policy
@@ -142,9 +147,10 @@ private fun SettingsSectionHeading(text: String) {
 @Composable
 private fun AboutLink(labelRes: Int, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(stringResource(labelRes)) },
         modifier = Modifier.clickable(onClick = onClick)
-    )
+    ) {
+        Text(stringResource(labelRes))
+    }
 }
 
 private fun Context.openUrl(urlRes: Int) {
