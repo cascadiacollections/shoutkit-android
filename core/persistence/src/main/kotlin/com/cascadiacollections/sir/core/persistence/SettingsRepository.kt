@@ -3,7 +3,6 @@ package com.cascadiacollections.sir.core.persistence
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -11,15 +10,10 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.preferencesDataStoreFile
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.core.playback.EqualizerPreset
 import com.cascadiacollections.sir.core.playback.SleepTimerDuration
 import com.cascadiacollections.sir.core.playback.StreamQuality
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,60 +26,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
-/**
- * The single live [DataStore] for the settings file.
- *
- * DataStore requires that a file is owned by one instance at a time, which the
- * `preferencesDataStore` property delegate guarantees by caching one instance forever.
- * That delegate caches it against the *first* context it ever sees, though, which breaks
- * under Robolectric: a test class can get a fresh Application with a fresh files
- * directory, leaving the cached store writing through a directory that no longer exists.
- *
- * So the owning Application is tracked explicitly. In production it is set once and never
- * changes. When a *different* Application appears, the previous store's scope is cancelled
- * before the replacement is built — DataStore only releases its claim on the file when
- * that scope completes, so without the cancel the second store would either contend with
- * the first or trip the "multiple DataStores active for the same file" check.
- *
- * This used to be a `WeakHashMap<Context, DataStore<Preferences>>`, which looked like it
- * bounded itself but did not: the cached value's `produceFile` lambda closes over the very
- * context used as the key, so no entry was ever weakly reachable and no scope was ever
- * cancelled. One strongly-held owner is both smaller and honest about its lifetime.
- */
-private object SettingsDataStore {
-
-    private const val FILE_NAME = "settings"
-
-    private var owner: Context? = null
-    private var ownerScope: CoroutineScope? = null
-    private var instance: DataStore<Preferences>? = null
-
-    @Synchronized
-    operator fun get(context: Context): DataStore<Preferences> {
-        val app = context.applicationContext
-        instance?.let { existing -> if (owner === app) return existing }
-
-        ownerScope?.cancel()
-
-        val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-        val created = PreferenceDataStoreFactory.create(scope = scope) {
-            app.preferencesDataStoreFile(FILE_NAME)
-        }
-        owner = app
-        ownerScope = scope
-        instance = created
-        return created
-    }
-}
-
-private val Context.dataStore: DataStore<Preferences> get() = SettingsDataStore[this]
+private val settingsDataStore = AppScopedDataStore("settings")
 
 /**
  * Settings repository using DataStore for persistence.
  */
-class SettingsRepository(private val context: Context) :
+class SettingsRepository(context: Context) :
     RecentShelfStore,
     SavedStationRefreshStore {
+
+    private val dataStore: DataStore<Preferences> = settingsDataStore[context]
 
     private val streamQualityKey = intPreferencesKey("stream_quality")
     private val chromecastEnabledKey = booleanPreferencesKey("chromecast_enabled")
@@ -111,18 +61,18 @@ class SettingsRepository(private val context: Context) :
     private val installReferrerCheckedKey = booleanPreferencesKey("install_referrer_checked")
     private val hiddenRecentStationIdsKey = stringSetPreferencesKey("hidden_recent_station_ids")
 
-    val streamQuality: Flow<StreamQuality> = context.dataStore.data.map { prefs ->
+    val streamQuality: Flow<StreamQuality> = dataStore.data.map { prefs ->
         StreamQuality.fromOrdinal(prefs[streamQualityKey] ?: 0)
     }
 
     suspend fun setStreamQuality(quality: StreamQuality) {
-        context.dataStore.edit { prefs -> prefs[streamQualityKey] = quality.ordinal }
+        dataStore.edit { prefs -> prefs[streamQualityKey] = quality.ordinal }
     }
 
     /**
      * Flow of Chromecast enabled preference
      */
-    val chromecastEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val chromecastEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[chromecastEnabledKey] ?: false
     }
 
@@ -130,7 +80,7 @@ class SettingsRepository(private val context: Context) :
      * Set Chromecast enabled preference
      */
     suspend fun setChromecastEnabled(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[chromecastEnabledKey] = enabled
         }
     }
@@ -138,7 +88,7 @@ class SettingsRepository(private val context: Context) :
     /**
      * Flow of sleep timer duration
      */
-    val sleepTimerDuration: Flow<SleepTimerDuration> = context.dataStore.data.map { preferences ->
+    val sleepTimerDuration: Flow<SleepTimerDuration> = dataStore.data.map { preferences ->
         SleepTimerDuration.fromMinutes(preferences[sleepTimerMinutesKey] ?: 0)
     }
 
@@ -146,7 +96,7 @@ class SettingsRepository(private val context: Context) :
      * Set sleep timer duration
      */
     suspend fun setSleepTimerDuration(duration: SleepTimerDuration) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[sleepTimerMinutesKey] = duration.minutes
         }
     }
@@ -154,7 +104,7 @@ class SettingsRepository(private val context: Context) :
     /**
      * Flow of the epoch-millis timestamp when the sleep timer will fire (0 = no timer active)
      */
-    val sleepTimerFiresAt: Flow<Long> = context.dataStore.data.map { prefs ->
+    val sleepTimerFiresAt: Flow<Long> = dataStore.data.map { prefs ->
         prefs[sleepTimerFiresAtKey] ?: 0L
     }
 
@@ -162,7 +112,7 @@ class SettingsRepository(private val context: Context) :
      * Persist when the sleep timer will fire; pass 0 or negative to clear
      */
     suspend fun setSleepTimerFiresAt(epochMillis: Long) {
-        context.dataStore.edit { prefs ->
+        dataStore.edit { prefs ->
             if (epochMillis <= 0L) {
                 prefs.remove(sleepTimerFiresAtKey)
             } else {
@@ -174,17 +124,17 @@ class SettingsRepository(private val context: Context) :
     /**
      * Flow of equalizer preset
      */
-    val equalizerPreset: Flow<EqualizerPreset> = context.dataStore.data.map { preferences ->
+    val equalizerPreset: Flow<EqualizerPreset> = dataStore.data.map { preferences ->
         EqualizerPreset.fromOrdinal(preferences[equalizerPresetKey] ?: 0)
     }
 
     /** Whether the equalizer is using a custom band curve rather than [equalizerPreset]. */
-    val equalizerUseCustomBands: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val equalizerUseCustomBands: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[equalizerUseCustomBandsKey] ?: false
     }
 
     /** The custom equalizer curve, one gain per UI slider (-1f..1f, 0f = flat). */
-    val equalizerCustomBands: Flow<List<Float>> = context.dataStore.data
+    val equalizerCustomBands: Flow<List<Float>> = dataStore.data
         .map { it[equalizerCustomBandsKey] }
         .distinctUntilChanged()
         .map { decodeFloatList(it) }
@@ -194,7 +144,7 @@ class SettingsRepository(private val context: Context) :
      * mutually exclusive, so picking one always supersedes the other.
      */
     suspend fun setEqualizerPreset(preset: EqualizerPreset) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[equalizerPresetKey] = preset.ordinal
             preferences[equalizerUseCustomBandsKey] = false
         }
@@ -202,7 +152,7 @@ class SettingsRepository(private val context: Context) :
 
     /** Persists [bands] as the active equalizer curve, switching into custom-band mode. */
     suspend fun setEqualizerCustomBands(bands: List<Float>) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[equalizerCustomBandsKey] = Json.encodeToString(bands)
             preferences[equalizerUseCustomBandsKey] = true
         }
@@ -211,7 +161,7 @@ class SettingsRepository(private val context: Context) :
     /**
      * Flow of custom stream URL (debug only feature)
      */
-    val customStreamUrl: Flow<String?> = context.dataStore.data.map { preferences ->
+    val customStreamUrl: Flow<String?> = dataStore.data.map { preferences ->
         preferences[customStreamUrlKey]?.takeIf { it.isNotBlank() }
     }
 
@@ -219,7 +169,7 @@ class SettingsRepository(private val context: Context) :
      * Set custom stream URL (debug only feature)
      */
     suspend fun setCustomStreamUrl(url: String?) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             if (url.isNullOrBlank()) {
                 preferences.remove(customStreamUrlKey)
             } else {
@@ -234,7 +184,7 @@ class SettingsRepository(private val context: Context) :
     override val savedStations: Flow<List<Station>> = decodedStations(savedStationsKey)
 
     /** Saved stations ordered by play count, with saved order breaking ties. */
-    val mostPlayedSavedStations: Flow<List<Station>> = context.dataStore.data
+    val mostPlayedSavedStations: Flow<List<Station>> = dataStore.data
         .map { preferences -> preferences[savedStationsKey] to preferences[stationPlayCountsKey] }
         .distinctUntilChanged()
         .map { (savedRaw, countsRaw) ->
@@ -243,12 +193,12 @@ class SettingsRepository(private val context: Context) :
         }
 
     /** Whether speculative connection prewarming is enabled. Disabled until measured. */
-    val connectionPrewarmingEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val connectionPrewarmingEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[connectionPrewarmingEnabledKey] ?: false
     }
 
     suspend fun setConnectionPrewarmingEnabled(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[connectionPrewarmingEnabledKey] = enabled
         }
     }
@@ -257,12 +207,12 @@ class SettingsRepository(private val context: Context) :
      * Whether a broadcast that genuinely finishes (a finite file, not a live stream) plays
      * again from the start rather than stopping. Off by default, matching ShoutKit.
      */
-    val loopFinishedBroadcasts: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val loopFinishedBroadcasts: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[loopFinishedBroadcastsKey] ?: false
     }
 
     suspend fun setLoopFinishedBroadcasts(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[loopFinishedBroadcastsKey] = enabled
         }
     }
@@ -272,12 +222,12 @@ class SettingsRepository(private val context: Context) :
      * the directory uses to rank popular stations. On by default, matching ShoutKit;
      * user-toggleable from the privacy section of settings.
      */
-    val reportPlaysToDirectory: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val reportPlaysToDirectory: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[reportPlaysToDirectoryKey] ?: true
     }
 
     suspend fun setReportPlaysToDirectory(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[reportPlaysToDirectoryKey] = enabled
         }
     }
@@ -286,12 +236,12 @@ class SettingsRepository(private val context: Context) :
      * Whether the current track's artist and title are sent to Apple's iTunes Search API to
      * find its cover art. On by default, matching ShoutKit; when off, no request is made.
      */
-    val fetchAlbumArtwork: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val fetchAlbumArtwork: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[fetchAlbumArtworkKey] ?: true
     }
 
     suspend fun setFetchAlbumArtwork(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[fetchAlbumArtworkKey] = enabled
         }
     }
@@ -300,23 +250,23 @@ class SettingsRepository(private val context: Context) :
      * Whether Now Playing shows the live level meter. On by default, as in ShoutKit. The meter
      * also hides itself when the system asks for reduced motion, whatever this says.
      */
-    val showVisualizer: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val showVisualizer: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[showVisualizerKey] ?: true
     }
 
     suspend fun setShowVisualizer(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[showVisualizerKey] = enabled
         }
     }
 
     /** Whether playback is spatialized on headphones that support it. Off by default, as in ShoutKit. */
-    val spatialAudioEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val spatialAudioEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[spatialAudioKey] ?: false
     }
 
     suspend fun setSpatialAudioEnabled(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[spatialAudioKey] = enabled
         }
     }
@@ -325,12 +275,12 @@ class SettingsRepository(private val context: Context) :
      * Whether the one-time first-run welcome has been dismissed. Absent means "not yet",
      * so existing installs see the welcome once after upgrading, which is intended.
      */
-    val hasCompletedFirstRun: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val hasCompletedFirstRun: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[hasCompletedFirstRunKey] ?: false
     }
 
     suspend fun setHasCompletedFirstRun(completed: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[hasCompletedFirstRunKey] = completed
         }
     }
@@ -339,13 +289,13 @@ class SettingsRepository(private val context: Context) :
      * Genre preset for the first-run welcome, or null when nothing has set one.
      * Callers store only an allow-listed tag; this value never leaves the device.
      */
-    val firstRunGenre: Flow<String?> = context.dataStore.data.map { preferences ->
+    val firstRunGenre: Flow<String?> = dataStore.data.map { preferences ->
         preferences[firstRunGenreKey]
     }
 
     /** Persists [genre], or clears the preset when [genre] is null. */
     suspend fun setFirstRunGenre(genre: String?) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             if (genre == null) preferences.remove(firstRunGenreKey) else preferences[firstRunGenreKey] = genre
         }
     }
@@ -369,12 +319,12 @@ class SettingsRepository(private val context: Context) :
      * Whether this install has already consulted the Play Install Referrer.
      * The referrer string itself is never stored; this flag only stops a second read.
      */
-    val installReferrerChecked: Flow<Boolean> = context.dataStore.data.map { preferences ->
+    val installReferrerChecked: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[installReferrerCheckedKey] ?: false
     }
 
     suspend fun setInstallReferrerChecked(checked: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[installReferrerCheckedKey] = checked
         }
     }
@@ -384,12 +334,12 @@ class SettingsRepository(private val context: Context) :
      */
     override val recentStations: Flow<List<Station>> = decodedStations(recentStationsKey)
 
-    override val hiddenRecentStationIds: Flow<Set<String>> = context.dataStore.data.map { preferences ->
+    override val hiddenRecentStationIds: Flow<Set<String>> = dataStore.data.map { preferences ->
         preferences[hiddenRecentStationIdsKey].orEmpty()
     }
 
     override suspend fun hideRecentStation(stationId: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val recentIds = StationCodec.decode(preferences[recentStationsKey]).map { it.id }
             if (stationId in recentIds) {
                 preferences[hiddenRecentStationIdsKey] = preferences[hiddenRecentStationIdsKey].orEmpty() + stationId
@@ -398,7 +348,7 @@ class SettingsRepository(private val context: Context) :
     }
 
     override suspend fun unhideRecentStation(stationId: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences.putHiddenRecentIds(preferences[hiddenRecentStationIdsKey].orEmpty() - stationId)
         }
     }
@@ -415,7 +365,7 @@ class SettingsRepository(private val context: Context) :
      * leaving a stale entry for `selectStation` to prune on some later, unrelated call.
      */
     suspend fun removeStation(stationId: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val updated = StationCollections.removeFavorite(
                 StationCodec.decode(preferences[savedStationsKey]),
                 stationId
@@ -434,7 +384,7 @@ class SettingsRepository(private val context: Context) :
      */
     suspend fun favoriteSelectedStation(toggle: Boolean = false): FavoriteCurrentStation.Outcome {
         var outcome: FavoriteCurrentStation.Outcome = FavoriteCurrentStation.Outcome.NothingSelected
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val saved = StationCodec.decode(preferences[savedStationsKey])
             val selected = StationCodec.decode(preferences[selectedStationKey]).firstOrNull()
             val decided = FavoriteCurrentStation.decide(selected, saved, toggle)
@@ -457,7 +407,7 @@ class SettingsRepository(private val context: Context) :
      * stream. Persisted so the choice survives process death and is visible to the
      * playback service, the widget and the tile without an explicit hand-off.
      */
-    val selectedStation: Flow<Station?> = context.dataStore.data
+    val selectedStation: Flow<Station?> = dataStore.data
         .map { it[selectedStationKey] }
         .distinctUntilChanged()
         .map { StationCodec.decode(it).firstOrNull() }
@@ -469,7 +419,7 @@ class SettingsRepository(private val context: Context) :
      * playing that is missing from the recents list.
      */
     suspend fun selectStation(station: Station) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[selectedStationKey] = StationCodec.encode(listOf(station))
 
             // Play counts exist only to rank `mostPlayedSavedStations`, so they are bounded
@@ -509,12 +459,12 @@ class SettingsRepository(private val context: Context) :
      * Reverts to the app's own stream.
      */
     suspend fun clearSelectedStation() {
-        context.dataStore.edit { preferences -> preferences.remove(selectedStationKey) }
+        dataStore.edit { preferences -> preferences.remove(selectedStationKey) }
     }
 
     /** Removes one station from the recently played list (and its shelf-hidden flag). */
     suspend fun removeRecentStation(stationId: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val recents = StationCollections.removeRecent(
                 StationCodec.decode(preferences[recentStationsKey]),
                 stationId
@@ -529,7 +479,7 @@ class SettingsRepository(private val context: Context) :
      * Does nothing when it is already there, for instance because it was played again.
      */
     suspend fun restoreRecentStation(station: Station, index: Int) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val recents = StationCodec.decode(preferences[recentStationsKey])
             if (recents.any { it.id == station.id }) return@edit
             val restored = recents.toMutableList().apply { add(index.coerceIn(0, size), station) }
@@ -541,7 +491,7 @@ class SettingsRepository(private val context: Context) :
      * Clears the recently played list, e.g. from the privacy settings.
      */
     suspend fun clearRecentStations() {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences.remove(recentStationsKey)
             preferences.remove(hiddenRecentStationIdsKey)
         }
@@ -567,7 +517,7 @@ class SettingsRepository(private val context: Context) :
     suspend fun importPlaylistStations(imported: List<Station>): StationCollections.MergeResult {
         var result = StationCollections.MergeResult(emptyList(), added = 0, skipped = imported.size)
         if (imported.isEmpty()) return result
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             result = StationCollections.mergePlaylist(
                 StationCodec.decode(preferences[savedStationsKey]),
                 imported
@@ -585,7 +535,7 @@ class SettingsRepository(private val context: Context) :
      */
     suspend fun importSavedStations(imported: List<Station>): StationCollections.MergeResult {
         var result = StationCollections.MergeResult(emptyList(), added = 0, skipped = 0)
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             result = StationCollections.mergeFavorites(
                 StationCodec.decode(preferences[savedStationsKey]),
                 imported
@@ -602,7 +552,7 @@ class SettingsRepository(private val context: Context) :
      */
     override suspend fun refreshSavedStations(fetched: List<Station>): Int {
         var updated = 0
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val result = SavedStationRefresh.merge(StationCodec.decode(preferences[savedStationsKey]), fetched)
             updated = result.updated
             if (result.updated > 0) preferences[savedStationsKey] = StationCodec.encode(result.stations)
@@ -615,7 +565,7 @@ class SettingsRepository(private val context: Context) :
      * the whole file on every edit, and re-decoding favourites or recents for an
      * unrelated toggle made every collector look like the list had changed.
      */
-    private fun decodedStations(key: Preferences.Key<String>): Flow<List<Station>> = context.dataStore.data
+    private fun decodedStations(key: Preferences.Key<String>): Flow<List<Station>> = dataStore.data
         .map { it[key] }
         .distinctUntilChanged()
         .map { StationCodec.decode(it) }
@@ -625,7 +575,7 @@ class SettingsRepository(private val context: Context) :
      * from the UI and the playback service cannot clobber each other.
      */
     private suspend fun editStations(key: Preferences.Key<String>, transform: (List<Station>) -> List<Station>) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             val updated = transform(StationCodec.decode(preferences[key]))
             preferences[key] = StationCodec.encode(updated)
         }
