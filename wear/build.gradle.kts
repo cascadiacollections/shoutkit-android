@@ -25,8 +25,59 @@ android {
         compose = true
     }
 
+    @Suppress("UnstableApiUsage")
+    androidResources {
+        // Wear only translates English (default) and Simplified Chinese; strip unused library locales.
+        localeFilters += listOf("en", "zh-rCN")
+    }
+
+    buildTypes {
+        release {
+            @Suppress("UnstableApiUsage")
+            vcsInfo.include = false
+            proguardFiles("proguard-rules.pro")
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/**/LICENSE*"
+            excludes += "/META-INF/NOTICE*"
+            excludes += "/META-INF/**/NOTICE*"
+            excludes += "/META-INF/*.version"
+            excludes += "/META-INF/**/*.version"
+            excludes += "/META-INF/*.kotlin_module"
+            excludes += "/kotlin/**"
+            excludes += "/DebugProbesKt.bin"
+            excludes += "/*.txt"
+            excludes += "/*.properties"
+        }
+        jniLibs {
+            useLegacyPackaging = false
+            keepDebugSymbols += "**/*.so"
+        }
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     testOptions {
         unitTests.isIncludeAndroidResources = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-Xno-call-assertions",
+            "-Xno-param-assertions",
+            "-Xno-receiver-assertions"
+        )
     }
 }
 

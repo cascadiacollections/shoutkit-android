@@ -16,8 +16,8 @@
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
 
-# Firebase Crashlytics - preserve exception classes for readable reports
--keep public class * extends java.lang.Exception
+# Crashlytics and Play Console deobfuscate exception names using the uploaded R8 mapping file,
+# so keeping every `Exception` subclass unoptimized is unnecessary (and blocks 150-230+ items).
 
 # ============================================
 # OkHttp 5.x Rules

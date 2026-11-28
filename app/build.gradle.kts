@@ -127,6 +127,12 @@ android {
         buildConfig = true
     }
 
+    @Suppress("UnstableApiUsage")
+    androidResources {
+        // The app only translates English (default) and Simplified Chinese; strip unused library locales.
+        localeFilters += listOf("en", "zh-rCN")
+    }
+
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
@@ -146,8 +152,11 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
             excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/**/LICENSE*"
             excludes += "/META-INF/NOTICE*"
+            excludes += "/META-INF/**/NOTICE*"
             excludes += "/META-INF/*.version"
+            excludes += "/META-INF/**/*.version"
             excludes += "/META-INF/*.kotlin_module"
             excludes += "/kotlin/**"
             excludes += "/DebugProbesKt.bin"

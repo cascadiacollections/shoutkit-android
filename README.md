@@ -104,8 +104,9 @@ to open.
 
 ### Lightweight APK
 
-- **~2.5 MB release APK** with aggressive R8 optimizations
-- On-demand Chromecast module (~750KB) downloaded only when needed
+- **~3.9 MB FOSS / ~4.8 MB Play release APK** (~4.5 MB Wear APK) with R8 full-mode shrinking and resource optimization
+- Locale resource filtering (`en`, `zh-rCN`) and stripped packaging/VCS metadata
+- On-demand Chromecast dynamic module downloaded only when needed
 - ARM + x86_64 ABIs (phones, tablets, ChromeOS)
 
 ### Audio Playback
@@ -136,9 +137,10 @@ to open.
 
 ### Build Toolchain
 
-- **AGP 9.5.3** with configuration cache
+- **AGP 9.5.3** with R8 full mode and configuration cache
 - **OpenJDK 21 (Temurin)** via Foojay / mise
 - **Gradle 9.9.3** with parallel builds and build cache
+- **Static analysis** — Detekt + ktlint + Compose rules, Android Lint (`warningsAsErrors`), and `-Werror` on Kotlin compilation
 - **JaCoCo** coverage with 5% minimum threshold
 - **Baseline profiles** for AOT compilation
 - **Convention plugins** (`build-logic/`) for shared config
@@ -165,8 +167,8 @@ just build-foss
 # Run tests
 ./gradlew testPlayDebugUnitTest :wear:testDebugUnitTest
 
-# Lint
-./gradlew lintPlayDebug
+# Lint and static analysis
+just lint        # or: ./gradlew detekt lintPlayDebug lintFossDebug :wear:lintDebug
 
 # Refactor baseline validation
 just verify
@@ -180,13 +182,17 @@ sibling iOS client:
 | Module | Responsibility |
 | --- | --- |
 | `:app` | Composition root, Compose UI, Android surfaces (Auto, Tile, Widget, shortcuts) |
+| `:wear` | Standalone Wear OS app, Tile, complication, and phone → watch sync |
+| `:cast` | On-demand Chromecast dynamic feature (Play flavor only) |
+| `:benchmark` | Macrobenchmark & Baseline Profile generator |
 | `:core:model` | Platform-neutral domain types (`Station`, `StationQuery`) |
 | `:core:directory` | `RadioDirectory` boundary: radio-browser client, mirror rotation, caching, curated fallback |
 | `:core:playback` | Playback policy: equalizer curves, buffer config, sleep timer restore, audio route, stream source |
 | `:core:persistence` | Settings store, favourites/recents rules, station serialization |
-| `:cast` | On-demand Chromecast dynamic feature (Play flavor only) |
+| `:core:artwork` | iTunes Search album-art lookup and generated station monograms |
 | `:libs:media3-timeshift` | DVR/time-shift Media3 `DataSource` (publishable) |
 | `:libs:okhttp-streaming` | Streaming-tuned OkHttp client factory (publishable) |
+| `:libs:notification-colors` | Shared media-notification accent color palette |
 | `:libs:audio-levels` | Live level meter analysis, shared spec and golden vectors with iOS (publishable) |
 
 See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
