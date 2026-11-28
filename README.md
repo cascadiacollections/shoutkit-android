@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/cascadiacollections/shoutkit-android/workflows/Android%20CI/badge.svg)](https://github.com/cascadiacollections/shoutkit-android/actions)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/cascadiacollections/shoutkit-android/badge)](https://scorecard.dev/viewer/?uri=github.com/cascadiacollections/shoutkit-android)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=24)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Latest Release](https://img.shields.io/github/v/release/cascadiacollections/shoutkit-android?include_prereleases&label=nightly)](https://github.com/cascadiacollections/shoutkit-android/releases)
 [![License: GPL-3.0 app, MIT libraries](https://img.shields.io/badge/License-GPL--3.0%20%2F%20MIT-blue.svg)](#license)
 
@@ -125,9 +125,9 @@ to open.
 
 ## Tech Stack
 
-- **Kotlin** 2.4.20 with **Compose** UI + Material 3 Expressive
+- **Kotlin** 2.4.21 with **Compose** UI + Material 3 Expressive
 - **Media3** 1.11.1 (ExoPlayer + MediaSession + Cast)
-- **OkHttp** 5.5.0 for HTTP/2 networking
+- **OkHttp** 5.5.1 for HTTP/2 networking
 - **DataStore** for preferences
 - **Glance** for home screen widget
 - **Firebase Crashlytics/Analytics** (Play builds only)
@@ -136,9 +136,9 @@ to open.
 
 ### Build Toolchain
 
-- **AGP 9.4.1** with configuration cache
+- **AGP 9.5.2** with configuration cache
 - **Eclipse Adoptium Temurin JDK 21** via Foojay resolver
-- **Gradle 9.7.1** with parallel builds and build cache
+- **Gradle 9.9.1** with parallel builds and build cache
 - **JaCoCo** coverage with 5% minimum threshold
 - **Baseline profiles** for AOT compilation
 - **Convention plugins** (`build-logic/`) for shared config

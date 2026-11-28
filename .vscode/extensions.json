@@ -2,9 +2,9 @@
   "recommendations": [
     "fwcd.kotlin",
     "vscjava.vscode-gradle",
-    "mathiasfrohlich.Kotlin",
-    "naco-siren.gradle-language",
-    "esafirm.kotlin-formatter",
+    "redhat.vscode-xml",
+    "EditorConfig.EditorConfig",
+    "nefrob.vscode-just-syntax",
     "anthropic.claude-code"
   ]
 }

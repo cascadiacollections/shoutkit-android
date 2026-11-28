@@ -1,40 +1,48 @@
 {
-  "name": "SIR Android",
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "Shoutkit Android",
   "build": {
     "dockerfile": "Dockerfile"
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "32gb"
   },
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
-    }
+    },
+    "ghcr.io/guiyomh/features/just:0": {}
   },
-  "postStartCommand": "gh extension install github/gh-copilot || gh extension upgrade github/gh-copilot || true",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "fwcd.kotlin",
-        "vscjava.vscode-gradle",
-        "mathiasfrohlich.Kotlin",
-        "naco-siren.gradle-language",
-        "esafirm.kotlin-formatter",
-        "GitHub.copilot",
-        "GitHub.copilot-chat"
-      ],
-      "settings": {
-        "kotlin.languageServer.enabled": true,
-        "editor.formatOnSave": true
-      }
-    }
-  },
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.gradle && ./gradlew --version",
+  "remoteUser": "vscode",
   "containerEnv": {
     "ANDROID_HOME": "/usr/local/android-sdk",
     "GRADLE_USER_HOME": "/home/vscode/.gradle"
   },
   "mounts": [
-    "source=sir-android-gradle-cache,target=/home/vscode/.gradle,type=volume"
+    "source=shoutkit-android-gradle-cache,target=/home/vscode/.gradle,type=volume",
+    "source=shoutkit-android-m2-cache,target=/home/vscode/.m2,type=volume"
   ],
+  "onCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.gradle /home/vscode/.m2",
+  "updateContentCommand": "./gradlew --version --no-daemon",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "fwcd.kotlin",
+        "vscjava.vscode-gradle",
+        "redhat.vscode-xml",
+        "EditorConfig.EditorConfig",
+        "nefrob.vscode-just-syntax",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
   "forwardPorts": [5037],
   "portsAttributes": {
     "5037": {

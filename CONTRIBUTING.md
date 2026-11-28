@@ -33,7 +33,7 @@ Contributions don't grant rights to the Shoutkit name or icon. See [TRADEMARK.md
 ## Pull requests
 
 - Keep PRs focused, and separate refactors from behavior changes.
-- Run `just test` and `./gradlew lintDebug` before pushing.
+- Run `just test` and `just lint` (or `just verify`) before pushing.
 
 ## Releasing
 

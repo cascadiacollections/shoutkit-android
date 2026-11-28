@@ -2,34 +2,34 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Debug",
+      "label": "Build FOSS Debug",
       "type": "shell",
       "command": "./gradlew",
-      "args": ["assembleDebug", "--no-daemon"],
+      "args": ["assembleFossDebug", "--no-daemon"],
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": ["$gradle"]
     },
     {
-      "label": "Build Release",
+      "label": "Build Play Debug",
       "type": "shell",
       "command": "./gradlew",
-      "args": ["assembleRelease", "--no-daemon"],
+      "args": ["assemblePlayDebug", "--no-daemon"],
       "group": "build",
       "problemMatcher": ["$gradle"]
     },
     {
-      "label": "Test",
+      "label": "Test (FOSS Debug)",
       "type": "shell",
       "command": "./gradlew",
-      "args": ["testDebugUnitTest", "--no-daemon"],
+      "args": ["testFossDebugUnitTest", "--no-daemon"],
       "group": { "kind": "test", "isDefault": true },
       "problemMatcher": ["$gradle"]
     },
     {
-      "label": "Test All",
+      "label": "Verify (CI Baseline)",
       "type": "shell",
-      "command": "./gradlew",
-      "args": ["testDebugUnitTest", ":wear:testDebugUnitTest", "--no-daemon", "--parallel"],
+      "command": "just",
+      "args": ["verify"],
       "group": "test",
       "problemMatcher": ["$gradle"]
     },
@@ -42,11 +42,18 @@
       "problemMatcher": ["$gradle"]
     },
     {
-      "label": "Lint",
+      "label": "Lint (Detekt + Android Lint)",
       "type": "shell",
-      "command": "./gradlew",
-      "args": ["lintDebug", "--no-daemon"],
+      "command": "just",
+      "args": ["lint"],
       "group": "test",
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Format (ktlint auto-correct)",
+      "type": "shell",
+      "command": "just",
+      "args": ["format"],
       "problemMatcher": ["$gradle"]
     },
     {
