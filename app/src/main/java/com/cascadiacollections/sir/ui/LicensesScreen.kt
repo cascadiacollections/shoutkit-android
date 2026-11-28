@@ -21,8 +21,9 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LicensesScreen(onBack: () -> Unit) {
+fun LicensesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {},

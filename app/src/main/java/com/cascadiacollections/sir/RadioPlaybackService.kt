@@ -517,11 +517,11 @@ class RadioPlaybackService : MediaLibraryService() {
                         ACTION_SEEK_BACK -> {
                             if (!SEEKBACK_ENABLED) {
                                 return Futures.immediateFuture(
-                                    SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED)
+                                    SessionResult(SessionError.ERROR_NOT_SUPPORTED)
                                 )
                             }
                             if (!timeShift.seekBack(SEEK_BACK_INCREMENT)) {
-                                return Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED))
+                                return Futures.immediateFuture(SessionResult(SessionError.ERROR_NOT_SUPPORTED))
                             }
                             playbackMode = PlaybackMode.TimeShifted
                             flushPlayer()
@@ -532,7 +532,7 @@ class RadioPlaybackService : MediaLibraryService() {
                         ACTION_GO_LIVE -> {
                             if (!SEEKBACK_ENABLED) {
                                 return Futures.immediateFuture(
-                                    SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED)
+                                    SessionResult(SessionError.ERROR_NOT_SUPPORTED)
                                 )
                             }
                             timeShift.goLive()
@@ -918,12 +918,10 @@ class RadioPlaybackService : MediaLibraryService() {
             }
 
             ACTION_SEEK_BACK -> {
-                if (SEEKBACK_ENABLED) {
-                    if (timeShift.seekBack(SEEK_BACK_INCREMENT)) {
-                        playbackMode = PlaybackMode.TimeShifted
-                        flushPlayer()
-                        updateCustomLayout()
-                    }
+                if (SEEKBACK_ENABLED && timeShift.seekBack(SEEK_BACK_INCREMENT)) {
+                    playbackMode = PlaybackMode.TimeShifted
+                    flushPlayer()
+                    updateCustomLayout()
                 }
             }
 

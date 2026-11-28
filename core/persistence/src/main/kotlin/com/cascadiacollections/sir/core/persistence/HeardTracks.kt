@@ -61,11 +61,7 @@ object HeardTracks {
         require(limit > 0) { "limit must be positive" }
         if (track.title.isBlank() && track.artist.isNullOrBlank()) return current
         val front = current.firstOrNull()
-        if (front != null &&
-            front.stationId == track.stationId &&
-            front.title == track.title &&
-            front.artist == track.artist
-        ) {
+        if (front != null && front.isSameHearingAs(track)) {
             val merged = front.copy(
                 stationName = track.stationName,
                 timestampMillis = maxOf(front.timestampMillis, track.timestampMillis),
@@ -75,6 +71,9 @@ object HeardTracks {
         }
         return (listOf(track) + current).take(limit)
     }
+
+    private fun HeardTrack.isSameHearingAs(other: HeardTrack): Boolean =
+        stationId == other.stationId && title == other.title && artist == other.artist
 
     /**
      * Attaches [artworkUrl] to the most recent entry, but only when that entry is the

@@ -10,10 +10,8 @@ package com.cascadiacollections.sir.core.playback
 object EqualizerCurves {
 
     /**
-     * Maps [preset] onto [bandCount] bands within the device-reported millibel range.
-     *
-     * @param minLevel lowest supported band level, in millibels.
-     * @param maxLevel highest supported band level, in millibels.
+     * Maps [preset] onto [bandCount] bands within the device-reported millibel range
+     * from [minLevel] (lowest supported band level) to [maxLevel] (highest supported band level).
      */
     fun levelsFor(preset: EqualizerPreset, bandCount: Int, minLevel: Short, maxLevel: Short): List<Short> {
         val curve = preset.curve ?: return List(bandCount.coerceAtLeast(0)) { 0.toShort() }

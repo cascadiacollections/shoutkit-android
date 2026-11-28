@@ -77,10 +77,11 @@ fun TvHomeScreen(
     onStationSelected: (Station) -> Unit,
     onTogglePlayback: () -> Unit,
     onStop: () -> Unit,
+    modifier: Modifier = Modifier,
     onRetryPopular: () -> Unit = {},
     audioLevels: Flow<AudioLevels> = emptyFlow()
 ) {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 58.dp, vertical = 32.dp),
             verticalArrangement = Arrangement.spacedBy(36.dp)

@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 9.5.0-alpha08" type="baseline" client="gradle" dependencies="false" name="AGP (9.5.0-alpha08)" variant="all" version="9.5.0-alpha08">
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.connecting` appears to be unused"
-        errorLine1="    &lt;string name=&quot;connecting&quot;>Connecting…&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="7"
-            column="13"/>
-    </issue>
+<issues format="6" by="lint 9.5.2" type="baseline" client="gradle" dependencies="false" name="AGP (9.5.2)" variant="all" version="9.5.2">
 
 </issues>

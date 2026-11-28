@@ -13,7 +13,8 @@ import org.junit.Test
 class AlbumArtLookupTest {
 
     private val hit = Reply.Http(
-        body = """{"results":[{"artworkUrl100":"https://a/100x100bb.jpg","trackViewUrl":"https://music.apple.com/t"}]}"""
+        body = """{"results":[
+            {"artworkUrl100":"https://a/100x100bb.jpg","trackViewUrl":"https://music.apple.com/t"}]}"""
     )
 
     @Test

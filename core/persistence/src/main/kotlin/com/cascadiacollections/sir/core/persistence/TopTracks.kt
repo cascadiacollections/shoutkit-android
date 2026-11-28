@@ -51,9 +51,8 @@ object TopTracks {
      *
      * Tracks match case-insensitively on title and artist. Both are required, as in
      * ShoutKit: one-sided ICY metadata can't be matched reliably across plays. The most
-     * recent hearing supplies the displayed spelling.
-     *
-     * @param nowMillis injectable clock, so the timeframes are testable.
+     * recent hearing supplies the displayed spelling. [nowMillis] is an injectable clock so
+     * [timeframe] filtering is testable.
      */
     fun rank(
         history: List<HeardTrack>,

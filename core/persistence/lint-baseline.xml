@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 9.5.0-alpha08" type="baseline" client="gradle" dependencies="false" name="AGP (9.5.0-alpha08)" variant="all" version="9.5.0-alpha08">
+<issues format="6" by="lint 9.5.2" type="baseline" client="gradle" dependencies="false" name="AGP (9.5.2)" variant="all" version="9.5.2">
 
     <issue
         id="StaticFieldLeak"
@@ -8,7 +8,7 @@
         errorLine2="^">
         <location
             file="src/main/kotlin/com/cascadiacollections/sir/core/persistence/SettingsRepository.kt"
-            line="31"
+            line="35"
             column="1"/>
     </issue>
 
@@ -19,7 +19,7 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/com/cascadiacollections/sir/core/persistence/SettingsRepository.kt"
-            line="55"
+            line="59"
             column="5"/>
     </issue>
 

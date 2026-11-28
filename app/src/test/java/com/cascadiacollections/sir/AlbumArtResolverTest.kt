@@ -34,7 +34,7 @@ class AlbumArtResolverTest {
             answers.getOrPut(artist to title) { CompletableDeferred() }.await()
         },
         onChanged = { changes++ }
-    ).also { it.start() }
+    ).apply { start() }
 
     private fun answer(artist: String, title: String, art: AlbumArt?) {
         answers.getOrPut(artist to title) { CompletableDeferred() }.complete(art)

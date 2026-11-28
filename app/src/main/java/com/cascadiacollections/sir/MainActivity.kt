@@ -177,8 +177,8 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RadioScreen(
-    modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
+    modifier: Modifier = Modifier,
     castDeviceDetector: CastDeviceDetector? = null,
     castFeatureManager: CastFeatureManager? = null,
     settingsRepository: SettingsRepository? = null,
@@ -250,16 +250,20 @@ fun RadioScreen(
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
     LaunchedEffect(Unit) {
-        val toRequest = listOfNotNull(
-            Manifest.permission.POST_NOTIFICATIONS.takeIf {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
-            },
-            Manifest.permission.BLUETOOTH_CONNECT.takeIf {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        val toRequest = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
             }
-        )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+        }
         toRequest.takeIf { it.isNotEmpty() }?.let { permissionLauncher.launch(it.toTypedArray()) }
     }
 
@@ -372,7 +376,7 @@ internal val Player.isActuallyPlaying: Boolean
 
 @Preview(showBackground = true, name = "Idle")
 @Composable
-fun RadioScreenPreview() {
+private fun RadioScreenPreview() {
     SirTheme {
         RadioUi(
             modifier = Modifier.fillMaxSize(),
@@ -388,7 +392,7 @@ fun RadioScreenPreview() {
 
 @Preview(showBackground = true, name = "Playing with Metadata")
 @Composable
-fun RadioScreenPlayingPreview() {
+private fun RadioScreenPlayingPreview() {
     SirTheme {
         RadioUi(
             modifier = Modifier.fillMaxSize(),

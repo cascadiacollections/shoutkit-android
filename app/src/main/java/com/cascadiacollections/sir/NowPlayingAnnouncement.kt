@@ -61,11 +61,14 @@ sealed interface NowPlayingAnnouncement {
          *
          * @param isPlaying playback is wanted and the player is buffering or ready — a
          *   stream that is still connecting counts, since that is what the listener hears next.
+         * @param title current session title, or null if absent.
+         * @param artist current session artist, or null if absent.
+         * @param station [RadioPlaybackService.EXTRA_STATION_NAME], else [fallbackStation].
          * @param hasResolvedTrack [RadioPlaybackService.EXTRA_HAS_RESOLVED_TRACK]: without it
          *   the session title is the station name and the artist a generic description.
          * @param hasResolvedArtist [RadioPlaybackService.EXTRA_HAS_RESOLVED_ARTIST]; the
          *   artist slot otherwise holds the same generic description.
-         * @param station [RadioPlaybackService.EXTRA_STATION_NAME], else [fallbackStation].
+         * @param fallbackStation station name used when [station] is null or blank.
          */
         fun from(
             isPlaying: Boolean,

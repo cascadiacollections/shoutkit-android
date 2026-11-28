@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -121,6 +122,7 @@ internal fun StationMonogramTile(monogram: StationMonogram, size: Dp, modifier: 
 }
 
 @Composable
+@ReadOnlyComposable
 private fun sizedRequest(url: String, size: Dp): ImageRequest {
     val px = with(LocalDensity.current) { size.roundToPx() }
     return ImageRequest.Builder(LocalPlatformContext.current)

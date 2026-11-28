@@ -42,8 +42,9 @@ object SongTitleFilter {
     private val knownTlds = listOf(".com", ".org", ".net", ".fm", ".io", ".co")
 
     /**
-     * @param stationName the station's display name, used to reject a title that is just
-     *   the station plugging itself. Null skips that check rather than failing it.
+     * Returns whether [track] looks like a real song title rather than broadcaster junk.
+     * [stationName] is the station's display name, used to reject a title that is just
+     * the station plugging itself; null skips that check rather than failing it.
      */
     fun isLikelySongTitle(track: IcyTrack, stationName: String?): Boolean {
         val title = track.title?.trim()?.takeUnless(String::isEmpty) ?: return false

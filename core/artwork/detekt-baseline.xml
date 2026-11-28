@@ -5,7 +5,6 @@
     <ID>CommentWrapping:LruCache.kt:LruCache.&lt;no name provided&gt;$/* accessOrder = */</ID>
     <ID>MagicNumber:StationMonogram.kt:StationMonogram.Companion$0xFF</ID>
     <ID>MagicNumber:StationMonogram.kt:StationMonogram.Companion$360u</ID>
-    <ID>MaxLineLength:AlbumArtLookupTest.kt:AlbumArtLookupTest$body = """{"results":[{"artworkUrl100":"https://a/100x100bb.jpg","trackViewUrl":"https://music.apple.com/t"}]}"""</ID>
     <ID>ReturnCount:AlbumArtLookup.kt:AlbumArtLookup$suspend fun lookup: AlbumArt?</ID>
     <ID>ReturnCount:ITunesSearch.kt:ITunesSearch$fun parse: AlbumArt?</ID>
   </CurrentIssues>

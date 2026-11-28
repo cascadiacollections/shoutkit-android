@@ -19,10 +19,16 @@ import okhttp3.Protocol
  */
 object StreamingHttpClientFactory {
 
+    private const val MAX_IDLE_CONNECTIONS = 2
+    private const val KEEP_ALIVE_MINUTES = 5L
+    private const val CONNECT_TIMEOUT_SECONDS = 10L
+    private const val READ_TIMEOUT_SECONDS = 30L
+    private const val CALL_TIMEOUT_SECONDS = 0L
+
     fun newBuilder(): OkHttpClient.Builder {
         val connectionPool = ConnectionPool(
-            maxIdleConnections = 2,
-            keepAliveDuration = 5,
+            maxIdleConnections = MAX_IDLE_CONNECTIONS,
+            keepAliveDuration = KEEP_ALIVE_MINUTES,
             timeUnit = TimeUnit.MINUTES
         )
 
@@ -31,9 +37,9 @@ object StreamingHttpClientFactory {
             .dns(CachingDns())
             .connectionSpecs(listOf(ConnectionSpec.MODERN_TLS))
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .callTimeout(0, TimeUnit.SECONDS)
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .callTimeout(CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
     }
 }

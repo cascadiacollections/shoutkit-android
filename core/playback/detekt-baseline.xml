@@ -18,9 +18,6 @@
     <ID>MagicNumber:SleepTimerDuration.kt:SleepTimerRestore$60_000L</ID>
     <ID>MagicNumber:StreamFailure.kt:StreamFailureClassifier$400</ID>
     <ID>MagicNumber:StreamFailure.kt:StreamFailureClassifier$499</ID>
-    <ID>OutdatedDocumentation:EqualizerCurves.kt:EqualizerCurves$fun levelsFor: List&lt;Short&gt;</ID>
-    <ID>OutdatedDocumentation:SongTitleFilter.kt:SongTitleFilter$fun isLikelySongTitle: Boolean</ID>
-    <ID>OutdatedDocumentation:StreamMetadata.kt:StreamMetadataResolver$fun resolve: StreamMetadataUpdate</ID>
     <ID>ReturnCount:EqualizerCurves.kt:EqualizerCurves$fun displayGainsFor: List&lt;Float&gt;</ID>
     <ID>ReturnCount:IcyMetadataParser.kt:IcyMetadataParser$internal fun fields: Map&lt;String, String&gt;?</ID>
     <ID>ReturnCount:IcyMetadataParser.kt:IcyMetadataParser$private fun parse: IcyTrack</ID>

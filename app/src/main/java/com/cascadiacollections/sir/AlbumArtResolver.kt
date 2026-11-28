@@ -75,11 +75,16 @@ internal class AlbumArtResolver(
         job?.cancel()
         job = scope.launch {
             val art = lookup(wanted.first, wanted.second)
-            if (art != null && track == wanted && isEnabled && art != current) {
+            if (shouldApply(art, wanted)) {
                 current = art
                 onChanged()
             }
         }
+    }
+
+    private fun shouldApply(art: AlbumArt?, wanted: Pair<String, String>): Boolean {
+        if (!isEnabled || track != wanted) return false
+        return art != null && art != current
     }
 }
 

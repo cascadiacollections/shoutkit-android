@@ -40,9 +40,9 @@ class StreamMetadataResolver(
 ) {
 
     /**
-     * @param stationName the station's display name, used by [SongTitleFilter] to reject a
-     *   title that is only the station plugging itself. Defaults to whatever the stream
-     *   reports as its station.
+     * Folds [raw] ICY fields into [previous]. [stationName] is the station's display name,
+     * used by [SongTitleFilter] to reject a title that is only the station plugging itself;
+     * defaults to whatever the stream reports as its station.
      */
     fun resolve(previous: StreamMetadata, raw: RawStreamMetadata, stationName: String? = null): StreamMetadataUpdate {
         val station = raw.station?.takeUnless { it.isBlank() } ?: previous.station

@@ -39,8 +39,7 @@ import kotlinx.coroutines.launch
  * ShoutKit's `RecentlyHeardListView`. Top Tracks is the summary; this is the drill-in.
  *
  * Tapping a row copies "Title — Artist", as the player's track history sheet does.
- *
- * @param nowMillis the reference time for the relative timestamps; injectable for tests.
+ * [nowMillis] is the reference time for the relative timestamps (injectable for tests).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

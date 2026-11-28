@@ -30,11 +30,7 @@
     <string name="metered_network_title">移动数据</string>
     <string name="metered_network_message">你当前处于按流量计费的网络。播放直播将消耗移动数据。</string>
     <string name="metered_network_dismiss">知道了</string>
-    <!-- Main UI: titles -->
-    <string name="tap_to_play">点按任意位置播放</string>
-    <!-- Main UI: subtitles -->
     <!-- Main UI: hints / labels -->
-    <string name="tap_to_stop">点按停止</string>
     <!-- %1$d = minutes remaining -->
     <string name="sleep_timer_countdown">%1$d 分钟后停止</string>
     <!-- Settings dialog -->
@@ -180,7 +176,6 @@
     <!-- Notification / Service -->
     <string name="notification_channel_name">电台播放</string>
     <string name="stream_description">直播流</string>
-    <string name="stream_quality">直播流质量</string>
     <string name="seek_back_30">回放 30 秒</string>
     <string name="go_live">直播</string>
     <!-- Widget -->

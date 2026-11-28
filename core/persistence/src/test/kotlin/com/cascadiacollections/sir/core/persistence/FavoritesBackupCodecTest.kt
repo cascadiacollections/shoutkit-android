@@ -118,7 +118,8 @@ class FavoritesBackupCodecTest {
 
     @Test
     fun `a nameless entry with a blank stream url falls back to its id`() {
-        val text = """{"schemaVersion":1,"favorites":[{"id":"abc","name":"","streamURL":"","genre":"","sortIndex":0}]}"""
+        val text = """{"schemaVersion":1,"favorites":[
+            {"id":"abc","name":"","streamURL":"","genre":"","sortIndex":0}]}"""
         assertThat(FavoritesBackupCodec.decode(text).single().name).isEqualTo("abc")
     }
 

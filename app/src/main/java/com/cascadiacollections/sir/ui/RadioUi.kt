@@ -88,10 +88,11 @@ import kotlinx.coroutines.flow.emptyFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RadioUi(
-    modifier: Modifier,
     isConnected: Boolean,
     isPlaying: Boolean,
     isBuffering: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
     isError: Boolean = false,
     trackTitle: String? = null,
     artist: String? = null,
@@ -99,8 +100,7 @@ fun RadioUi(
     showSettingsButton: Boolean = false,
     station: Station? = null,
     failure: StreamFailure? = null,
-    onSettingsClick: () -> Unit = {},
-    onToggle: () -> Unit
+    onSettingsClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current

@@ -32,13 +32,7 @@
     <string name="metered_network_message">You\'re on a metered connection. Streaming will use mobile data.</string>
     <string name="metered_network_dismiss">Got it</string>
 
-    <!-- Main UI: titles -->
-    <string name="tap_to_play">Tap anywhere to play</string>
-
-    <!-- Main UI: subtitles -->
-
     <!-- Main UI: hints / labels -->
-    <string name="tap_to_stop">Tap to stop</string>
     <!-- %1$d = minutes remaining -->
     <string name="sleep_timer_countdown">Sleep in %1$dm</string>
 
@@ -205,7 +199,6 @@
     <string name="notification_channel_name">Radio Playback</string>
     <string name="station_name" translatable="false">Shoutkit</string>
     <string name="stream_description">Live stream</string>
-    <string name="stream_quality">Stream Quality</string>
     <string name="seek_back_30">Replay 30s</string>
     <string name="go_live">Live</string>
 

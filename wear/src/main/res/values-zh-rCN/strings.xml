@@ -3,7 +3,6 @@
     <string name="play">播放</string>
     <string name="pause">暂停</string>
     <string name="live">直播</string>
-    <string name="connecting">正在连接…</string>
     <string name="stream_description">直播流</string>
     <string name="stop">停止</string>
     <string name="recent_stations">最近播放的电台</string>
