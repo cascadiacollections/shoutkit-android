@@ -3,7 +3,6 @@
 package com.cascadiacollections.sir
 
 import android.Manifest
-import android.app.Application
 import android.app.SearchManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +15,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +44,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.Player
 import com.cascadiacollections.sir.core.directory.RadioDirectory
 import com.cascadiacollections.sir.core.directory.Tag
@@ -76,6 +75,23 @@ class MainActivity : ComponentActivity() {
     // Play reads the Install Referrer; FOSS is a no-op. Flavor source set picks the class.
     private val campaignGenreSource by lazy { CampaignGenreSourceImpl(applicationContext) }
 
+    private val viewModel: RadioViewModel by viewModels {
+        RadioViewModel.Factory(
+            application = application,
+            settingsRepository = settingsRepository
+        )
+    }
+
+    // Must go through the ViewModelStore: a ViewModel built with remember never receives
+    // onCleared(), so its DataStore collectors would outlive every destroyed Activity.
+    private val browserViewModel: RadioBrowserViewModel by viewModels {
+        RadioBrowserViewModel.Factory(
+            directory = AppDirectory.instance,
+            settingsRepository = settingsRepository,
+            trackHistoryRepository = TrackHistoryRepository(applicationContext)
+        )
+    }
+
     // Surfaces a sir://station/{id} deep link into the Compose tree, mirroring how
     // CastDeviceDetector bridges its own StateFlow into RadioScreen via collectAsState().
     private val pendingStationId = MutableStateFlow<String?>(null)
@@ -91,6 +107,7 @@ class MainActivity : ComponentActivity() {
 
         // Handle home-screen shortcut: start playback immediately
         if (intent?.action == ACTION_SHORTCUT_PLAY) {
+            StationShortcuts.reportPlayUsed(this)
             ContextCompat.startForegroundService(
                 this,
                 Intent(this, RadioPlaybackService::class.java).apply {
@@ -115,6 +132,8 @@ class MainActivity : ComponentActivity() {
                 RadioScreen(
                     modifier = Modifier.fillMaxSize(),
                     windowSizeClass = calculateWindowSizeClass(this),
+                    viewModel = viewModel,
+                    browserViewModel = browserViewModel,
                     castDeviceDetector = castDeviceDetector,
                     castFeatureManager = castFeatureManager,
                     settingsRepository = settingsRepository,
@@ -139,7 +158,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleDeepLink(intent: Intent?, readInstallReferrer: Boolean) {
-        StationDeepLink.stationId(intent)?.let { pendingStationId.value = it }
+        StationDeepLink.stationId(intent)?.let { id ->
+            pendingStationId.value = id
+            StationShortcuts.reportStationUsed(this, id)
+        }
         val genre = StationDeepLink.welcomeGenre(intent)
         if (genre == null && !readInstallReferrer) return
         lifecycleScope.launch {
@@ -178,10 +200,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun RadioScreen(
     windowSizeClass: WindowSizeClass,
+    viewModel: RadioViewModel,
+    browserViewModel: RadioBrowserViewModel,
+    castFeatureManager: CastFeatureManager,
+    settingsRepository: SettingsRepository,
     modifier: Modifier = Modifier,
     castDeviceDetector: CastDeviceDetector? = null,
-    castFeatureManager: CastFeatureManager? = null,
-    settingsRepository: SettingsRepository? = null,
     pendingStationId: StateFlow<String?> = MutableStateFlow(null),
     onDeepLinkConsumed: () -> Unit = {}
 ) {
@@ -195,15 +219,14 @@ fun RadioScreen(
     // Cast state
     val castDevicesAvailable by castDeviceDetector?.castDevicesAvailable?.collectAsState()
         ?: remember { mutableStateOf(false) }
-    val castModuleState by castFeatureManager?.moduleState?.collectAsState()
-        ?: remember { mutableStateOf(CastModuleState.NotInstalled) }
+    val castModuleState by castFeatureManager.moduleState.collectAsState()
 
     // Auto-download Cast module when devices detected
     LaunchedEffect(castDevicesAvailable, castModuleState) {
         if (castDevicesAvailable && castModuleState is CastModuleState.NotInstalled) {
-            val chromecastEnabled = settingsRepository?.chromecastEnabled?.first() ?: false
+            val chromecastEnabled = settingsRepository.chromecastEnabled.first()
             if (chromecastEnabled) {
-                castFeatureManager?.installCastModule()
+                castFeatureManager.installCastModule()
             }
         }
     }
@@ -225,25 +248,8 @@ fun RadioScreen(
         )
         return
     }
-
-    val repository = settingsRepository ?: return
-    val viewModel: RadioViewModel = viewModel(
-        factory = RadioViewModel.Factory(
-            application = context.applicationContext as Application,
-            settingsRepository = repository
-        )
-    )
     val uiState by viewModel.uiState.collectAsState()
-
-    // Must go through the ViewModelStore: a ViewModel built with remember never receives
-    // onCleared(), so its DataStore collectors would outlive every destroyed Activity.
-    val browserViewModel: RadioBrowserViewModel = viewModel(
-        factory = RadioBrowserViewModel.Factory(
-            directory = AppDirectory.instance,
-            settingsRepository = repository,
-            trackHistoryRepository = TrackHistoryRepository(context.applicationContext)
-        )
-    )
+    val browserState by browserViewModel.uiState.collectAsState()
 
     // Runtime permission requests: POST_NOTIFICATIONS (API 33+), BLUETOOTH_CONNECT (API 31+)
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -267,11 +273,9 @@ fun RadioScreen(
         toRequest.takeIf { it.isNotEmpty() }?.let { permissionLauncher.launch(it.toTypedArray()) }
     }
 
-    if (castFeatureManager == null) return
-
     // Dynamic per-station home-screen shortcuts, ranked by play count so the shortcuts
     // that survive the launcher's cap are the ones actually worth a quick-launch slot.
-    val mostPlayedStations by repository.mostPlayedSavedStations.collectAsState(initial = emptyList())
+    val mostPlayedStations by settingsRepository.mostPlayedSavedStations.collectAsState(initial = emptyList())
     LaunchedEffect(mostPlayedStations) {
         StationShortcuts.update(context, mostPlayedStations)
     }
@@ -279,7 +283,7 @@ fun RadioScreen(
     val pendingId by pendingStationId.collectAsState()
     LaunchedEffect(pendingId) {
         val id = pendingId ?: return@LaunchedEffect
-        if (StationDeepLink.play(id, AppDirectory.instance, repository)) {
+        if (StationDeepLink.play(id, AppDirectory.instance, settingsRepository)) {
             selectedTab = SirTab.LISTEN
         }
         onDeepLinkConsumed()
@@ -293,8 +297,9 @@ fun RadioScreen(
         onSelectTab = { selectedTab = it },
         onToggle = { viewModel.togglePlayback() },
         onToggleFavorite = { viewModel.toggleFavorite() },
-        browserViewModel = browserViewModel,
-        settingsRepository = repository,
+        heardTracks = browserState.heardTracks,
+        onClearHeardTracks = { browserViewModel.clearHeardTracks() },
+        settingsRepository = settingsRepository,
         castFeatureManager = castFeatureManager,
         onOpenLicenses = { showLicenses = true }
     )
@@ -313,21 +318,21 @@ fun RadioScreen(
     // so returning users never see it flash. A chosen genre opens Browse on that tag;
     // leaving the chips off keeps the Listen tab.
     val genreOwner = LocalViewModelStoreOwner.current
-    val linkedGenre by repository.browseGenreRequest.collectAsState()
+    val linkedGenre by settingsRepository.browseGenreRequest.collectAsState()
     LaunchedEffect(linkedGenre) {
         val genre = linkedGenre ?: return@LaunchedEffect
         genreOwner?.let { owner ->
-            selectBrowseGenre(genre, owner, AppDirectory.instance, repository)
+            selectBrowseGenre(genre, owner, AppDirectory.instance, settingsRepository)
         }
         selectedTab = SirTab.BROWSE
-        repository.consumeBrowseGenre()
+        settingsRepository.consumeBrowseGenre()
     }
     if (!showLicenses) {
         FirstRunWelcomeHost(
-            repository = repository,
+            repository = settingsRepository,
             onChooseGenre = { genre ->
                 genreOwner?.let { owner ->
-                    selectBrowseGenre(genre, owner, AppDirectory.instance, repository)
+                    selectBrowseGenre(genre, owner, AppDirectory.instance, settingsRepository)
                 }
                 selectedTab = SirTab.BROWSE
             }

@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 
 private const val RESOURCES_VERSION = "1"
+private const val PLAY_LAST_SPACER_DP = 12f
 
 /**
  * Wear Tile showing the current station and playback state, backed by
@@ -115,7 +116,7 @@ class RadioTileService : TileService() {
             layout
                 .addContent(
                     LayoutElementBuilders.Spacer.Builder()
-                        .setHeight(DimensionBuilders.dp(12f))
+                        .setHeight(DimensionBuilders.dp(PLAY_LAST_SPACER_DP))
                         .build()
                 )
                 .addContent(

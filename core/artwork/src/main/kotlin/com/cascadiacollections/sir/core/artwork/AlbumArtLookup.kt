@@ -36,19 +36,24 @@ class AlbumArtLookup(
      */
     suspend fun lookup(artist: String?, title: String?, country: String?): AlbumArt? {
         val key = TrackKey.of(artist, title) ?: return null
-        cache[key]?.let { return it.art }
-        val url = ITunesSearch.searchUrl(artist.orEmpty(), title.orEmpty(), country)
+        val cached = cache[key]
+        return if (cached != null) cached.art else fetchAndCache(key, artist.orEmpty(), title.orEmpty(), country)
+    }
+
+    private suspend fun fetchAndCache(key: TrackKey, artist: String, title: String, country: String?): AlbumArt? {
+        val url = ITunesSearch.searchUrl(artist, title, country)
         val request = Request.Builder().url(url).header("User-Agent", userAgent).build()
-        val body = client.newCall(request).awaitBody() ?: return null
-        val art = try {
-            ITunesSearch.parse(body)
-        } catch (_: SerializationException) {
-            return null
-        } catch (_: IllegalArgumentException) {
-            return null
-        }
-        cache[key] = Entry(art)
-        return art
+        val body = client.newCall(request).awaitBody()
+        val parsed = body?.let(::parseEntry)
+        return parsed?.also { cache[key] = it }?.art
+    }
+
+    private fun parseEntry(body: String): Entry? = try {
+        Entry(ITunesSearch.parse(body))
+    } catch (_: SerializationException) {
+        null
+    } catch (_: IllegalArgumentException) {
+        null
     }
 
     /** Whether an answer (hit or miss) for the pair is cached. Exposed for tests. */

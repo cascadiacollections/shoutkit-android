@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -31,7 +32,7 @@ import kotlinx.coroutines.launch
  * The sleep timer and equalizer above it predate the heading and stay where they are.
  */
 @Composable
-internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
+internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val prewarm by settingsRepository.connectionPrewarmingEnabled.collectAsState(initial = false)
     val loopBroadcasts by settingsRepository.loopFinishedBroadcasts.collectAsState(initial = false)
@@ -40,98 +41,102 @@ internal fun PlaybackSettingsSection(settingsRepository: SettingsRepository) {
     val context = LocalContext.current
     val spatialSupported = remember { SpatialAudio.isSupported(context) }
 
-    SettingsSectionHeading(stringResource(R.string.playback_heading))
-    // Read once at launch by SirApp, so a change takes effect from the next launch.
-    ListItem(
-        supportingContent = { Text(stringResource(R.string.prewarm_connections_summary)) },
-        trailingContent = {
-            Switch(
-                checked = prewarm,
-                onCheckedChange = { enabled ->
-                    scope.launch { settingsRepository.setConnectionPrewarmingEnabled(enabled) }
-                }
-            )
-        }
-    ) {
-        Text(stringResource(R.string.prewarm_connections))
-    }
-    // Read live by RadioPlaybackService, so a change applies to whatever is playing now.
-    ListItem(
-        supportingContent = { Text(stringResource(R.string.loop_finished_broadcasts_summary)) },
-        trailingContent = {
-            Switch(
-                checked = loopBroadcasts,
-                onCheckedChange = { enabled ->
-                    scope.launch { settingsRepository.setLoopFinishedBroadcasts(enabled) }
-                }
-            )
-        }
-    ) {
-        Text(stringResource(R.string.loop_finished_broadcasts))
-    }
-    // Only where the device has a spatializer; read live by RadioPlaybackService.
-    if (spatialSupported) {
+    Column(modifier = modifier) {
+        SettingsSectionHeading(stringResource(R.string.playback_heading))
+        // Read once at launch by SirApp, so a change takes effect from the next launch.
         ListItem(
-            supportingContent = { Text(stringResource(R.string.spatial_audio_summary)) },
+            supportingContent = { Text(stringResource(R.string.prewarm_connections_summary)) },
             trailingContent = {
                 Switch(
-                    checked = spatialAudio,
+                    checked = prewarm,
                     onCheckedChange = { enabled ->
-                        scope.launch { settingsRepository.setSpatialAudioEnabled(enabled) }
+                        scope.launch { settingsRepository.setConnectionPrewarmingEnabled(enabled) }
                     }
                 )
             }
         ) {
-            Text(stringResource(R.string.spatial_audio))
+            Text(stringResource(R.string.prewarm_connections))
         }
-    }
-    // Read live by Now Playing. Not tied to battery saver: the meter is about ten small FFTs
-    // a second, and stopping it there made the bars look broken on iOS.
-    ListItem(
-        supportingContent = { Text(stringResource(R.string.show_visualizer_summary)) },
-        trailingContent = {
-            Switch(
-                checked = showVisualizer,
-                onCheckedChange = { enabled ->
-                    scope.launch { settingsRepository.setShowVisualizer(enabled) }
+        // Read live by RadioPlaybackService, so a change applies to whatever is playing now.
+        ListItem(
+            supportingContent = { Text(stringResource(R.string.loop_finished_broadcasts_summary)) },
+            trailingContent = {
+                Switch(
+                    checked = loopBroadcasts,
+                    onCheckedChange = { enabled ->
+                        scope.launch { settingsRepository.setLoopFinishedBroadcasts(enabled) }
+                    }
+                )
+            }
+        ) {
+            Text(stringResource(R.string.loop_finished_broadcasts))
+        }
+        // Only where the device has a spatializer; read live by RadioPlaybackService.
+        if (spatialSupported) {
+            ListItem(
+                supportingContent = { Text(stringResource(R.string.spatial_audio_summary)) },
+                trailingContent = {
+                    Switch(
+                        checked = spatialAudio,
+                        onCheckedChange = { enabled ->
+                            scope.launch { settingsRepository.setSpatialAudioEnabled(enabled) }
+                        }
+                    )
                 }
-            )
+            ) {
+                Text(stringResource(R.string.spatial_audio))
+            }
         }
-    ) {
-        Text(stringResource(R.string.show_visualizer))
+        // Read live by Now Playing. Not tied to battery saver: the meter is about ten small FFTs
+        // a second, and stopping it there made the bars look broken on iOS.
+        ListItem(
+            supportingContent = { Text(stringResource(R.string.show_visualizer_summary)) },
+            trailingContent = {
+                Switch(
+                    checked = showVisualizer,
+                    onCheckedChange = { enabled ->
+                        scope.launch { settingsRepository.setShowVisualizer(enabled) }
+                    }
+                )
+            }
+        ) {
+            Text(stringResource(R.string.show_visualizer))
+        }
     }
 }
 
 /** Settings → About, at the end of the screen. */
 @Composable
-internal fun AboutSettingsSection(onOpenLicenses: () -> Unit) {
+internal fun AboutSettingsSection(onOpenLicenses: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
-    SettingsSectionHeading(stringResource(R.string.about_heading))
-    ListItem(
-        supportingContent = {
-            Text(
-                stringResource(
-                    R.string.about_version_value,
-                    BuildConfig.VERSION_NAME,
-                    BuildConfig.VERSION_CODE,
-                    BuildConfig.GIT_COMMIT
+    Column(modifier = modifier) {
+        HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+        SettingsSectionHeading(stringResource(R.string.about_heading))
+        ListItem(
+            supportingContent = {
+                Text(
+                    stringResource(
+                        R.string.about_version_value,
+                        BuildConfig.VERSION_NAME,
+                        BuildConfig.VERSION_CODE,
+                        BuildConfig.GIT_COMMIT
+                    )
                 )
-            )
+            }
+        ) {
+            Text(stringResource(R.string.about_version))
         }
-    ) {
-        Text(stringResource(R.string.about_version))
+        AboutLink(R.string.about_source_code) { context.openUrl(R.string.about_source_code_url) }
+        AboutLink(R.string.about_report_issue) { context.openUrl(R.string.about_report_issue_url) }
+        // ShoutKit's "Support Holmdel" link. FOSS builds only: Google Play's payments policy
+        // restricts steering users to outside payment, and nothing here is gated on it anyway.
+        if (BuildConfig.FLAVOR == "foss") {
+            AboutLink(R.string.about_support) { context.openUrl(R.string.about_support_url) }
+        }
+        AboutLink(R.string.about_station_data) { context.openUrl(R.string.about_station_data_url) }
+        AboutLink(R.string.open_source_licenses, onOpenLicenses)
     }
-    AboutLink(R.string.about_source_code) { context.openUrl(R.string.about_source_code_url) }
-    AboutLink(R.string.about_report_issue) { context.openUrl(R.string.about_report_issue_url) }
-    // ShoutKit's "Support Holmdel" link. FOSS builds only: Google Play's payments policy
-    // restricts steering users to outside payment, and nothing here is gated on it anyway.
-    if (BuildConfig.FLAVOR == "foss") {
-        AboutLink(R.string.about_support) { context.openUrl(R.string.about_support_url) }
-    }
-    AboutLink(R.string.about_station_data) { context.openUrl(R.string.about_station_data_url) }
-    AboutLink(R.string.open_source_licenses, onOpenLicenses)
 }
 
 @Composable

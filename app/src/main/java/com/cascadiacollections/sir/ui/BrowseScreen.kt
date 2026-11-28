@@ -96,7 +96,8 @@ import com.cascadiacollections.sir.SearchViewModel
 import com.cascadiacollections.sir.core.directory.StationSearchFilters
 import com.cascadiacollections.sir.core.directory.Tag
 import com.cascadiacollections.sir.core.model.Station
-import com.cascadiacollections.sir.core.persistence.RecentShelfStore
+import com.cascadiacollections.sir.core.persistence.SettingsRepository
+import com.cascadiacollections.sir.core.persistence.TrackHistoryRepository
 import com.cascadiacollections.sir.ui.icons.FilterList
 import kotlinx.coroutines.launch
 
@@ -124,12 +125,18 @@ internal val BITRATE_OPTIONS_KBPS: List<Int?> = listOf(null, 64, 96, 128, 160, 1
  */
 @Composable
 fun BrowseScreen(
-    viewModel: RadioBrowserViewModel,
+    settingsRepository: SettingsRepository,
     modifier: Modifier = Modifier,
-    shelfStore: RecentShelfStore? = null,
     playbackAudible: Boolean = true,
+    viewModel: RadioBrowserViewModel = viewModel(
+        factory = RadioBrowserViewModel.Factory(
+            directory = AppDirectory.instance,
+            settingsRepository = settingsRepository,
+            trackHistoryRepository = TrackHistoryRepository(LocalContext.current.applicationContext)
+        )
+    ),
     searchViewModel: SearchViewModel = viewModel(
-        factory = SearchViewModel.Factory(AppDirectory.instance, shelfStore)
+        factory = SearchViewModel.Factory(AppDirectory.instance, settingsRepository)
     )
 ) {
     val context = LocalContext.current

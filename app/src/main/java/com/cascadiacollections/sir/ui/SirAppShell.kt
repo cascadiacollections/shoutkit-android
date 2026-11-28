@@ -39,8 +39,8 @@ import com.cascadiacollections.sir.CastFeatureManager
 import com.cascadiacollections.sir.CastModuleState
 import com.cascadiacollections.sir.LiveAudioLevels
 import com.cascadiacollections.sir.R
-import com.cascadiacollections.sir.RadioBrowserViewModel
 import com.cascadiacollections.sir.RadioUiState
+import com.cascadiacollections.sir.core.persistence.HeardTrack
 import com.cascadiacollections.sir.core.persistence.SettingsRepository
 import com.cascadiacollections.sir.core.playback.SleepTimerDuration
 import com.cascadiacollections.sir.ui.icons.History
@@ -64,7 +64,8 @@ fun SirAppShell(
     selectedTab: SirTab,
     onSelectTab: (SirTab) -> Unit,
     onToggle: () -> Unit,
-    browserViewModel: RadioBrowserViewModel,
+    heardTracks: List<HeardTrack>,
+    onClearHeardTracks: () -> Unit,
     settingsRepository: SettingsRepository,
     castFeatureManager: CastFeatureManager,
     onOpenLicenses: () -> Unit,
@@ -200,14 +201,13 @@ fun SirAppShell(
                     )
 
                     SirTab.BROWSE -> BrowseScreen(
-                        viewModel = browserViewModel,
-                        shelfStore = settingsRepository,
+                        settingsRepository = settingsRepository,
                         playbackAudible = uiState.isPlaying,
                         modifier = contentModifier
                     )
 
                     SirTab.LIBRARY -> LibraryScreen(
-                        viewModel = browserViewModel,
+                        settingsRepository = settingsRepository,
                         playbackAudible = uiState.isPlaying,
                         onOpenRecentlyHeard = { showRecentlyHeard = true },
                         modifier = contentModifier
@@ -226,12 +226,11 @@ fun SirAppShell(
         // Full-screen drill-in from the Library tab. Composed after the scaffold so it draws on
         // top, and its BackHandler is registered last so back closes it before any tab reset.
         if (showRecentlyHeard) {
-            val browserState by browserViewModel.uiState.collectAsState()
             BackHandler { showRecentlyHeard = false }
             RecentlyHeardScreen(
-                tracks = browserState.heardTracks,
+                tracks = heardTracks,
                 onBack = { showRecentlyHeard = false },
-                onClear = { browserViewModel.clearHeardTracks() },
+                onClear = onClearHeardTracks,
                 modifier = Modifier.fillMaxSize()
             )
         }

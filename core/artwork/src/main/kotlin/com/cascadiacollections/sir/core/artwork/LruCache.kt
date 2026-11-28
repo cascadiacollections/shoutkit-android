@@ -11,7 +11,7 @@ class LruCache<K : Any, V>(private val maxSize: Int) {
         require(maxSize > 0) { "maxSize must be positive" }
     }
 
-    private val map = object : LinkedHashMap<K, V>(16, 0.75f, /* accessOrder = */ true) {
+    private val map = object : LinkedHashMap<K, V>(INITIAL_CAPACITY, LOAD_FACTOR, ACCESS_ORDER) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean = size > maxSize
     }
 
@@ -30,4 +30,10 @@ class LruCache<K : Any, V>(private val maxSize: Int) {
 
     @Synchronized
     fun size(): Int = map.size
+
+    private companion object {
+        const val INITIAL_CAPACITY = 16
+        const val LOAD_FACTOR = 0.75f
+        const val ACCESS_ORDER = true
+    }
 }

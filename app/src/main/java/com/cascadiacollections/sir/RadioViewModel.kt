@@ -206,14 +206,14 @@ class RadioViewModel(
                 if (remaining > 0) {
                     getApplication<Application>().getString(
                         R.string.sleep_timer_countdown,
-                        (remaining / 60_000).toInt().coerceAtLeast(1)
+                        (remaining / MS_PER_MINUTE).toInt().coerceAtLeast(1)
                     )
                 } else {
                     null
                 }
             )
             if (remaining <= 0L) break
-            delay(30_000L)
+            delay(SLEEP_TIMER_POLL_INTERVAL_MS)
         }
     }
 
@@ -287,5 +287,10 @@ class RadioViewModel(
             @Suppress("UNCHECKED_CAST")
             return RadioViewModel(application, settingsRepository) as T
         }
+    }
+
+    private companion object {
+        const val MS_PER_MINUTE = 60_000
+        const val SLEEP_TIMER_POLL_INTERVAL_MS = 30_000L
     }
 }

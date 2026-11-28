@@ -2,6 +2,12 @@ plugins {
     `kotlin-dsl`
 }
 
+kotlin {
+    compilerOptions {
+        allWarningsAsErrors.set(true)
+    }
+}
+
 dependencies {
     compileOnly(libs.android.gradle.plugin)
 }

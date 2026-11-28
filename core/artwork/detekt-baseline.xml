@@ -1,11 +1,5 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues>
-    <ID>CommentWrapping:LruCache.kt:LruCache.&lt;no name provided&gt;$/* accessOrder = */</ID>
-    <ID>MagicNumber:StationMonogram.kt:StationMonogram.Companion$0xFF</ID>
-    <ID>MagicNumber:StationMonogram.kt:StationMonogram.Companion$360u</ID>
-    <ID>ReturnCount:AlbumArtLookup.kt:AlbumArtLookup$suspend fun lookup: AlbumArt?</ID>
-    <ID>ReturnCount:ITunesSearch.kt:ITunesSearch$fun parse: AlbumArt?</ID>
-  </CurrentIssues>
+  <CurrentIssues/>
 </SmellBaseline>

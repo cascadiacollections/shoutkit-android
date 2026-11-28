@@ -51,7 +51,7 @@ subprojects {
     }
 }
 
-// Configure Java toolchain for all subprojects
+// Configure Java toolchain and strict Kotlin compiler warnings for all subprojects
 subprojects {
     plugins.withType<JavaBasePlugin>().configureEach {
         extensions.configure<JavaPluginExtension> {
@@ -62,6 +62,9 @@ subprojects {
                 // fails there with "Cannot find a Java installation".
             }
         }
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+        compilerOptions.allWarningsAsErrors.set(true)
     }
 }
 

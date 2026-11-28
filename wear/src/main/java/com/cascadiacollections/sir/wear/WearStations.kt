@@ -55,9 +55,11 @@ object WearStations {
      */
     fun abbreviate(name: String, max: Int = SHORT_TEXT_MAX): String {
         val trimmed = name.trim()
-        if (trimmed.length <= max) return trimmed
         val firstWord = trimmed.substringBefore(' ')
-        if (firstWord.length in 1..max) return firstWord
-        return trimmed.take(max - 1).trimEnd() + "…"
+        return when {
+            trimmed.length <= max -> trimmed
+            firstWord.length in 1..max -> firstWord
+            else -> trimmed.take(max - 1).trimEnd() + "…"
+        }
     }
 }

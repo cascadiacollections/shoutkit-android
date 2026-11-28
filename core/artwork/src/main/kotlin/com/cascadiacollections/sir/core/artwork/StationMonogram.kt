@@ -50,13 +50,15 @@ data class StationMonogram(
         fun hue(key: String): Float {
             var hash = FNV_OFFSET_BASIS
             for (byte in key.toByteArray(Charsets.UTF_8)) {
-                hash = hash xor (byte.toInt() and 0xFF)
+                hash = hash xor (byte.toInt() and BYTE_MASK)
                 hash *= FNV_PRIME
             }
-            return (hash.toUInt() % 360u).toFloat()
+            return (hash.toUInt() % HUE_DEGREES).toFloat()
         }
 
         private const val FNV_OFFSET_BASIS = -0x7ee3623b // 0x811C9DC5 as a signed Int
         private const val FNV_PRIME = 0x01000193
+        private const val BYTE_MASK = 0xFF
+        private const val HUE_DEGREES = 360u
     }
 }

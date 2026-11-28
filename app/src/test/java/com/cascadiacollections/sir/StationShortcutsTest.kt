@@ -207,4 +207,18 @@ class StationShortcutsTest {
 
         assertThat(ShadowToast.getTextOfLatestToast()).isEqualTo("Automation link copied")
     }
+
+    @Test
+    fun `reporting shortcut usage delegates to ShortcutManager for valid ids and skips blanks`() {
+        val context = RuntimeEnvironment.getApplication()
+        StationShortcuts.update(context, listOf(station("a")))
+
+        StationShortcuts.reportStationUsed(context, "a")
+        StationShortcuts.reportStationUsed(context, "   ")
+        StationShortcuts.reportPinnedStationUsed(context, "a")
+        StationShortcuts.reportPinnedStationUsed(context, "")
+        StationShortcuts.reportPlayUsed(context)
+        StationShortcuts.reportWhatsPlayingUsed(context)
+        StationShortcuts.reportFavoriteCurrentUsed(context)
+    }
 }

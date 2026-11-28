@@ -45,7 +45,12 @@ class PlayStationActivity : ComponentActivity() {
 
             PlayRequest.Resume -> start(app, stationId = null)
 
-            is PlayRequest.Station -> start(app, request.id)
+            is PlayRequest.Station -> {
+                if (intent?.action == ACTION_PLAY_STATION) {
+                    StationShortcuts.reportPinnedStationUsed(app, request.id)
+                }
+                start(app, request.id)
+            }
         }
     }
 

@@ -65,12 +65,14 @@ object ITunesSearch {
      */
     fun parse(body: String): AlbumArt? {
         val response = json.decodeFromString(SearchResponse.serializer(), body)
-        val first = response.results.firstOrNull() ?: return null
-        val thumbnail = first.artworkUrl100?.takeIf { it.isNotBlank() } ?: return null
-        return AlbumArt(
-            artworkUrl = upscale(thumbnail),
-            trackViewUrl = first.trackViewUrl?.takeIf { it.isNotBlank() }
-        )
+        val first = response.results.firstOrNull()
+        val thumbnail = first?.artworkUrl100?.takeIf { it.isNotBlank() }
+        return thumbnail?.let {
+            AlbumArt(
+                artworkUrl = upscale(it),
+                trackViewUrl = first.trackViewUrl?.takeIf { url -> url.isNotBlank() }
+            )
+        }
     }
 
     /** Rewrites a `…/100x100bb.jpg` thumbnail URL to its [ARTWORK_SIZE] rendition. */

@@ -27,6 +27,9 @@ class FavoriteCurrentStationActivity : ComponentActivity() {
             finish()
             return
         }
+        if (intent?.action == ACTION_FAVORITE_CURRENT) {
+            StationShortcuts.reportFavoriteCurrentUsed(this)
+        }
         val app = applicationContext
         lifecycleScope.launch {
             val outcome = runCatching { SettingsRepository(app).favoriteSelectedStation() }

@@ -53,6 +53,9 @@ class NowPlayingAnnounceActivity : ComponentActivity() {
             finish()
             return
         }
+        if (intent?.action == ACTION_WHATS_PLAYING) {
+            StationShortcuts.reportWhatsPlayingUsed(this)
+        }
         if (!RadioPlaybackService.isRunning) {
             announce(NowPlayingAnnouncement.NothingPlaying)
             return

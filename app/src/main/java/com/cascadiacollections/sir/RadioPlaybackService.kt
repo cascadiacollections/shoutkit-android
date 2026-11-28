@@ -710,7 +710,7 @@ class RadioPlaybackService : MediaLibraryService() {
         // player being released). Logged rather than wired to analytics so the `foss`
         // flavor gets the same numbers; `:benchmark` and logcat can both read them.
         exoPlayer.addAnalyticsListener(
-            PlaybackStatsListener(/* keepHistory = */ false) { _, stats ->
+            PlaybackStatsListener(false) { _, stats ->
                 Log.i(
                     TAG_PLAYBACK_STATS,
                     "joinMs=${stats.getTotalJoinTimeMs()} " +
@@ -1236,7 +1236,7 @@ class RadioPlaybackService : MediaLibraryService() {
         if (p.playbackState != Player.STATE_IDLE) p.stop()
         timeShift.reset()
         playbackMode = PlaybackMode.Live
-        Log.d(TAG, "Released the stream after ${PausedRelease.DEFAULT_TIMEOUT_MS / 60_000} minutes paused")
+        Log.d(TAG, "Released the stream after ${PausedRelease.DEFAULT_TIMEOUT_MS / MS_PER_MINUTE} minutes paused")
     }
 
     /**
@@ -1285,7 +1285,7 @@ class RadioPlaybackService : MediaLibraryService() {
         val runnable = Runnable { updateCustomLayout() }
         seekBackRevealRunnable = runnable
         // Check shortly after 30s of buffering; add 2s margin for network jitter
-        sleepTimerHandler.postDelayed(runnable, SEEK_BACK_INCREMENT.inWholeMilliseconds + 2_000)
+        sleepTimerHandler.postDelayed(runnable, SEEK_BACK_INCREMENT.inWholeMilliseconds + SEEK_BACK_REVEAL_MARGIN_MS)
     }
 
     private fun updateCustomLayout() {
@@ -1331,8 +1331,8 @@ class RadioPlaybackService : MediaLibraryService() {
         .setMediaId(currentStreamUrl)
         .setLiveConfiguration(
             MediaItem.LiveConfiguration.Builder()
-                .setMaxPlaybackSpeed(1.02f) // Slight speedup to catch up if behind
-                .setMinPlaybackSpeed(0.98f) // Slight slowdown if too far ahead
+                .setMaxPlaybackSpeed(MAX_LIVE_PLAYBACK_SPEED) // Slight speedup to catch up if behind
+                .setMinPlaybackSpeed(MIN_LIVE_PLAYBACK_SPEED) // Slight slowdown if too far ahead
                 .build()
         )
         .setMediaMetadata(
@@ -1730,5 +1730,9 @@ class RadioPlaybackService : MediaLibraryService() {
         const val EXTRA_TRACK_VIEW_URL = "track_view_url"
 
         private val USER_AGENT = "SIR Android/${Build.VERSION.SDK_INT}"
+        private const val MS_PER_MINUTE = 60_000
+        private const val SEEK_BACK_REVEAL_MARGIN_MS = 2_000L
+        private const val MAX_LIVE_PLAYBACK_SPEED = 1.02f
+        private const val MIN_LIVE_PLAYBACK_SPEED = 0.98f
     }
 }

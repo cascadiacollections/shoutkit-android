@@ -64,14 +64,18 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cascadiacollections.sir.AppDirectory
 import com.cascadiacollections.sir.PlaylistImportResult
 import com.cascadiacollections.sir.R
 import com.cascadiacollections.sir.RadioBrowserViewModel
 import com.cascadiacollections.sir.core.model.Station
 import com.cascadiacollections.sir.core.persistence.FavoritesBackupCodec
+import com.cascadiacollections.sir.core.persistence.SettingsRepository
 import com.cascadiacollections.sir.core.persistence.StationCollections
 import com.cascadiacollections.sir.core.persistence.TopTracks
 import com.cascadiacollections.sir.core.persistence.TopTracksTimeframe
+import com.cascadiacollections.sir.core.persistence.TrackHistoryRepository
 import com.cascadiacollections.sir.ui.icons.Backup
 import com.cascadiacollections.sir.ui.icons.DragHandle
 import com.cascadiacollections.sir.ui.icons.FileDownload
@@ -93,10 +97,17 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
  */
 @Composable
 fun LibraryScreen(
-    viewModel: RadioBrowserViewModel,
+    settingsRepository: SettingsRepository,
     modifier: Modifier = Modifier,
     playbackAudible: Boolean = true,
-    onOpenRecentlyHeard: () -> Unit = {}
+    onOpenRecentlyHeard: () -> Unit = {},
+    viewModel: RadioBrowserViewModel = viewModel(
+        factory = RadioBrowserViewModel.Factory(
+            directory = AppDirectory.instance,
+            settingsRepository = settingsRepository,
+            trackHistoryRepository = TrackHistoryRepository(LocalContext.current.applicationContext)
+        )
+    )
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current

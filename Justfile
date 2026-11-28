@@ -50,7 +50,7 @@ verify:
 
 # Static analysis: detekt (+ ktlint, Compose rules) and Android Lint across all modules
 lint:
-    ./gradlew detekt lintPlayDebug :wear:lintDebug --no-daemon --continue
+    ./gradlew detekt lintPlayDebug lintFossDebug :wear:lintDebug --no-daemon --continue
 
 # Apply ktlint formatting fixes
 format:

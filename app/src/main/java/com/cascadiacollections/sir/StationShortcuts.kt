@@ -23,6 +23,10 @@ object StationShortcuts {
     // Pinned play shortcuts (requestPin); never shared with the dynamic ones above.
     private const val PIN_PREFIX = "play-"
 
+    private const val STATIC_PLAY_ID = "play"
+    private const val STATIC_WHATS_PLAYING_ID = "whats_playing"
+    private const val STATIC_FAVORITE_CURRENT_ID = "favorite_current"
+
     /**
      * The `<shortcut>`s in `res/xml/shortcuts.xml`. The launcher's per-activity limit
      * counts static and dynamic shortcuts together, so these come off the stations' share:
@@ -96,5 +100,34 @@ object StationShortcuts {
             )
             .build()
         return ShortcutManagerCompat.requestPinShortcut(context, shortcut, null)
+    }
+
+    /** Reports usage of a dynamic station shortcut (`station-{id}`) so launchers can rank it. */
+    fun reportStationUsed(context: Context, stationId: String) {
+        if (stationId.isNotBlank()) {
+            ShortcutManagerCompat.reportShortcutUsed(context, ID_PREFIX + stationId)
+        }
+    }
+
+    /** Reports usage of a pinned station play shortcut (`play-{id}`). */
+    fun reportPinnedStationUsed(context: Context, stationId: String) {
+        if (stationId.isNotBlank()) {
+            ShortcutManagerCompat.reportShortcutUsed(context, PIN_PREFIX + stationId)
+        }
+    }
+
+    /** Reports usage of the static "Play" shortcut or Assistant capability. */
+    fun reportPlayUsed(context: Context) {
+        ShortcutManagerCompat.reportShortcutUsed(context, STATIC_PLAY_ID)
+    }
+
+    /** Reports usage of the static "What's playing?" shortcut or Assistant capability. */
+    fun reportWhatsPlayingUsed(context: Context) {
+        ShortcutManagerCompat.reportShortcutUsed(context, STATIC_WHATS_PLAYING_ID)
+    }
+
+    /** Reports usage of the static "Favorite this station" shortcut or Assistant capability. */
+    fun reportFavoriteCurrentUsed(context: Context) {
+        ShortcutManagerCompat.reportShortcutUsed(context, STATIC_FAVORITE_CURRENT_ID)
     }
 }

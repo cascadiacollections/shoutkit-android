@@ -51,6 +51,7 @@ class BackgroundRefreshWorker(
         const val UNIQUE_WORK_NAME: String = "directory-background-refresh"
         const val REPEAT_HOURS: Long = 4
         const val MAX_RETRIES: Int = 3
+        private const val BACKOFF_MINUTES: Long = 15
 
         val constraints: Constraints
             get() = Constraints.Builder()
@@ -61,7 +62,7 @@ class BackgroundRefreshWorker(
         fun request(): PeriodicWorkRequest =
             PeriodicWorkRequestBuilder<BackgroundRefreshWorker>(REPEAT_HOURS, TimeUnit.HOURS)
                 .setConstraints(constraints)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_MINUTES, TimeUnit.MINUTES)
                 .build()
 
         /** Idempotent: KEEP leaves an already-scheduled refresh (and its cadence) alone. */

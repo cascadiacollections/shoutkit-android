@@ -14,7 +14,6 @@
     <ID>CognitiveComplexMethod:SirApp.kt:SirApp$override fun onCreate</ID>
     <ID>CognitiveComplexMethod:SirAppShell.kt:@Composable fun SirAppShell</ID>
     <ID>CognitiveComplexMethod:StationPlaylistFetcher.kt:StationPlaylistFetcher$private suspend fun fetch: String?</ID>
-    <ID>CommentWrapping:RadioPlaybackService.kt:RadioPlaybackService$/* keepHistory = */</ID>
     <ID>ComplexCondition:build.gradle.kts:alias != null &amp;&amp; keyPwd != null &amp;&amp; storePath != null &amp;&amp; storePwd != null</ID>
     <ID>ComposableNestingDepth:BrowseScreen.kt:@Composable fun BrowseContent</ID>
     <ID>ComposableNestingDepth:LibraryScreen.kt:@Composable fun LibraryScreen</ID>
@@ -37,18 +36,9 @@
     <ID>LongMethod:RadioPlaybackService.kt:RadioPlaybackService$@OptIn(UnstableApi::class) override fun onCreate</ID>
     <ID>LongMethod:RadioPlaybackService.kt:RadioPlaybackService$@OptIn(UnstableApi::class) override fun onStartCommand: Int</ID>
     <ID>LongMethod:RadioWidget.kt:RadioWidget$override suspend fun provideGlance</ID>
-    <ID>MagicNumber:BackgroundRefreshWorker.kt:BackgroundRefreshWorker.Companion$15</ID>
-    <ID>MagicNumber:RadioPlaybackService.kt:RadioPlaybackService$0.98f</ID>
-    <ID>MagicNumber:RadioPlaybackService.kt:RadioPlaybackService$1.02f</ID>
-    <ID>MagicNumber:RadioPlaybackService.kt:RadioPlaybackService$2_000</ID>
-    <ID>MagicNumber:RadioPlaybackService.kt:RadioPlaybackService$60_000</ID>
-    <ID>MagicNumber:RadioViewModel.kt:RadioViewModel$30_000L</ID>
-    <ID>MagicNumber:RadioViewModel.kt:RadioViewModel$60_000</ID>
     <ID>MatchingDeclarationName:BrowseScreen.kt:BrowseScreenTestTags</ID>
     <ID>MatchingDeclarationName:EditStationSheet.kt:EditStationSheetTestTags</ID>
     <ID>MatchingDeclarationName:TvHomeScreen.kt:TvPopular</ID>
-    <ID>MultipleEmitters:SettingsSections.kt:@Composable internal fun AboutSettingsSection</ID>
-    <ID>MultipleEmitters:SettingsSections.kt:@Composable internal fun PlaybackSettingsSection</ID>
     <ID>ParameterNaming:BrowseScreen.kt:onToggleSaved: (Station, Boolean) -&gt; Unit</ID>
     <ID>ParameterNaming:LibraryScreen.kt:onOpenRecentlyHeard: () -&gt; Unit = {}</ID>
     <ID>ParameterNaming:ListenNow.kt:onToggleSaved: () -&gt; Unit</ID>
@@ -61,7 +51,6 @@
     <ID>ReturnCount:AutoLibrary.kt:AutoLibrary$suspend fun children: List&lt;MediaItem&gt;?</ID>
     <ID>ReturnCount:AutoLibrary.kt:AutoLibrary$suspend fun resolveStation: Station?</ID>
     <ID>ReturnCount:CastDeviceDetector.kt:CastDeviceDetector$private fun isOnWifi: Boolean</ID>
-    <ID>ReturnCount:MainActivity.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun RadioScreen</ID>
     <ID>ReturnCount:NowPlayingAnnouncement.kt:NowPlayingAnnouncement.Companion$fun from: NowPlayingAnnouncement</ID>
     <ID>ReturnCount:RadioPlaybackService.kt:RadioPlaybackService$private fun onPausedReleaseDue</ID>
     <ID>ReturnCount:RadioPlaybackService.kt:RadioPlaybackService$private suspend fun adoptStreamSource: MediaItem?</ID>
@@ -78,9 +67,5 @@
     <ID>TooGenericExceptionCaught:RadioViewModel.kt:RadioViewModel$error: Exception</ID>
     <ID>TooGenericExceptionCaught:WearStationPublisher.kt:WearStationPublisher$e: Exception</ID>
     <ID>TooManyFunctions:RadioBrowserViewModel.kt:RadioBrowserViewModel : ViewModel</ID>
-    <ID>ViewModelForwarding:SirAppShell.kt:BrowseScreen( viewModel = browserViewModel, shelfStore = settingsRepository, playbackAudible = uiState.isPlaying, modifier = contentModifier )</ID>
-    <ID>ViewModelForwarding:SirAppShell.kt:LibraryScreen( viewModel = browserViewModel, playbackAudible = uiState.isPlaying, onOpenRecentlyHeard = { showRecentlyHeard = true }, modifier = contentModifier )</ID>
-    <ID>ViewModelInjection:MainActivity.kt:val browserViewModel: RadioBrowserViewModel = viewModel( factory = RadioBrowserViewModel.Factory( directory = AppDirectory.instance, settingsRepository = repository, trackHistoryRepository = TrackHistoryRepository(context.applicationContext) ) )</ID>
-    <ID>ViewModelInjection:MainActivity.kt:val viewModel: RadioViewModel = viewModel( factory = RadioViewModel.Factory( application = context.applicationContext as Application, settingsRepository = repository ) )</ID>
   </CurrentIssues>
 </SmellBaseline>
